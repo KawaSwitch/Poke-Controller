@@ -793,14 +793,16 @@ class InfinityFeather(RankGlitchPythonCommand):
 			self.press(Direction(Stick.LEFT, 45), duration=0.05) # Select a Pokémon Day Care
 			self.press(Button.A, wait=1)
 			self.press(Button.A, wait=4.0)
+			if not self.checkIfAlive(): return
 			# print('pick feather')
-			self.press([Direction.RIGHT, Direction.DOWN], duration=0.15)
+			self.press(Direction.DOWN_RIGHT, duration=0.15)
 			self.press(Direction.RIGHT, duration=3)
 			self.press(Button.A, wait=0.3)
 			self.press(Button.A, wait=0.3)
 			self.press(Button.A, wait=0.3)
 			self.press(Button.A, wait=0.3)
 			# print('Time leap')
+			if not self.checkIfAlive(): return
 			self.timeLeap()
 			# tm = round(time.time() - start, 2)
 			# print('Loop : {} in {} sec. Average: {} sec/loop'.format(i, tm, round(tm / i, 2)))
