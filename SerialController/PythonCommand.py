@@ -145,7 +145,6 @@ class RankGlitchPythonCommand(PythonCommand):
 		else:
 			self.press(Button.A, wait=0.2)
 			self.press(Direction.RIGHT)
-			self.press(Direction.RIGHT)
 			self.press(Direction.UP, wait=0.2) # increment a day
 			self.press(Direction.RIGHT, duration=1)
 			self.press(Button.A, wait=0.5)
@@ -429,7 +428,7 @@ class InfinityCafe(RankGlitchPythonCommand):
 
 			self.press(Direction.UP, duration=2, wait=1)
 
-# auto releaseing pokemons
+# auto releasing pokemons
 class AutoRelease(ImageProcPythonCommand):
 	def __init__(self, name, cam):
 		super(AutoRelease, self).__init__(name, cam)
@@ -710,12 +709,13 @@ class InfinityWatt(RankGlitchPythonCommand):
 			self.wait(1)
 
 			if self.use_rank:
-				self.timeLeap()
-
+				self.press(Button.A, duration=0.4, wait=0.1)
+				self.press(Button.A, duration=0.4, wait=0.1) # 2000W
 				self.press(Button.A, wait=1)
-				self.press(Button.A, wait=1) # 2000W
-				self.press(Button.A, wait=1.8)
-				self.press(Button.B, wait=1.5)
+				self.press(Button.A, duration=0.1, wait=2.5)
+				self.press(Button.B, duration=0.3, wait=0.5)
+				self.timeLeap(False)
+				self.press(Button.A, wait=4.1)
 
 			else:
 				self.press(Button.A, wait=1)
@@ -789,24 +789,87 @@ class Sample(PythonCommand):
 		self.wait(1)
 
 
+# Perform the Day skip glitch once
+class AdvanceFrame(RankGlitchPythonCommand):
+	def __init__(self, name):
+		super(AdvanceFrame, self).__init__(name)
+		self.use_rank = True
+
+	def do(self):
+		if self.checkIfAlive():
+			self.press(Button.A, duration=0.4, wait=0.1)
+			self.press(Button.A, duration=0.4, wait=0.1) # 2000W
+			self.press(Button.A, wait=1)
+			self.press(Button.A, duration=0.1, wait=2.5)
+			self.press(Button.B, duration=0.3, wait=0.5)
+			self.timeLeap(False)
+			self.press(Button.A, wait=5)
+
+		self.finish()
+
+
+# Perform the Day skip glitch three times
+class AdvanceFrameThree(RankGlitchPythonCommand):
+	def __init__(self, name):
+		super(AdvanceFrameThree, self).__init__(name)
+		self.use_rank = True
+
+	def do(self):
+		for _ in range(3):
+			self.wait(1)
+
+			if self.checkIfAlive():
+				self.press(Button.A, duration=0.4, wait=0.1)
+				self.press(Button.A, duration=0.4, wait=0.1) # 2000W
+				self.press(Button.A, wait=1)
+				self.press(Button.A, duration=0.1, wait=2.5)
+				self.press(Button.B, duration=0.3, wait=0.5)
+				self.timeLeap(False)
+				self.press(Button.A, wait=5)
+			else:
+				break
+
+		self.finish()
+
+
+# reset the game
+class Reset(PythonCommand):
+	def __init__(self, name):
+		super(Reset, self).__init__(name)
+
+	def do(self):
+		self.wait(1)
+		self.press(Button.HOME, wait=1)
+		self.press(Button.X, wait=1)
+		self.press(Button.A, wait=5)
+		self.press(Button.A, wait=2)
+		self.press(Button.A, wait=18)
+		self.press(Button.A, wait=1)
+
+		self.finish()
+
+
 # Add commands you want to use
 # 使用したいコマンドをここに追加してください
 commands = {
-	'A連打': Mash_A,
-	'自動リーグ周回': AutoLeague,
-	'仮:自動孵化(画像認識)': AutoHatching,
-	'固定数孵化(画像認識)': CountHatching,
-	'自動リリース': AutoRelease,
-	'無限ワット(ランクマ)': InfinityWatt,
-	'無限IDくじ(ランクマ)': InfinityLottery,
-	'無限きのみ(ランクマ)': InfinityBerry,
-	'無限カフェ(ランクマ)': InfinityCafe,
-	'デバグ': Debug,
+	'Mash_A - A連打': Mash_A,
+	'AutoLeague - 自動リーグ周回': AutoLeague,
+	'AutoHatching - 仮:自動孵化(画像認識)': AutoHatching,
+	'CountHatching - 固定数孵化(画像認識)': CountHatching,
+	'AutoRelease - 自動リリース': AutoRelease,
+	'InfinityWatt - 無限ワット(ランクマ)': InfinityWatt,
+	'InfinityLottery - 無限IDくじ(ランクマ)': InfinityLottery,
+	'InfinityBerry - 無限きのみ(ランクマ)': InfinityBerry,
+	'InfinityCafe - 無限カフェ(ランクマ)': InfinityCafe,
+	'Debug - デバグ': Debug,
+	'Advance Frame - Seed Search': AdvanceFrame,
+	'Advance Frame By 3 - Seed Search': AdvanceFrameThree,
+	'Reset': Reset,
 }
 
 # Add commands as utility you want to use
 # ユーティリティとして使用したいコマンドを追加してください
 utils = {
-	'コントローラ同期': Sync,
-	'コントローラ同期解除': Unsync,
+	'Sync - コントローラ同期': Sync,
+	'Unsync - コントローラ同期解除': Unsync,
 }
