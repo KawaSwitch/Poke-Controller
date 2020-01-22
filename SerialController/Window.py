@@ -8,11 +8,8 @@ from tkinter import ttk
 import cv2
 import json
 from PIL import Image, ImageTk
-import time
-import datetime
-import McuCommand
-import PythonCommand
-import UnitCommand
+import time, datetime
+import McuCommand, PythonCommand, UnitCommand
 import Sender
 from Keys import KeyPress
 from Keyboard import SwitchKeyboardController
@@ -187,42 +184,19 @@ class GUI:
 		self.label1 = ttk.Label(self.camera_f1, text='Camera ID:')
 		self.cameraID = tk.IntVar()
 		self.cameraID.set(int(self.settings['camera_id']))
+		self.camera_entry = None
 		if os.name == 'nt':
-			import clr
-			clr.AddReference("../DirectShowLib/DirectShowLib-2005")
-			from DirectShowLib import DsDevice, FilterCategory
-
-			# Get names of detected camera devices
-			captureDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice)
-			self.camera_dic = {device.Name: cam_id for cam_id, device in enumerate(captureDevices)}
-			dev_num = len(self.camera_dic)
-
-			if self.cameraID.get() > dev_num - 1:
-				print('inappropriate camera ID! -> set to 0')
-				self.cameraID.set(0)
-				if dev_num == 0: print('No camera devices can be found.')
-
-			# locate a combobox instead of an entry
-			self.cameraName = tk.StringVar()
-			self.label1['text'] = 'Camera: '
-			self.camera_cb = ttk.Combobox(self.camera_f1, width=30, textvariable=self.cameraName, state="readonly")
-			self.camera_cb['values'] = [device for device in self.camera_dic.keys()]
-			self.camera_cb.bind('<<ComboboxSelected>>', self.assignCamera)
-			if not dev_num == 0:
-				self.camera_cb.current(self.cameraID.get())
+			try:
+				self.locateCameraCmbbox()
+			except:
+				# Locate an entry instead whenever dll is not imported successfully
+				self.camera_entry = ttk.Entry(self.camera_f1, width=5, textvariable=self.cameraID)
 		else:
-			self.entry1 = ttk.Entry(self.camera_f1, width=5, textvariable=self.cameraID)
+			self.camera_entry = ttk.Entry(self.camera_f1, width=5, textvariable=self.cameraID)
 
 		# open up a camera
 		self.camera = Camera()
 		self.openCamera()
-
-		if os.name == 'nt':
-			import clr
-			clr.AddReference("../DirectShowLib/DirectShowLib-2005")
-			from DirectShowLib import DsDevice, FilterCategory
-		else:
-			pass
 
 		self.showPreview = tk.BooleanVar()
 		self.cb1 = ttk.Checkbutton(
@@ -266,6 +240,12 @@ class GUI:
 			command=lambda: self.ser.setIsShowSerial(self.showSerial.get()))
 
 		# simple controller
+		self.useKeyboard = tk.BooleanVar()
+		self.cb_use_keyboard = ttk.Checkbutton(
+			self.control_lf, text='Use Keyboard',
+			onvalue=True, offvalue=False, variable=self.useKeyboard,
+			command=self.activateKeyboard)
+		self.useKeyboard.set(False)
 		self.simpleConButton = ttk.Button(self.control_lf, text='Controller', command=self.createControllerWindow)
 
 		# fps
@@ -277,14 +257,7 @@ class GUI:
 		self.fps_cb.bind('<<ComboboxSelected>>', self.applyFps)
 		self.fps_cb.current(self.fps_cb['values'].index(self.fps.get()))
 
-		# special commands registration
-		self.unit_dir_commands = [
-			UnitCommand.UP(),
-			UnitCommand.RIGHT(),
-			UnitCommand.DOWN(),
-			UnitCommand.LEFT(),
-		]
-
+		# commands
 		self.mcu_name = tk.StringVar()
 		self.mcu_cb = ttk.Combobox(self.lf, textvariable=self.mcu_name, state="readonly")
 		self.mcu_cb['values'] = [name for name in McuCommand.commands.keys()]
@@ -316,10 +289,8 @@ class GUI:
 		self.camera_f2.grid(row=2,column=0, sticky='nw', pady=(5, 0))
 		self.preview.grid(row=1,column=0,columnspan=7, sticky='nw')
 		self.label1.pack(side=tk.LEFT)
-		if os.name == 'nt':
-			self.camera_cb.pack(side=tk.LEFT, padx=5)
-		else:
-			self.entry1.pack(side=tk.LEFT, padx=5)
+		self.camera_entry.pack(side=tk.LEFT, padx=5)
+
 		self.reloadButton.pack(side=tk.LEFT)
 		self.partition1.pack(side=tk.LEFT, padx=10)
 		self.cb1.pack(side=tk.LEFT)
@@ -337,7 +308,8 @@ class GUI:
 
 		# controller simulator
 		self.control_lf.grid(row=1, column=1, sticky='ne')
-		self.simpleConButton.grid(row=0, column=0)
+		self.cb_use_keyboard.grid(row=0, column=0)
+		self.simpleConButton.grid(row=1, column=0, pady=(5,0))
 
 		# commands selection
 		self.lf.grid(row=1,column=2, rowspan=3, sticky='ne')
@@ -462,6 +434,30 @@ class GUI:
 			self.util_cb.grid(row=1,column=1, columnspan=2, padx=(10, 0))
 			self.assignUtilCommand(None)
 
+	def locateCameraCmbbox(self):
+		import clr
+		clr.AddReference(r"..\DirectShowLib\DirectShowLib-2005")
+		from DirectShowLib import DsDevice, FilterCategory
+
+		# Get names of detected camera devices
+		captureDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice)
+		self.camera_dic = {device.Name: cam_id for cam_id, device in enumerate(captureDevices)}
+		dev_num = len(self.camera_dic)
+
+		if self.cameraID.get() > dev_num - 1:
+			print('inappropriate camera ID! -> set to 0')
+			self.cameraID.set(0)
+			if dev_num == 0: print('No camera devices can be found.')
+
+		# locate a combobox instead of an entry
+		self.cameraName = tk.StringVar()
+		self.label1['text'] = 'Camera: '
+		self.camera_entry = ttk.Combobox(self.camera_f1, width=30, textvariable=self.cameraName, state="readonly")
+		self.camera_entry['values'] = [device for device in self.camera_dic.keys()]
+		self.camera_entry.bind('<<ComboboxSelected>>', self.assignCamera)
+		if not dev_num == 0:
+			self.camera_entry.current(self.cameraID.get())
+
 	def activateSerial(self):
 		if self.ser.isOpened():
 			print('Port is already opened and being closed.')
@@ -480,32 +476,32 @@ class GUI:
 			return
 
 		window = ControllerGUI(self.root, self.ser)
-
-		# enable Keyboard as controller
-		if self.keyboard is None:
-			self.keyboard = SwitchKeyboardController(self.keyPress)
-			self.keyboard.listen()
-
-		# bind focus
-		if os.name == 'nt':
-			window.bind("<FocusIn>", self.onFocusInController)
-			window.bind("<FocusOut>", self.onFocusOutController)
-			self.root.bind("<FocusIn>", self.onFocusInController)
-			self.root.bind("<FocusOut>", self.onFocusOutController)
-
 		window.protocol("WM_DELETE_WINDOW", self.closingController)
 		self.controller = window
+	
+	def activateKeyboard(self):
+		if self.useKeyboard.get() == True:
+			# enable Keyboard as controller
+			if self.keyboard is None:
+				self.keyboard = SwitchKeyboardController(self.keyPress)
+				self.keyboard.listen()
+		
+			# bind focus
+			if os.name == 'nt':
+				self.root.bind("<FocusIn>", self.onFocusInController)
+				self.root.bind("<FocusOut>", self.onFocusOutController)
+
+		elif self.useKeyboard.get() == False:
+			if os.name == 'nt': # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
+				if not self.keyboard is None:
+					# stop listening to keyboard events
+					self.keyboard.stop()
+					self.keyboard = None
+
+					self.root.bind("<FocusIn>", lambda _: None)
+					self.root.bind("<FocusOut>", lambda _: None)
 
 	def closingController(self):
-		if os.name == 'nt': # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
-			# stop listening to keyboard events
-			if not self.keyboard is None:
-				self.keyboard.stop()
-				self.keyboard = None
-
-				self.root.bind("<FocusIn>", lambda _: None)
-				self.root.bind("<FocusOut>", lambda _: None)
-
 		self.controller.destroy()
 		self.controller = None
 
