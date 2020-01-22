@@ -807,6 +807,112 @@ class InfinityFeather(RankGlitchPythonCommand):
 			# tm = round(time.time() - start, 2)
 			# print('Loop : {} in {} sec. Average: {} sec/loop'.format(i, tm, round(tm / i, 2)))
 
+class Fossil_shiny(ImageProcPythonCommand):
+	def __init__(self, name, cam):
+		super(Fossil_shiny, self).__init__(name, cam)
+
+	'''
+	head = {0 : カセキのトリ, 1 : カセキのサカナ}
+	body = {0 : カセキのリュウ, 1 : カセキのクビナガ}
+	'''
+	def fossil_loop(self, head=0, body=0):
+		# start = time.time()
+		i = 0
+		while self.checkIfAlive():
+			i += 1
+			for j in range(30):
+				print(str(30*(i-1)+j+1)+"体目, ({}/30 of box)".format(j+1))
+				self.press(Button.A, wait=0.75) #　ん？カセキ そろってんね
+				self.press(Button.A, wait=0.75) # ウカッツの 眼鏡に かなう
+
+				if head == 1:
+					self.press(Direction.DOWN, duration=0.07, wait=0.75) # select fossil
+				self.press(Button.A, wait=0.75) # determine fossil
+
+				if body == 1:
+					self.press(Direction.DOWN, duration=0.07, wait=0.75)  # select fossil
+				self.press(Button.A, wait=0.75) # determine fossil
+
+				self.press(Button.A, wait=0.75) # select "それでよければ"
+				while not self.isContainTemplate('Network_Offline.png', 0.8):
+					self.press(Button.B, wait=0.25)
+					if not self.checkIfAlive(): return
+				self.wait(1.0)
+				if not self.checkIfAlive(): return
+
+			# open up pokemon box
+			self.press(Button.X, wait=1)
+			self.press(Direction.RIGHT, duration=0.07, wait=1)
+			self.press(Button.A, wait=2)
+			self.press(Button.R, wait=2)
+
+			is_contain_shiny = self.CheckBox()
+			# tm = round(time.time() - start, 2)
+			# print('Loop : {} in {} sec. Average: {} sec/loop'.format(i, tm, round(tm / i, 2)))
+			if is_contain_shiny:
+				print('Shiny!')
+				break
+			if not self.checkIfAlive(): return
+
+			self.press(Button.HOME, wait=2)  # EXIT Game
+			self.press(Button.X, wait=0.6)
+			self.press(Button.A, wait=2.5)  # closed
+			self.press(Button.A, wait=1.0)  # Choose game
+			self.press(Button.A)  # User selection
+			self.loopwhileImage('OP.png', 500)  # recognize Opening
+			self.press(Button.A, wait=7.0)  # load save-data
+		self.finish()
+
+	def CheckBox(self):
+		row = 5
+		col = 6
+		for i in range(0, row):
+			for j in range(0, col):
+				if not self.checkIfAlive(): return False
+				# if shiny, then stop
+				if self.isContainTemplate('shiny_mark.png', threshold=0.9):
+					return True
+				# Maybe this threshold works for only Japanese version.
+				if self.isContainTemplate('status.png', threshold=0.7): # 恐らくmilcery_status.pngでも可能だが念の為。
+					# Release a pokemon
+					pass
+				if not self.checkIfAlive(): return False
+				if not j == col - 1:
+					if i % 2 == 0:
+						self.press(Direction.RIGHT, wait=0.2)
+					else:
+						self.press(Direction.LEFT, wait=0.2)
+			self.press(Direction.DOWN, wait=0.2)
+		return False
+
+class Fossil_shiny_00(Fossil_shiny): # パッチラゴン
+	def __init__(self, name, cam):
+		super(Fossil_shiny, self).__init__(name, cam)
+
+	def do(self):
+		Fossil_shiny.fossil_loop(self, 0, 0)
+
+class Fossil_shiny_01(Fossil_shiny): # パッチルドン
+	def __init__(self, name, cam):
+		super(Fossil_shiny, self).__init__(name, cam)
+
+	def do(self):
+		Fossil_shiny.fossil_loop(self, 0, 1)
+
+class Fossil_shiny_10(Fossil_shiny): # ウオノラゴン
+	def __init__(self, name, cam):
+		super(Fossil_shiny, self).__init__(name, cam)
+
+	def do(self):
+		Fossil_shiny.fossil_loop(self, 1, 0)
+
+class Fossil_shiny_11(Fossil_shiny): # ウオチルドン
+	def __init__(self, name, cam):
+		super(Fossil_shiny, self).__init__(name, cam)
+
+	def do(self):
+		Fossil_shiny.fossil_loop(self, 1, 1)
+
 # sample initial code
 # Copy and paste this class and write codes in start method.
 # After you write the codes, don't forget to add commands dictionary below.
@@ -833,6 +939,10 @@ commands = {
 	'無限きのみ(ランクマ)': InfinityBerry,
 	'無限カフェ(ランクマ)': InfinityCafe,
 	'無限羽回収(ランクマ)': InfinityFeather,
+    'カセキ色厳選(パッチラゴン)': Fossil_shiny_00,
+    'カセキ色厳選(パッチルドン)': Fossil_shiny_01,
+    'カセキ色厳選(ウオノラゴン)': Fossil_shiny_10,
+    'カセキ色厳選(ウオチルドン)': Fossil_shiny_11,
 	'デバグ': Debug,
 }
 
