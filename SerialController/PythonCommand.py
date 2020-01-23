@@ -862,7 +862,10 @@ class Fossil_shiny(ImageProcPythonCommand):
 			while not self.isContainTemplate('OP.png', 0.7): # recognize Opening
 				self.wait(0.2)
 				if not self.checkIfAlive(): return
-			self.press(Button.A, wait=7.0)  # load save-data
+self.press(Button.A)  # load save-data
+while not self.isContainTemplate('Network_Offline.png', 0.8):
+	self.wait(0.2)
+	if not self.checkIfAlive(): return
 		self.finish()
 
 	def CheckBox(self):
