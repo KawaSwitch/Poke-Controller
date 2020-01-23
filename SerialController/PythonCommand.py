@@ -913,7 +913,7 @@ class Fossil_shiny_11(Fossil_shiny): # ウオチルドン
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	def do(self):
-		Fossil_shiny.fossil_loop(self, 1, 1)
+		self.fossil_loop(1, 1)
 
 # sample initial code
 # Copy and paste this class and write codes in start method.
