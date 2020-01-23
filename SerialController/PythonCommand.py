@@ -859,7 +859,9 @@ class Fossil_shiny(ImageProcPythonCommand):
 			self.press(Button.A, wait=2.5)  # closed
 			self.press(Button.A, wait=1.0)  # Choose game
 			self.press(Button.A)  # User selection
-			self.loopwhileImage('OP.png', 500)  # recognize Opening
+			while not self.isContainTemplate('OP.png', 0.7): # recognize Opening
+				self.wait(0.2)
+				if not self.checkIfAlive(): return
 			self.press(Button.A, wait=7.0)  # load save-data
 		self.finish()
 
@@ -939,10 +941,10 @@ commands = {
 	'無限きのみ(ランクマ)': InfinityBerry,
 	'無限カフェ(ランクマ)': InfinityCafe,
 	'無限羽回収(ランクマ)': InfinityFeather,
-    'カセキ色厳選(パッチラゴン)': Fossil_shiny_00,
-    'カセキ色厳選(パッチルドン)': Fossil_shiny_01,
-    'カセキ色厳選(ウオノラゴン)': Fossil_shiny_10,
-    'カセキ色厳選(ウオチルドン)': Fossil_shiny_11,
+	'カセキ色厳選(パッチラゴン)': Fossil_shiny_00,
+	'カセキ色厳選(パッチルドン)': Fossil_shiny_01,
+	'カセキ色厳選(ウオノラゴン)': Fossil_shiny_10,
+	'カセキ色厳選(ウオチルドン)': Fossil_shiny_11,
 	'デバグ': Debug,
 }
 
