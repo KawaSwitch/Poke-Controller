@@ -857,7 +857,7 @@ class Fossil_shiny(ImageProcPythonCommand):
 			self.press(Button.HOME, wait=2)  # EXIT Game
 			self.press(Button.X, wait=0.6)
 			self.press(Button.A, wait=2.5)  # closed
-			self.press(Button.A, wait=1.0)  # Choose game
+			self.press(Button.A, wait=2.0)  # Choose game
 			self.press(Button.A)  # User selection
 			while not self.isContainTemplate('OP.png', 0.7): # recognize Opening
 				self.wait(0.2)
