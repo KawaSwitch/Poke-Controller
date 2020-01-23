@@ -899,7 +899,7 @@ class Fossil_shiny_01(Fossil_shiny): # パッチルドン
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	def do(self):
-		Fossil_shiny.fossil_loop(self, 0, 1)
+		self.fossil_loop(0, 1)
 
 class Fossil_shiny_10(Fossil_shiny): # ウオノラゴン
 	def __init__(self, name, cam):
