@@ -812,18 +812,17 @@ class Fossil_shiny(ImageProcPythonCommand):
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	'''
-	head = {0 : カセキのトリ, 1 : カセキのサカナ}
-	body = {0 : カセキのリュウ, 1 : カセキのクビナガ}
+	head = {0 : "カセキのトリ", 1 : "カセキのサカナ"}
+	body = {0 : "カセキのリュウ", 1 : "カセキのクビナガ"}
 	'''
 	def fossil_loop(self, head=0, body=0):
 		# start = time.time()
 		i = 0
 		while self.checkIfAlive():
-			i += 1
 			for j in range(30):
-				print(str(30*(i-1)+j+1)+"体目, ({}/30 of box)".format(j+1))
-				self.press(Button.A, wait=0.75) #　ん？カセキ そろってんね
-				self.press(Button.A, wait=0.75) # ウカッツの 眼鏡に かなう
+				print(str(30*i+j+1)+"体目 ({}/30 of a box)".format(j+1))
+				self.press(Button.A, wait=0.75)
+				self.press(Button.A, wait=0.75)
 
 				if head == 1:
 					self.press(Direction.DOWN, duration=0.07, wait=0.75) # select fossil
@@ -835,7 +834,7 @@ class Fossil_shiny(ImageProcPythonCommand):
 
 				self.press(Button.A, wait=0.75) # select "それでよければ"
 				while not self.isContainTemplate('Network_Offline.png', 0.8):
-					self.press(Button.B, wait=0.25)
+					self.press(Button.B, wait=0.5)
 					if not self.checkIfAlive(): return
 				self.wait(1.0)
 				if not self.checkIfAlive(): return
@@ -857,12 +856,17 @@ class Fossil_shiny(ImageProcPythonCommand):
 			self.press(Button.HOME, wait=2)  # EXIT Game
 			self.press(Button.X, wait=0.6)
 			self.press(Button.A, wait=2.5)  # closed
-			self.press(Button.A, wait=1.0)  # Choose game
+			self.press(Button.A, wait=2.0)  # Choose game
 			self.press(Button.A)  # User selection
 			while not self.isContainTemplate('OP.png', 0.7): # recognize Opening
 				self.wait(0.2)
 				if not self.checkIfAlive(): return
-			self.press(Button.A, wait=7.0)  # load save-data
+			self.press(Button.A)  # load save-data
+			while not self.isContainTemplate('Network_Offline.png', 0.8):
+				self.wait(0.5)
+				if not self.checkIfAlive(): return
+			self.wait(1.0)
+			i += 1
 		self.finish()
 
 	def CheckBox(self):
@@ -875,7 +879,7 @@ class Fossil_shiny(ImageProcPythonCommand):
 				if self.isContainTemplate('shiny_mark.png', threshold=0.9):
 					return True
 				# Maybe this threshold works for only Japanese version.
-				if self.isContainTemplate('status.png', threshold=0.7): # 恐らくmilcery_status.pngでも可能だが念の為。
+				if self.isContainTemplate('status.png', threshold=0.7): # 恐らくmilcery_status.pngで可能だが念の為。
 					# Release a pokemon
 					pass
 				if not self.checkIfAlive(): return False
@@ -892,28 +896,28 @@ class Fossil_shiny_00(Fossil_shiny): # パッチラゴン
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	def do(self):
-		Fossil_shiny.fossil_loop(self, 0, 0)
+		self.fossil_loop(0, 0)
 
 class Fossil_shiny_01(Fossil_shiny): # パッチルドン
 	def __init__(self, name, cam):
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	def do(self):
-		Fossil_shiny.fossil_loop(self, 0, 1)
+		self.fossil_loop(0, 1)
 
 class Fossil_shiny_10(Fossil_shiny): # ウオノラゴン
 	def __init__(self, name, cam):
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	def do(self):
-		Fossil_shiny.fossil_loop(self, 1, 0)
+		self.fossil_loop(1, 0)
 
 class Fossil_shiny_11(Fossil_shiny): # ウオチルドン
 	def __init__(self, name, cam):
 		super(Fossil_shiny, self).__init__(name, cam)
 
 	def do(self):
-		Fossil_shiny.fossil_loop(self, 1, 1)
+		self.fossil_loop(1, 1)
 
 # sample initial code
 # Copy and paste this class and write codes in start method.
