@@ -155,14 +155,19 @@ class OCR():
 		langs = self.tool.get_available_languages()
 		print("Available languages: %s" % ", ".join(langs))
 		
-	def read(self, image_path, lang="jpn"):
+	def read(self, image_path, crop_area=None):
+		image = Image.open('./Template/' + image_path)
+		if not crop_area is None:
+			image = image.crop(crop_area)
+			image.save('./Captures/ocr_test.png')
+
 		text = self.tool.image_to_string(
-			Image.open('./Template/' + image_path),
-			lang=lang,
+			image,
+			lang=self.language,
 			builder=pyocr.builders.TextBuilder(tesseract_layout=6)
 		)
 		return text
 
 if __name__ == "__main__":
 	ocr = OCR()
-	print(ocr.read('status.png'))
+	print(ocr.read('status.png', (2, 152, 102, 182)))
