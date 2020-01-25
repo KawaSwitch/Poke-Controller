@@ -123,8 +123,46 @@ def testAkaze(test_path):
 	cap.release()
 	cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-	#res = isContainTemplate("sample.png", "dougu_to_bag.png", 0.7, True)
-	#testInterframeDiff()
+from PIL import Image
+import sys
+import pyocr
+import pyocr.builders
 
-	testAkaze('pannels.png')
+class OCR():
+	def __init__(self):
+		self.language = "jpn"
+		self.can_use = True
+	
+		# The tools are returned in the recommended order of usage
+		tools = pyocr.get_available_tools()
+		if len(tools) == 0:
+			print("No OCR tool found")
+			self.can_use = False
+			return
+
+		self.tool = tools[0]
+
+		# check if we can use OCR of Japanese
+		langs = self.tool.get_available_languages()
+		if not self.language in langs:
+			print("Japanese OCR cannot be used")
+			self.can_use = False
+			return
+	
+	def printStatus():
+		print("Will use tool '%s'" % (self.tool.get_name()))
+
+		langs = self.tool.get_available_languages()
+		print("Available languages: %s" % ", ".join(langs))
+		
+	def read(self, image_path, lang="jpn"):
+		text = self.tool.image_to_string(
+			Image.open('./Template/' + image_path),
+			lang=lang,
+			builder=pyocr.builders.TextBuilder(tesseract_layout=6)
+		)
+		return text
+
+if __name__ == "__main__":
+	ocr = OCR()
+	print(ocr.read('status.png'))
