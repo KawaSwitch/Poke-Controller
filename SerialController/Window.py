@@ -198,6 +198,9 @@ class GUI:
 		self.preview.startCapture()
 
 	def setCommandItems(self):
+		import importlib
+		importlib.import_module('Commands.PythonCommands.MashA')
+
 		self.mcu_cb['values'] = [name for name in McuCommand.commands.keys()]
 		self.mcu_cb.current(0)
 		self.py_cb['values'] = [name for name in PythonCommand.commands.keys()]

@@ -887,6 +887,8 @@ class Fossil_shiny_11(Fossil_shiny): # ウオチルドン
 # このクラスをコピぺしてstartメソッドの続きにコードを書いてください
 # コードを書き終わったら, 下のcommands変数に追加するのを忘れないように
 class Sample(PythonCommand):
+	NAME = 'command_name'
+
 	def __init__(self, name):
 		super(Sample, self).__init__(name)
 
