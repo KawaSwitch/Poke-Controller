@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import CommandBase
+from . import CommandBase
 
 # MCU command
 class McuCommand(CommandBase.Command):
-	def __init__(self, name, sync_name):
-		super(McuCommand, self).__init__(name)
-		#print('init MCU command: ' + name)
+	def __init__(self, sync_name):
+		super(McuCommand, self).__init__()
 		self.sync_name = sync_name
 		self.postProcess = None
 	

@@ -2,25 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import sys, os
-from tkinter.scrolledtext import ScrolledText
+import importlib
 import tkinter as tk
 from tkinter import ttk
 import cv2, json, time
-import McuCommand, PythonCommand, UnitCommand
-import Camera, Sender
-from Keys import KeyPress
+from Commands.Keys import KeyPress
 from Keyboard import SwitchKeyboardController
 from Camera import Camera
-from GuiAssets import CaptureArea, ControllerGUI
+from GuiAssets import MyScrolledText, CaptureArea, ControllerGUI
+import Utility as util
+from Commands import PythonCommandBase, McuCommandBase, Sender
 
 NAME = "Poke-Controller"
 VERSION = "v1.0"
 SETTING_PATH = "./settings.json"
-
-# To avoid the error says 'ScrolledText' object has no attribute 'flush'
-class MyScrolledText(ScrolledText):
-	def flush(self):
-		pass
 
 # Main GUI
 class GUI:
@@ -139,10 +134,8 @@ class GUI:
 		# commands
 		self.mcu_name = tk.StringVar()
 		self.mcu_cb = ttk.Combobox(self.lf, textvariable=self.mcu_name, state="readonly")
-		self.mcu_cb.bind('<<ComboboxSelected>>', self.assignMcuCommand)
 		self.py_name = tk.StringVar()
 		self.py_cb = ttk.Combobox(self.lf, textvariable=self.py_name, state="readonly")
-		self.py_cb.bind('<<ComboboxSelected>>', self.assignPythonCommand)
 		self.setCommandItems()
 		self.assignCommand()
 
@@ -198,13 +191,35 @@ class GUI:
 		self.preview.startCapture()
 
 	def setCommandItems(self):
-		import importlib
-		importlib.import_module('Commands.PythonCommands.MashA')
+		py_path = 'Commands\PythonCommands'
+		mcu_path = 'Commands\McuCommands'
 
-		self.mcu_cb['values'] = [name for name in McuCommand.commands.keys()]
-		self.mcu_cb.current(0)
-		self.py_cb['values'] = [name for name in PythonCommand.commands.keys()]
+		self.py_modules = self.getCommandModules(py_path)
+		self.mcu_modules = self.getCommandModules(mcu_path)
+
+		self.py_classes = []
+		for mod in self.py_modules:
+			self.py_classes.extend([c for c in util.getClassesInModule(mod)\
+				if issubclass(c, PythonCommandBase.PythonCommand) and hasattr(c, 'NAME')])
+
+		self.mcu_classes = []
+		for mod in self.mcu_modules:
+			self.mcu_classes.extend([c for c in util.getClassesInModule(mod)\
+				if issubclass(c, McuCommandBase.McuCommand) and hasattr(c, 'NAME')])
+
+		self.py_cb['values'] = [c.NAME for c in self.py_classes]
 		self.py_cb.current(0)
+		self.mcu_cb['values'] = [c.NAME for c in self.mcu_classes]
+		self.mcu_cb.current(0)
+	
+	def getCommandModules(self, path):
+		module_names = [os.path.splitext(n)[0] for n in util.browseFileNames(path=path, ext='.py')]
+
+		modules = []
+		for name in module_names:
+			modules.append(importlib.import_module(path.replace('\\', '.') + '.' + name))
+		
+		return modules
 
 	def openCamera(self):
 		self.camera.openCamera(self.cameraID.get())
@@ -235,7 +250,7 @@ class GUI:
 		# set and init selected command
 		self.assignCommand()
 
-		print(self.startButton["text"] + ' ' + self.cur_command.getName())
+		print(self.startButton["text"] + ' ' + self.cur_command.NAME)
 		self.cur_command.start(self.ser, self.stopPlayPost)
 
 		self.startButton["text"] = "Stop"
@@ -243,19 +258,17 @@ class GUI:
 
 	def assignCommand(self):
 		if self.v1.get() == 'Mcu':
-			name = self.mcu_name.get()
-			self.cur_command = McuCommand.commands[name](name)
+			self.cur_command = self.mcu_classes[self.mcu_cb.current()]()
 		elif self.v1.get() == 'Python':
-			name = self.py_name.get() 
-			cmd_class = PythonCommand.commands[name]
+			cmd_class = self.py_classes[self.py_cb.current()]
 
-			if issubclass(cmd_class, PythonCommand.ImageProcPythonCommand):
-				self.cur_command = cmd_class(name, self.camera)
+			if issubclass(cmd_class, PythonCommandBase.ImageProcPythonCommand):
+				self.cur_command = cmd_class(self.camera)
 			else:
-				self.cur_command = cmd_class(name)
+				self.cur_command = cmd_class()
 
 	def stopPlay(self):
-		print(self.startButton["text"] + ' ' + self.cur_command.getName())
+		print(self.startButton["text"] + ' ' + self.cur_command.NAME)
 		self.startButton["state"] = "disabled"
 		self.cur_command.end(self.ser)
 
@@ -286,21 +299,13 @@ class GUI:
 		self.preview.setFps(self.fps.get())
 		self.settings['fps'] = self.fps.get()
 
-	def assignMcuCommand(self, event):
-		print('changed to mcu command: ' + self.mcu_name.get())
-
-	def assignPythonCommand(self, event):
-		print('changed to python command: ' + self.py_name.get())
-
 	def setCommandCmbbox(self):
 		if self.v1.get() == 'Mcu':
 			self.mcu_cb.grid(row=0,column=1, columnspan=2, padx=(10, 0))
 			self.py_cb.grid_remove()
-			self.assignMcuCommand(None)
 		elif self.v1.get() == 'Python':
 			self.mcu_cb.grid_remove()
 			self.py_cb.grid(row=0,column=1, columnspan=2, padx=(10, 0))
-			self.assignPythonCommand(None)
 
 	def locateCameraCmbbox(self):
 		import clr
@@ -392,21 +397,22 @@ class GUI:
 		self.logArea.see(tk.END)
 
 	def reloadCommand(self):
-		import importlib
-		importlib.reload(McuCommand)
-		importlib.reload(PythonCommand)
-		importlib.reload(UnitCommand)
+		pass
+		# import importlib
+		# importlib.reload(McuCommand)
+		# importlib.reload(PythonCommand)
+		# importlib.reload(UnitCommand)
 
-		if self.v1.get() == 'Mcu':
-			visibledCb = self.mcu_cb
-		elif self.v1.get() == 'Python':
-			visibledCb = self.py_cb
+		# if self.v1.get() == 'Mcu':
+		# 	visibledCb = self.mcu_cb
+		# elif self.v1.get() == 'Python':
+		# 	visibledCb = self.py_cb
 
-		oldval = visibledCb.get()
-		self.setCommandItems()
-		if(oldval in visibledCb['values']):
-			visibledCb.set(oldval)
-		print('Reload command modules.')
+		# oldval = visibledCb.get()
+		# self.setCommandItems()
+		# if(oldval in visibledCb['values']):
+		# 	visibledCb.set(oldval)
+		# print('Reload command modules.')
 
 if __name__ == "__main__":
 	gui = GUI()

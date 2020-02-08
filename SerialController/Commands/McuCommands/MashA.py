@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from .. import McuCommandBase.McuCommand
+from ..McuCommandBase import McuCommand
 
 # Mash A button
 class Mash_A(McuCommand):
-	def __init__(self, name, sync_name = 'mash_a'):
-		super(Mash_A, self).__init__(name, sync_name)
+	NAME = 'A連打'
+
+	def __init__(self, sync_name = 'mash_a'):
+		super(Mash_A, self).__init__(sync_name)

@@ -4,9 +4,8 @@
 from abc import ABCMeta, abstractclassmethod
 from time import sleep
 import threading
-import Keys
 import cv2
-from Keys import Button, Direction, Stick
+from .Keys import KeyPress, Button, Direction, Stick
 from . import CommandBase
 
 # the class For notifying stop signal is sent from Main window
@@ -15,9 +14,8 @@ class StopThread(Exception):
 
 # Python command
 class PythonCommand(CommandBase.Command):
-	def __init__(self, name):
-		super(PythonCommand, self).__init__(name)
-		#print('init Python command: ' + name)
+	def __init__(self):
+		super(PythonCommand, self).__init__()
 		self.keys = None
 		self.thread = None
 		self.alive = True
@@ -29,17 +27,17 @@ class PythonCommand(CommandBase.Command):
 
 	def do_safe(self, ser):
 		if self.keys is None:
-			self.keys = Keys.KeyPress(ser)
+			self.keys = KeyPress(ser)
 
 		try:
 			if self.alive:
 				self.do()
 				self.finish()
 		except StopThread:
-			print(self.name + ' has finished successfully.')
+			print('-- finished successfully. --')
 		except:
 			if self.keys is None:
-				self.keys = Keys.KeyPress(ser)
+				self.keys = KeyPress(ser)
 			print('interruppt')
 			import traceback
 			traceback.print_exc()
@@ -59,7 +57,7 @@ class PythonCommand(CommandBase.Command):
 	def sendStopRequest(self):
 		if self.checkIfAlive(): # try if we can stop now
 			self.alive = False
-			print(self.name + ': we\'ve sent a stop request.')
+			print('-- sent a stop request. --')
 
 	# NOTE: Use this function if you want to get out from a command loop by yourself
 	def finish(self):
@@ -109,12 +107,6 @@ class PythonCommand(CommandBase.Command):
 		else:
 			return True
 
-# Python command using rank match glitch
-class RankGlitchPythonCommand(PythonCommand):
-	def __init__(self, name):
-		super(RankGlitchPythonCommand, self).__init__(name)
-		self.day = 0
-
 	# Use time glitch
 	# Controls the system time and get every-other-day bonus without any punishments
 	def timeLeap(self, is_go_back=True):
@@ -161,11 +153,10 @@ class RankGlitchPythonCommand(PythonCommand):
 		self.press(Button.HOME, wait=1)
 		self.press(Button.HOME, wait=1)
 
-
-TEMPLATE_PATH = "./Template/"
+TEMPLATE_PATH = "../../Template/"
 class ImageProcPythonCommand(PythonCommand):
-	def __init__(self, name, cam):
-		super(ImageProcPythonCommand, self).__init__(name)
+	def __init__(self, cam):
+		super(ImageProcPythonCommand, self).__init__()
 		self.camera = cam
 
 	# Judge if current screenshot contains an image using template matching
