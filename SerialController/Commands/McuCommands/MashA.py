@@ -8,4 +8,4 @@ class Mash_A(McuCommand):
 	NAME = 'A連打'
 
 	def __init__(self, sync_name = 'mash_a'):
-		super(Mash_A, self).__init__(sync_name)
+		super().__init__(sync_name)

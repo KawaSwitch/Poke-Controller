@@ -10,7 +10,7 @@ class AutoHatching(ImageProcPythonCommand):
 	NAME = '自動卵孵化'
 
 	def __init__(self, cam):
-		super(AutoHatching, self).__init__(cam)
+		super().__init__(cam)
 		self.cam = cam
 		self.party_num = 1	# don't count eggs
 		self.hatched_num = 0

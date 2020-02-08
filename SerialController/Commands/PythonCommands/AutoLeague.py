@@ -10,7 +10,7 @@ class AutoLeague(PythonCommand):
 	NAME = '自動リーグ周回'
 
 	def __init__(self):
-		super(AutoLeague, self).__init__()
+		super().__init__()
 
 	def do(self):
 		self.hold(Direction(Stick.LEFT, 70))

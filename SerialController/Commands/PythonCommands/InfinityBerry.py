@@ -11,7 +11,7 @@ class InfinityBerry(ImageProcPythonCommand):
 	NAME = '無限きのみ'
 
 	def __init__(self, cam):
-		super(InfinityBerry, self).__init__(cam)
+		super().__init__(cam)
 		self.cam = cam
 
 	def do(self):

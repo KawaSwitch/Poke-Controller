@@ -6,7 +6,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 
 class Fossil_shiny(ImageProcPythonCommand):
 	def __init__(self, cam):
-		super(Fossil_shiny, self).__init__(cam)
+		super().__init__(cam)
 
 	'''
 	head = {0 : "カセキのトリ", 1 : "カセキのサカナ"}
@@ -83,7 +83,7 @@ class Fossil_shiny_00(Fossil_shiny): # パッチラゴン
 	NAME = 'カセキ色厳選(パッチラゴン)'
 
 	def __init__(self, cam):
-		super(Fossil_shiny, self).__init__(cam)
+		super().__init__(cam)
 
 	def do(self):
 		self.fossil_loop(0, 0)
@@ -92,7 +92,7 @@ class Fossil_shiny_01(Fossil_shiny): # パッチルドン
 	NAME = 'カセキ色厳選(パッチルドン)'
 
 	def __init__(self, cam):
-		super(Fossil_shiny, self).__init__(cam)
+		super().__init__(cam)
 
 	def do(self):
 		self.fossil_loop(0, 1)
@@ -101,7 +101,7 @@ class Fossil_shiny_10(Fossil_shiny): # ウオノラゴン
 	NAME = 'カセキ色厳選(ウオノラゴン)'
 
 	def __init__(self, cam):
-		super(Fossil_shiny, self).__init__(cam)
+		super().__init__(cam)
 
 	def do(self):
 		self.fossil_loop(1, 0)
@@ -110,7 +110,7 @@ class Fossil_shiny_11(Fossil_shiny): # ウオチルドン
 	NAME = 'カセキ色厳選(ウオチルドン)'
 
 	def __init__(self, cam):
-		super(Fossil_shiny, self).__init__(cam)
+		super().__init__(cam)
 
 	def do(self):
 		self.fossil_loop(1, 1)

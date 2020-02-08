@@ -11,7 +11,7 @@ class InfinityCafe(PythonCommand):
 	NAME = '無限カフェ'
 
 	def __init__(self):
-		super(InfinityCafe, self).__init__()
+		super().__init__()
 		self.pp_max = 10
 
 	def do(self):

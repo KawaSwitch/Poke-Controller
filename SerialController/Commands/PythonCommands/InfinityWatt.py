@@ -9,7 +9,7 @@ class InfinityWatt(PythonCommand):
 	NAME = '無限ワット'
 
 	def __init__(self):
-		super(InfinityWatt, self).__init__()
+		super().__init__()
 		self.use_rank = True
 
 	def do(self):

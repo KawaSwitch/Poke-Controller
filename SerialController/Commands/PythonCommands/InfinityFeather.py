@@ -8,7 +8,7 @@ class InfinityFeather(PythonCommand):
 	NAME = '無限羽回収'
 
 	def __init__(self):
-		super(InfinityFeather, self).__init__()
+		super().__init__()
 
 	def do(self):
 		# 時間等確認用。使用する際は "import time" すること

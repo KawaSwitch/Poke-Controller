@@ -9,7 +9,7 @@ class AutoRelease(ImageProcPythonCommand):
 	NAME = '自動リリース'
 
 	def __init__(self, cam):
-		super(AutoRelease, self).__init__(cam)
+		super().__init__(cam)
 		self.row = 5
 		self.col = 6
 		self.cam = cam

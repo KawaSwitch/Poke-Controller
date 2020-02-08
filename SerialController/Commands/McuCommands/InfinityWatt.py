@@ -8,4 +8,4 @@ class InfinityWatt(McuCommand):
 	NAME = '無限ワット'
 
 	def __init__(self, sync_name = 'inf_watt'):
-		super(InfinityWatt, self).__init__(sync_name)
+		super().__init__(sync_name)

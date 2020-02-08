@@ -10,7 +10,7 @@ class Mash_A(PythonCommand):
 	NAME = 'A連打'
 
 	def __init__(self):
-		super(Mash_A, self).__init__()
+		super().__init__()
 
 	def do(self):
 		while True:

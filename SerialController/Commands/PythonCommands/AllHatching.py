@@ -11,7 +11,7 @@ class AllHatching(ImageProcPythonCommand):
 	NAME = '全卵孵化'
 
 	def __init__(self, cam):
-		super(AllHatching, self).__init__(cam)
+		super().__init__(cam)
 		self.hatched_num = 0
 		self.count = 5
 		self.place = 'wild_area'

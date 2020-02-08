@@ -11,7 +11,7 @@ class InfinityLottery(PythonCommand):
 	NAME = '無限IDくじ'
 
 	def __init__(self):
-		super(InfinityLottery, self).__init__()
+		super().__init__()
 
 	def do(self):
 		while True:

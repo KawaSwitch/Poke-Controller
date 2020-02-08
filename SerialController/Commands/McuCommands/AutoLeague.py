@@ -8,4 +8,4 @@ class AutoLeague(McuCommand):
 	NAME = '自動リーグ周回'
 
 	def __init__(self, sync_name = 'auto_league'):
-		super(AutoLeague, self).__init__(sync_name)
+		super().__init__(sync_name)
