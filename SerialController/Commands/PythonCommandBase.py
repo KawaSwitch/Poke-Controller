@@ -153,7 +153,7 @@ class PythonCommand(CommandBase.Command):
 		self.press(Button.HOME, wait=1)
 		self.press(Button.HOME, wait=1)
 
-TEMPLATE_PATH = "../../Template/"
+TEMPLATE_PATH = "./Template/"
 class ImageProcPythonCommand(PythonCommand):
 	def __init__(self, cam):
 		super(ImageProcPythonCommand, self).__init__()
