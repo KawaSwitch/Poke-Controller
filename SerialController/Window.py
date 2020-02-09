@@ -191,35 +191,13 @@ class GUI:
 		self.preview.startCapture()
 
 	def setCommandItems(self):
-		py_path = 'Commands\PythonCommands'
-		mcu_path = 'Commands\McuCommands'
-
-		self.py_modules = self.getCommandModules(py_path)
-		self.mcu_modules = self.getCommandModules(mcu_path)
-
-		self.py_classes = []
-		for mod in self.py_modules:
-			self.py_classes.extend([c for c in util.getClassesInModule(mod)\
-				if issubclass(c, PythonCommandBase.PythonCommand) and hasattr(c, 'NAME')])
-
-		self.mcu_classes = []
-		for mod in self.mcu_modules:
-			self.mcu_classes.extend([c for c in util.getClassesInModule(mod)\
-				if issubclass(c, McuCommandBase.McuCommand) and hasattr(c, 'NAME')])
+		self.py_modules, self.py_classes = util.getPythonCommandModulesAndClasses()
+		self.mcu_modules, self.mcu_classes = util.getMcuCommandModulesAndClasses()
 
 		self.py_cb['values'] = [c.NAME for c in self.py_classes]
 		self.py_cb.current(0)
 		self.mcu_cb['values'] = [c.NAME for c in self.mcu_classes]
 		self.mcu_cb.current(0)
-	
-	def getCommandModules(self, path):
-		module_names = [os.path.splitext(n)[0] for n in util.browseFileNames(path=path, ext='.py')]
-
-		modules = []
-		for name in module_names:
-			modules.append(importlib.import_module(path.replace('\\', '.') + '.' + name))
-		
-		return modules
 
 	def openCamera(self):
 		self.camera.openCamera(self.cameraID.get())
@@ -397,22 +375,23 @@ class GUI:
 		self.logArea.see(tk.END)
 
 	def reloadCommand(self):
-		pass
-		# import importlib
-		# importlib.reload(McuCommand)
-		# importlib.reload(PythonCommand)
-		# importlib.reload(UnitCommand)
 
-		# if self.v1.get() == 'Mcu':
-		# 	visibledCb = self.mcu_cb
-		# elif self.v1.get() == 'Python':
-		# 	visibledCb = self.py_cb
 
-		# oldval = visibledCb.get()
-		# self.setCommandItems()
-		# if(oldval in visibledCb['values']):
-		# 	visibledCb.set(oldval)
-		# print('Reload command modules.')
+
+		importlib.reload(McuCommand)
+		importlib.reload(PythonCommand)
+		importlib.reload(UnitCommand)
+
+		if self.v1.get() == 'Mcu':
+			visibledCb = self.mcu_cb
+		elif self.v1.get() == 'Python':
+			visibledCb = self.py_cb
+
+		oldval = visibledCb.get()
+		self.setCommandItems()
+		if(oldval in visibledCb['values']):
+			visibledCb.set(oldval)
+		print('Finished reloading command modules.')
 
 if __name__ == "__main__":
 	gui = GUI()
