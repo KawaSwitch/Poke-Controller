@@ -1,6 +1,7 @@
+import os
 from os.path import join, relpath
 from glob import glob
-import inspect
+import inspect, importlib
 
 # Show all file names right under the directory
 def browseFileNames(path='.', ext=''):
@@ -12,33 +13,12 @@ def getClassesInModule(module):
 		classes.append(members[1])
 	return classes
 
-def getCommandModules(path):
-	module_names = [os.path.splitext(n)[0] for n in util.browseFileNames(path=path, ext='.py')]
+def getModuleNames(base_path):
+	return [os.path.splitext(n)[0] for n in browseFileNames(path=base_path, ext='.py')]
 
+def importAllModules(base_path, mod_names=None):
 	modules = []
-	for name in module_names:
-		modules.append(importlib.import_module(path.replace('\\', '.') + '.' + name))
+	for name in getModuleNames(base_path) if mod_names is None else mod_names:
+		modules.append(importlib.import_module(base_path.replace('\\', '.') + '.' + name))
 	
 	return modules
-
-def getPythonCommandModulesAndClasses():
-	path = 'Commands\PythonCommands'
-	modules = getCommandModules(path)
-
-	classes = []
-	for mod in modules:
-		classes.extend([c for c in getClassesInModule(mod)\
-			if issubclass(c, PythonCommandBase.PythonCommand) and hasattr(c, 'NAME')])
-	
-	return modules, classes
-
-def getMcuCommandModulesAndClasses():
-	path = 'Commands\McuCommands'
-	modules = getCommandModules(path)
-
-	classes = []
-	for mod in modules:
-		classes.extend([c for c in getClassesInModule(mod)\
-			if issubclass(c, McuCommandBase.McuCommand) and hasattr(c, 'NAME')])
-	
-	return modules, classes

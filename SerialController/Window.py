@@ -12,6 +12,7 @@ from Camera import Camera
 from GuiAssets import MyScrolledText, CaptureArea, ControllerGUI
 import Utility as util
 from Commands import PythonCommandBase, McuCommandBase, Sender
+from CommandLoader import CommandLoader
 
 NAME = "Poke-Controller"
 VERSION = "v1.0"
@@ -95,7 +96,7 @@ class GUI:
 		self.v1 = tk.StringVar(value='Python')
 		self.rb1 = ttk.Radiobutton(self.lf, text='Mcu', value='Mcu', variable=self.v1, command=self.setCommandCmbbox)
 		self.rb2 = ttk.Radiobutton(self.lf, text='Python', value='Python', variable=self.v1, command=self.setCommandCmbbox)
-		self.reloadCommandButton = ttk.Button(self.lf, text='Reload', command=self.reloadCommand)
+		self.reloadCommandButton = ttk.Button(self.lf, text='Reload', command=self.reloadCommands)
 
 		self.reloadButton = ttk.Button(self.camera_f1, text='Reload Cam', command=self.openCamera)
 		self.reloadComPort = ttk.Button(self.serial_f1, text='Reload Port', command=self.activateSerial)
@@ -136,8 +137,7 @@ class GUI:
 		self.mcu_cb = ttk.Combobox(self.lf, textvariable=self.mcu_name, state="readonly")
 		self.py_name = tk.StringVar()
 		self.py_cb = ttk.Combobox(self.lf, textvariable=self.py_name, state="readonly")
-		self.setCommandItems()
-		self.assignCommand()
+		self.loadCommands()
 
 		self.partition1 = ttk.Label(self.camera_f1, text=' / ')
 		self.partition2 = ttk.Label(self.camera_f1, text=' / ')
@@ -190,15 +190,6 @@ class GUI:
 		self.root.protocol("WM_DELETE_WINDOW", self.exit)
 		self.preview.startCapture()
 
-	def setCommandItems(self):
-		self.py_modules, self.py_classes = util.getPythonCommandModulesAndClasses()
-		self.mcu_modules, self.mcu_classes = util.getMcuCommandModulesAndClasses()
-
-		self.py_cb['values'] = [c.NAME for c in self.py_classes]
-		self.py_cb.current(0)
-		self.mcu_cb['values'] = [c.NAME for c in self.mcu_classes]
-		self.mcu_cb.current(0)
-
 	def openCamera(self):
 		self.camera.openCamera(self.cameraID.get())
 		self.settings['camera_id'] = self.cameraID.get()
@@ -233,17 +224,6 @@ class GUI:
 
 		self.startButton["text"] = "Stop"
 		self.startButton["command"] = self.stopPlay
-
-	def assignCommand(self):
-		if self.v1.get() == 'Mcu':
-			self.cur_command = self.mcu_classes[self.mcu_cb.current()]()
-		elif self.v1.get() == 'Python':
-			cmd_class = self.py_classes[self.py_cb.current()]
-
-			if issubclass(cmd_class, PythonCommandBase.ImageProcPythonCommand):
-				self.cur_command = cmd_class(self.camera)
-			else:
-				self.cur_command = cmd_class()
 
 	def stopPlay(self):
 		print(self.startButton["text"] + ' ' + self.cur_command.NAME)
@@ -374,23 +354,48 @@ class GUI:
 		time.sleep(0.0001)
 		self.logArea.see(tk.END)
 
-	def reloadCommand(self):
+	def loadCommands(self):
+		self.py_loader = CommandLoader('Commands\PythonCommands', PythonCommandBase.PythonCommand)
+		self.mcu_loader = CommandLoader('Commands\McuCommands', McuCommandBase.McuCommand)
+		
+		self.py_classes = self.py_loader.load()
+		self.mcu_classes = self.mcu_loader.load()
 
+		self.setCommandItems()
+		self.assignCommand()
+	
+	def setCommandItems(self):
+		self.py_cb['values'] = [c.NAME for c in self.py_classes]
+		self.py_cb.current(0)
+		self.mcu_cb['values'] = [c.NAME for c in self.mcu_classes]
+		self.mcu_cb.current(0)
 
+	def assignCommand(self):
+		if self.v1.get() == 'Mcu':
+			self.cur_command = self.mcu_classes[self.mcu_cb.current()]()
+		elif self.v1.get() == 'Python':
+			cmd_class = self.py_classes[self.py_cb.current()]
 
-		importlib.reload(McuCommand)
-		importlib.reload(PythonCommand)
-		importlib.reload(UnitCommand)
+			if issubclass(cmd_class, PythonCommandBase.ImageProcPythonCommand):
+				self.cur_command = cmd_class(self.camera)
+			else:
+				self.cur_command = cmd_class()
 
+	def reloadCommands(self):
 		if self.v1.get() == 'Mcu':
 			visibledCb = self.mcu_cb
 		elif self.v1.get() == 'Python':
 			visibledCb = self.py_cb
-
 		oldval = visibledCb.get()
+
+		self.py_classes = self.py_loader.reload()
+		self.mcu_classes = self.mcu_loader.reload()
+
+		# Restore the command selecting state if possible
 		self.setCommandItems()
 		if(oldval in visibledCb['values']):
 			visibledCb.set(oldval)
+		self.assignCommand()
 		print('Finished reloading command modules.')
 
 if __name__ == "__main__":
