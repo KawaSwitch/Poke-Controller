@@ -18,9 +18,12 @@ class CaptureArea(tk.Label):
 		self.setFps(fps)
 		self.bind("<ButtonPress-1>", self.mouseLeftDown)
 
+		# Set disabled image first
 		disabled_img = cv2.imread("../Images/disabled.png", cv2.IMREAD_GRAYSCALE)
 		disabled_pil = Image.fromarray(disabled_img)
 		self.diabled_tk = ImageTk.PhotoImage(disabled_pil)
+		self.im = self.diabled_tk
+		self.configure(image=self.diabled_tk)
 	
 	def setFps(self, fps):
 		self.next_frames = (int)(16 * (60 / int(fps)))
