@@ -224,6 +224,7 @@ class GUI:
 
 		self.startButton["text"] = "Stop"
 		self.startButton["command"] = self.stopPlay
+		self.reloadCommandButton["state"] = "disabled"
 
 	def stopPlay(self):
 		print(self.startButton["text"] + ' ' + self.cur_command.NAME)
@@ -234,6 +235,7 @@ class GUI:
 		self.startButton["text"] = "Start"
 		self.startButton["command"] = self.startPlay
 		self.startButton["state"] = "normal"
+		self.reloadCommandButton["state"] = "normal"
 
 	def exit(self):
 		if self.ser.isOpened():
