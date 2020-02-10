@@ -14,9 +14,11 @@ class CaptureArea(tk.Label):
 		self.camera = camera
 		self.show_size = (640, 360)
 		self.is_show_var = is_show
+		self.is_trim_mode = False
 
 		self.setFps(fps)
 		self.bind("<ButtonPress-1>", self.mouseLeftDown)
+		self.bind("<ButtonRelease-1>", self.mouseLeftUp)
 
 		# Set disabled image first
 		disabled_img = cv2.imread("../Images/disabled.png", cv2.IMREAD_GRAYSCALE)
@@ -33,6 +35,24 @@ class CaptureArea(tk.Label):
 		ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
 		ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
 		print('mouse down: show ({}, {}) / capture ({}, {})'.format(x, y, int(x * ratio_x), int(y * ratio_y)))
+
+		self.is_trim_mode = True
+		self.down_trim_x = int(x * ratio_x)
+		self.down_trim_y = int(y * ratio_y)
+	
+	def mouseLeftUp(self, event):
+		x, y = event.x, event.y
+		ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
+		ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
+		up_trim_x = int(x * ratio_x)
+		up_trim_y = int(y * ratio_y)
+		print('mouse up: show ({}, {}) / capture ({}, {})'.format(x, y, up_trim_x, up_trim_y))
+
+		if self.is_trim_mode:
+			self.camera.saveCapture(
+				(min(self.down_trim_x, up_trim_x), max(self.down_trim_x, up_trim_x),
+				min(self.down_trim_y, up_trim_y), max(self.down_trim_y, up_trim_y)))
+		self.is_trim_mode = False
 	
 	def startCapture(self):
 		self.capture()
