@@ -39,6 +39,6 @@ class CommandLoader:
 		classes = []
 		for mod in self.modules:
 			classes.extend([c for c in util.getClassesInModule(mod)\
-				if issubclass(c, self.base_type) and hasattr(c, 'NAME')])
+				if issubclass(c, self.base_type) and hasattr(c, 'NAME') and c.NAME])
 		
 		return classes
