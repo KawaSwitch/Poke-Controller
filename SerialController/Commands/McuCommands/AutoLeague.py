@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ..McuCommandBase import McuCommand
+from Commands.McuCommandBase import McuCommand
 
 # Mash A button
 class AutoLeague(McuCommand):

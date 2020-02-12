@@ -332,8 +332,8 @@ class GUI:
 		self.logArea.see(tk.END)
 
 	def loadCommands(self):
-		self.py_loader = CommandLoader('Commands\PythonCommands', PythonCommandBase.PythonCommand)
-		self.mcu_loader = CommandLoader('Commands\McuCommands', McuCommandBase.McuCommand)
+		self.py_loader = CommandLoader(util.ospath('Commands\PythonCommands'), PythonCommandBase.PythonCommand)
+		self.mcu_loader = CommandLoader(util.ospath('Commands\McuCommands'), McuCommandBase.McuCommand)
 		
 		self.py_classes = self.py_loader.load()
 		self.mcu_classes = self.mcu_loader.load()

@@ -15,7 +15,7 @@ class CommandLoader:
 		return self.getCommandClasses()
 	
 	def reload(self):
-		loaded_module_dic = {mod.__name__.split('.')[-1:][0]:mod for mod in self.modules}
+		loaded_module_dic = {mod.__name__: mod for mod in self.modules}
 		cur_module_names = util.getModuleNames(self.path)
 
 		# Load only not loaded modules

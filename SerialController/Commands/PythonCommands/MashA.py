@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ..PythonCommandBase import PythonCommand, ImageProcPythonCommand
+from Commands.PythonCommandBase import PythonCommand, ImageProcPythonCommand
 from Commands.Keys import KeyPress, Button, Direction, Stick
 
 # Mash a button A
@@ -15,4 +15,4 @@ class Mash_A(PythonCommand):
 	def do(self):
 		while True:
 			self.wait(0.5)
-			self.press(Button.B)
+			self.press(Button.A)

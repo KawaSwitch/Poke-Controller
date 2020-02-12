@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ..PythonCommandBase import PythonCommand, ImageProcPythonCommand
+from Commands.PythonCommandBase import PythonCommand, ImageProcPythonCommand
 from Commands.Keys import KeyPress, Button, Direction, Stick
 
 # using RankBattle glitch
