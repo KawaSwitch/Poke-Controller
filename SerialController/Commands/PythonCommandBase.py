@@ -79,8 +79,9 @@ class PythonCommand(CommandBase.Command):
 		self.wait(wait)
 
 	# add hold buttons
-	def hold(self, buttons):
+	def hold(self, buttons, wait=0.1):
 		self.keys.hold(buttons)
+		self.wait(wait)
 
 	# release holding buttons
 	def holdEnd(self, buttons):
