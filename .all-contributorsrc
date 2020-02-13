@@ -1,0 +1,27 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "KawaSwitch",
+      "name": "KawaSwitch",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/41296626?v=4",
+      "profile": "https://github.com/KawaSwitch",
+      "contributions": [
+        "code",
+        "maintenance",
+        "doc",
+        "question"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "Poke-Controller",
+  "projectOwner": "KawaSwitch",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
