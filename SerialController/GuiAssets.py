@@ -62,10 +62,12 @@ class CaptureArea(tk.Label):
 		self.camera.saveCapture()
 
 # The modal dialog
+# based from here: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm
 class Dialog(tk.Toplevel):
 	def __init__(self, parent, title = None):
 		tk.Toplevel.__init__(self, parent)
 		self.transient(parent)
+		self.option = None
 
 		if title:
 			self.title(title)
@@ -77,27 +79,26 @@ class Dialog(tk.Toplevel):
 		self.initial_focus = self.body(body)
 		body.pack(padx=5, pady=5)
 
-		self.buttonbox()
-		self.grab_set()
+		self.setButtonbox()
 
 		if not self.initial_focus:
 			self.initial_focus = self
 
 		self.protocol("WM_DELETE_WINDOW", self.cancel)
 
-		self.geometry("+%d+%d" % (parent.winfo_rootx()+50,
-								  parent.winfo_rooty()+50))
+		self.geometry("+%d+%d" % (parent.winfo_rootx(),
+								  parent.winfo_rooty()))
 
 		self.initial_focus.focus_set()
 		self.wait_window(self)
 
-	# Create dialog body.  return widget that should have initial focus.  
+	# Create dialog body that returns widget that should have initial focus.  
 	# This method should be overridden.
 	def body(self, master):
 		pass
 
 	# Add standard button box. Override if you don't want the standard buttons.
-	def buttonbox(self):
+	def setButtonbox(self):
 		box = tk.Frame(self)
 
 		w = tk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
@@ -132,33 +133,24 @@ class Dialog(tk.Toplevel):
 	def apply(self):
 		pass # override
 
-class MyDialog(Dialog):
-	def __init__(self, parent, title = None):
-		super().__init__(parent, title)
-
-	def body(self, master):
-		tk.Label(master, text="First:").grid(row=0)
-		tk.Label(master, text="Second:").grid(row=1)
-
-		self.e1 = tk.Entry(master)
-		self.e2 = tk.Entry(master)
-
-		self.e1.grid(row=0, column=1)
-		self.e2.grid(row=1, column=1)
-		return self.e1 # initial focus
-
-	def validate(self):
-		try:
-			first = int(self.e1.get())
-			second = int(self.e2.get())
-			self.option = first, second
-			return 1
-		except ValueError:
-			tk.messagebox.showwarning("Input Value Error", "不正な入力値です.\nPlease try again.")
-			return 0
-
-	def apply(self):
-		pass
+	## -- Set syntax-sugars
+	def setLabel(self, master, text):
+		return tk.Label(master, text=text)
+	
+	def setLabelWithEntry(self, master, text):
+		frame = tk.Frame(master, relief='flat')
+		tk.Label(frame, text=text).grid(row=0, column=0)
+		entry = tk.Entry(frame)
+		entry.grid(row=0, column=1)
+		return frame, entry
+	
+	def setSelectRadioButton(self, master, text, radio_texts):
+		frame = tk.Frame(master, relief='flat')
+		tk.Label(frame, text=text).grid(row=0, column=0)
+		var = tk.IntVar(value=0)
+		for i, radio_text in enumerate(radio_texts):
+			tk.Radiobutton(frame, value=i, variable=var, text=radio_text).grid(row=1, column=i)
+		return frame, var
 
 # GUI of switch controller simulator
 class ControllerGUI:

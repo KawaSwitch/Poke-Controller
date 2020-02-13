@@ -196,7 +196,7 @@ class GUI:
 		# set and init selected command
 		self.assignCommand()
 
-		if self.cur_command.startWithOption(self.root, self.ser, self.stopPlayPost):
+		if self.cur_command.startWithOption(self.lf, self.ser, self.stopPlayPost):
 			print(self.startButton["text"] + ' ' + self.cur_command.NAME)
 			self.startButton["text"] = "Stop"
 			self.startButton["command"] = self.stopPlay
