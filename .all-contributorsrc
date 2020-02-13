@@ -26,6 +26,15 @@
         "code",
         "question"
       ]
+    },
+    {
+      "login": "xv13",
+      "name": "xv13",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/47322147?v=4",
+      "profile": "https://github.com/xv13",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
