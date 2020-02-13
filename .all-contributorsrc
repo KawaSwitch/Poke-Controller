@@ -16,6 +16,16 @@
         "doc",
         "question"
       ]
+    },
+    {
+      "login": "Moi-poke",
+      "name": "Moi-poke",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/59233665?v=4",
+      "profile": "https://github.com/Moi-poke",
+      "contributions": [
+        "code",
+        "question"
+      ]
     }
   ],
   "contributorsPerLine": 7,
