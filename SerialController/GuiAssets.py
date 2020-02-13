@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
+import tkinter.messagebox
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 import cv2
@@ -59,6 +60,105 @@ class CaptureArea(tk.Label):
 
 	def saveCapture(self):
 		self.camera.saveCapture()
+
+# The modal dialog
+class Dialog(tk.Toplevel):
+	def __init__(self, parent, title = None):
+		tk.Toplevel.__init__(self, parent)
+		self.transient(parent)
+
+		if title:
+			self.title(title)
+
+		self.parent = parent
+		self.result = None
+
+		body = tk.Frame(self)
+		self.initial_focus = self.body(body)
+		body.pack(padx=5, pady=5)
+
+		self.buttonbox()
+		self.grab_set()
+
+		if not self.initial_focus:
+			self.initial_focus = self
+
+		self.protocol("WM_DELETE_WINDOW", self.cancel)
+
+		self.geometry("+%d+%d" % (parent.winfo_rootx()+50,
+								  parent.winfo_rooty()+50))
+
+		self.initial_focus.focus_set()
+		self.wait_window(self)
+
+	# Create dialog body.  return widget that should have initial focus.  
+	# This method should be overridden.
+	def body(self, master):
+		pass
+
+	# Add standard button box. Override if you don't want the standard buttons.
+	def buttonbox(self):
+		box = tk.Frame(self)
+
+		w = tk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
+		w.pack(side=tk.LEFT, padx=5, pady=5)
+		w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
+		w.pack(side=tk.LEFT, padx=5, pady=5)
+
+		self.bind("<Return>", self.ok)
+		self.bind("<Escape>", self.cancel)
+
+		box.pack()
+
+	def ok(self, event=None):
+		if not self.validate():
+			self.initial_focus.focus_set() # put focus back
+			return
+
+		self.withdraw()
+		self.update_idletasks()
+
+		self.apply()
+		self.cancel()
+
+	def cancel(self, event=None):
+		# put focus back to the parent window
+		self.parent.focus_set()
+		self.destroy()
+
+	def validate(self):
+		return 1 # override
+
+	def apply(self):
+		pass # override
+
+class MyDialog(Dialog):
+	def __init__(self, parent, title = None):
+		super().__init__(parent, title)
+
+	def body(self, master):
+		tk.Label(master, text="First:").grid(row=0)
+		tk.Label(master, text="Second:").grid(row=1)
+
+		self.e1 = tk.Entry(master)
+		self.e2 = tk.Entry(master)
+
+		self.e1.grid(row=0, column=1)
+		self.e2.grid(row=1, column=1)
+		return self.e1 # initial focus
+
+	def validate(self):
+		try:
+			first = int(self.e1.get())
+			second = int(self.e2.get())
+			self.option = first, second
+			return 1
+		except ValueError:
+			tk.messagebox.showwarning("Input Value Error", "不正な入力値です.\nPlease try again.")
+			return 0
+
+	def apply(self):
+		pass
 
 # GUI of switch controller simulator
 class ControllerGUI:
