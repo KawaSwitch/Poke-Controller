@@ -8,7 +8,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # Infinity getting berries
 # 無限きのみ(ランクマッチ, 画像認識任意)
 class InfinityBerry(ImageProcPythonCommand):
-	NAME = '無限きのみ'
+	NAME = 'Infinity Berry'
 
 	def __init__(self, cam):
 		super().__init__(cam)

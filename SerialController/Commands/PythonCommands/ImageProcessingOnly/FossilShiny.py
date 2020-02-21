@@ -80,7 +80,7 @@ class Fossil_shiny(ImageProcPythonCommand):
 		return False
 
 class Fossil_shiny_00(Fossil_shiny): # パッチラゴン
-	NAME = 'カセキ色厳選(パッチラゴン)'
+	NAME = 'Shiny Fossil 00'
 
 	def __init__(self, cam):
 		super().__init__(cam)
@@ -89,7 +89,7 @@ class Fossil_shiny_00(Fossil_shiny): # パッチラゴン
 		self.fossil_loop(0, 0)
 
 class Fossil_shiny_01(Fossil_shiny): # パッチルドン
-	NAME = 'カセキ色厳選(パッチルドン)'
+	NAME = 'Shiny Fossil 01'
 
 	def __init__(self, cam):
 		super().__init__(cam)
@@ -98,7 +98,7 @@ class Fossil_shiny_01(Fossil_shiny): # パッチルドン
 		self.fossil_loop(0, 1)
 
 class Fossil_shiny_10(Fossil_shiny): # ウオノラゴン
-	NAME = 'カセキ色厳選(ウオノラゴン)'
+	NAME = 'Shiny Fossil 10'
 
 	def __init__(self, cam):
 		super().__init__(cam)
@@ -107,7 +107,7 @@ class Fossil_shiny_10(Fossil_shiny): # ウオノラゴン
 		self.fossil_loop(1, 0)
 
 class Fossil_shiny_11(Fossil_shiny): # ウオチルドン
-	NAME = 'カセキ色厳選(ウオチルドン)'
+	NAME = 'Shiny Fossil 11'
 
 	def __init__(self, cam):
 		super().__init__(cam)

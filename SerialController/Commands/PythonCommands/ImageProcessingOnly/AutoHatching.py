@@ -7,7 +7,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # auto egg hatching using image recognition
 # 自動卵孵化(キャプボあり)
 class AutoHatching(ImageProcPythonCommand):
-	NAME = '自動卵孵化'
+	NAME = 'Auto Hatch'
 
 	def __init__(self, cam):
 		super().__init__(cam)

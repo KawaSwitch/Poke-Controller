@@ -6,7 +6,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 
 # auto releaseing pokemons
 class AutoRelease(ImageProcPythonCommand):
-	NAME = '自動リリース'
+	NAME = 'Auto Release'
 
 	def __init__(self, cam):
 		super().__init__(cam)

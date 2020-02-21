@@ -5,7 +5,7 @@ from Commands.PythonCommandBase import PythonCommand, ImageProcPythonCommand
 from Commands.Keys import KeyPress, Button, Direction, Stick
 
 class InfinityFeather(PythonCommand):
-	NAME = '無限羽回収'
+	NAME = 'Infinity Feather'
 
 	def __init__(self):
 		super().__init__()

@@ -8,7 +8,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # Infinity ID lottery
 # 無限IDくじ(ランクマッチ使用)
 class InfinityLottery(PythonCommand):
-	NAME = '無限IDくじ'
+	NAME = 'Infinity Lottery'
 
 	def __init__(self):
 		super().__init__()

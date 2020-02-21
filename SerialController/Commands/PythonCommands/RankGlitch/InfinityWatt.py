@@ -6,7 +6,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 
 # Get watt automatically using the glitch
 class InfinityWatt(PythonCommand):
-	NAME = '無限ワット'
+	NAME = 'Infinity Watt'
 
 	def __init__(self):
 		super().__init__()

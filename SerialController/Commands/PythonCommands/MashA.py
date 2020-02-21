@@ -7,7 +7,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # Mash a button A
 # A連打
 class Mash_A(PythonCommand):
-	NAME = 'A連打'
+	NAME = 'Mash A'
 
 	def __init__(self):
 		super().__init__()

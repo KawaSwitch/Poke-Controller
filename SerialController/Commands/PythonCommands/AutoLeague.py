@@ -7,7 +7,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # Auto league
 # 自動リーグ周回(画像認識なし)
 class AutoLeague(PythonCommand):
-	NAME = '自動リーグ周回'
+	NAME = 'Auto League'
 
 	def __init__(self):
 		super().__init__()

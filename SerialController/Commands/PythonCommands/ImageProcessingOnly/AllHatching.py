@@ -8,7 +8,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # すべての孵化(キャプボあり)
 # 現在は手持ちのみ
 class AllHatching(ImageProcPythonCommand):
-	NAME = '全卵孵化'
+	NAME = 'Hatch N Eggs'
 
 	def __init__(self, cam):
 		super().__init__(cam)

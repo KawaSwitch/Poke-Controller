@@ -8,7 +8,7 @@ from Commands.Keys import KeyPress, Button, Direction, Stick
 # Auto cafe battles
 # 無限カフェ(ランクマッチ使用)
 class InfinityCafe(PythonCommand):
-	NAME = '無限カフェ'
+	NAME = 'Infinity Cafe'
 
 	def __init__(self):
 		super().__init__()
