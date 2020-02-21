@@ -2,25 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import sys, os
-from tkinter.scrolledtext import ScrolledText
+import importlib
 import tkinter as tk
 from tkinter import ttk
-import cv2, json, time
-import McuCommand, PythonCommand, UnitCommand
-import Camera, Sender
-from Keys import KeyPress
+import cv2, time
+import Settings
 from Keyboard import SwitchKeyboardController
 from Camera import Camera
-from GuiAssets import CaptureArea, ControllerGUI
+from GuiAssets import MyScrolledText, CaptureArea, ControllerGUI
+import Utility as util
+from Commands import PythonCommandBase, McuCommandBase, Sender
+from Commands.Keys import KeyPress
+from CommandLoader import CommandLoader
 
 NAME = "Poke-Controller"
 VERSION = "v1.0"
-SETTING_PATH = "./settings.json"
-
-# To avoid the error says 'ScrolledText' object has no attribute 'flush'
-class MyScrolledText(ScrolledText):
-	def flush(self):
-		pass
 
 # Main GUI
 class GUI:
@@ -61,90 +57,75 @@ class GUI:
 
 		# camera settings
 		self.label1 = ttk.Label(self.camera_f1, text='Camera ID:')
-		self.cameraID = tk.IntVar()
-		self.cameraID.set(int(self.settings['camera_id']))
 		self.camera_entry = None
 		if os.name == 'nt':
 			try:
 				self.locateCameraCmbbox()
 			except:
 				# Locate an entry instead whenever dll is not imported successfully
-				self.camera_entry = ttk.Entry(self.camera_f1, width=5, textvariable=self.cameraID)
+				self.camera_entry = ttk.Entry(self.camera_f1, width=5, textvariable=self.settings.camera_id)
 		else:
-			self.camera_entry = ttk.Entry(self.camera_f1, width=5, textvariable=self.cameraID)
+			self.camera_entry = ttk.Entry(self.camera_f1, width=5, textvariable=self.settings.camera_id)
 
 		# open up a camera
 		self.camera = Camera()
 		self.openCamera()
 
-		self.showPreview = tk.BooleanVar()
 		self.cb1 = ttk.Checkbutton(
 			self.camera_f1,
 			padding=5,
 			text='Show Realtime',
 			onvalue=True,
 			offvalue=False,
-			variable=self.showPreview)
-		self.showPreview.set(True)
+			variable=self.settings.is_show_realtime)
 
 		self.label2 = ttk.Label(self.serial_f1, text='COM Port:')
-		self.comPort = tk.IntVar()
-		self.comPort.set(int(self.settings['com_port']))
-		self.entry2 = ttk.Entry(self.serial_f1, width=5, textvariable=self.comPort)
-		self.preview = CaptureArea(self.camera, self.settings['fps'], self.showPreview, self.camera_lf)
+		self.entry2 = ttk.Entry(self.serial_f1, width=5, textvariable=self.settings.com_port)
+		self.preview = CaptureArea(self.camera, self.settings.fps.get(), self.settings.is_show_realtime, self.camera_lf)
 
 		# activate serial communication
-		self.ser = Sender.Sender()
+		self.ser = Sender.Sender(self.settings.is_show_serial)
 		self.activateSerial()
 
 		self.v1 = tk.StringVar(value='Python')
 		self.rb1 = ttk.Radiobutton(self.lf, text='Mcu', value='Mcu', variable=self.v1, command=self.setCommandCmbbox)
 		self.rb2 = ttk.Radiobutton(self.lf, text='Python', value='Python', variable=self.v1, command=self.setCommandCmbbox)
-		self.reloadCommandButton = ttk.Button(self.lf, text='Reload', command=self.reloadCommand)
+		self.reloadCommandButton = ttk.Button(self.lf, text='Reload', command=self.reloadCommands)
 
 		self.reloadButton = ttk.Button(self.camera_f1, text='Reload Cam', command=self.openCamera)
 		self.reloadComPort = ttk.Button(self.serial_f1, text='Reload Port', command=self.activateSerial)
 		self.startButton = ttk.Button(self.lf, text='Start', command=self.startPlay)
 		self.captureButton = ttk.Button(self.camera_f1, text='Capture', command=self.preview.saveCapture)
 
-		self.showSerial = tk.BooleanVar()
-		self.showSerial.set(False)
 		self.cb_show_ser = ttk.Checkbutton(
 			self.serial_f2,
 			padding=5,
 			text='Show Serial',
 			onvalue=True,
 			offvalue=False,
-			variable=self.showSerial,
-			command=lambda: self.ser.setIsShowSerial(self.showSerial.get()))
+			variable=self.settings.is_show_serial)
 
 		# simple controller
-		self.useKeyboard = tk.BooleanVar()
 		self.cb_use_keyboard = ttk.Checkbutton(
 			self.control_lf, text='Use Keyboard',
-			onvalue=True, offvalue=False, variable=self.useKeyboard,
+			onvalue=True, offvalue=False, variable=self.settings.is_use_keyboard,
 			command=self.activateKeyboard)
-		self.useKeyboard.set(False)
+		self.activateKeyboard()
 		self.simpleConButton = ttk.Button(self.control_lf, text='Controller', command=self.createControllerWindow)
 
 		# fps
 		self.label3 = ttk.Label(self.camera_f2, text='FPS:')
-		self.fps = tk.StringVar()
-		self.fps.set(str(self.settings['fps']))
-		self.fps_cb = ttk.Combobox(self.camera_f2, textvariable=self.fps, width=2, state="readonly")
+		self.fps_cb = ttk.Combobox(self.camera_f2, textvariable=self.settings.fps, width=2, state="readonly")
 		self.fps_cb['values'] = [45, 30, 15]
 		self.fps_cb.bind('<<ComboboxSelected>>', self.applyFps)
-		self.fps_cb.current(self.fps_cb['values'].index(self.fps.get()))
+		self.fps_cb.current(self.fps_cb['values'].index(self.settings.fps.get()))
 
 		# commands
 		self.mcu_name = tk.StringVar()
 		self.mcu_cb = ttk.Combobox(self.lf, textvariable=self.mcu_name, state="readonly")
-		self.mcu_cb.bind('<<ComboboxSelected>>', self.assignMcuCommand)
 		self.py_name = tk.StringVar()
 		self.py_cb = ttk.Combobox(self.lf, textvariable=self.py_name, state="readonly")
-		self.py_cb.bind('<<ComboboxSelected>>', self.assignPythonCommand)
-		self.setCommandItems()
-		self.assignCommand()
+		self.loadCommands()
 
 		self.partition1 = ttk.Label(self.camera_f1, text=' / ')
 		self.partition2 = ttk.Label(self.camera_f1, text=' / ')
@@ -197,33 +178,16 @@ class GUI:
 		self.root.protocol("WM_DELETE_WINDOW", self.exit)
 		self.preview.startCapture()
 
-	def setCommandItems(self):
-		self.mcu_cb['values'] = [name for name in McuCommand.commands.keys()]
-		self.mcu_cb.current(0)
-		self.py_cb['values'] = [name for name in PythonCommand.commands.keys()]
-		self.py_cb.current(0)
-
 	def openCamera(self):
-		self.camera.openCamera(self.cameraID.get())
-		self.settings['camera_id'] = self.cameraID.get()
+		self.camera.openCamera(self.settings.camera_id.get())
 	
 	def assignCamera(self, event):
 		if os.name == 'nt':
-			self.cameraID.set(self.camera_dic[self.cameraName.get()])
+			self.settings.camera_id.set(self.camera_dic[self.cameraName.get()])
 
 	def loadSettings(self):
-		self.settings = None
-		if os.path.isfile(SETTING_PATH):
-			self.settings = json.load(open(SETTING_PATH, 'r'))
-		else:
-			default = {
-				"camera_id": 0,
-				"com_port": 1,
-				"fps": "45"
-			}
-			json.dump(default, open(SETTING_PATH, 'w'), indent=4)
-			print('default settings file has been created')
-			self.loadSettings()
+		self.settings = Settings.GuiSettings()
+		self.settings.load()
 
 	def startPlay(self):
 		if self.cur_command is None:
@@ -232,27 +196,15 @@ class GUI:
 		# set and init selected command
 		self.assignCommand()
 
-		print(self.startButton["text"] + ' ' + self.cur_command.getName())
+		print(self.startButton["text"] + ' ' + self.cur_command.NAME)
 		self.cur_command.start(self.ser, self.stopPlayPost)
 
 		self.startButton["text"] = "Stop"
 		self.startButton["command"] = self.stopPlay
-
-	def assignCommand(self):
-		if self.v1.get() == 'Mcu':
-			name = self.mcu_name.get()
-			self.cur_command = McuCommand.commands[name](name)
-		elif self.v1.get() == 'Python':
-			name = self.py_name.get() 
-			cmd_class = PythonCommand.commands[name]
-
-			if issubclass(cmd_class, PythonCommand.ImageProcPythonCommand):
-				self.cur_command = cmd_class(name, self.camera)
-			else:
-				self.cur_command = cmd_class(name)
+		self.reloadCommandButton["state"] = "disabled"
 
 	def stopPlay(self):
-		print(self.startButton["text"] + ' ' + self.cur_command.getName())
+		print(self.startButton["text"] + ' ' + self.cur_command.NAME)
 		self.startButton["state"] = "disabled"
 		self.cur_command.end(self.ser)
 
@@ -260,6 +212,7 @@ class GUI:
 		self.startButton["text"] = "Start"
 		self.startButton["command"] = self.startPlay
 		self.startButton["state"] = "normal"
+		self.reloadCommandButton["state"] = "normal"
 
 	def exit(self):
 		if self.ser.isOpened():
@@ -272,32 +225,23 @@ class GUI:
 			self.keyboard = None
 
 		# save settings
-		json.dump(self.settings, open(SETTING_PATH, 'w'), indent=4)
+		self.settings.save()
 
 		self.camera.destroy()
 		cv2.destroyAllWindows()
 		self.root.destroy()
 
 	def applyFps(self, event):
-		print('changed FPS to: ' + self.fps.get() + ' [fps]')
-		self.preview.setFps(self.fps.get())
-		self.settings['fps'] = self.fps.get()
-
-	def assignMcuCommand(self, event):
-		print('changed to mcu command: ' + self.mcu_name.get())
-
-	def assignPythonCommand(self, event):
-		print('changed to python command: ' + self.py_name.get())
+		print('changed FPS to: ' + self.settings.fps.get() + ' [fps]')
+		self.preview.setFps(self.settings.fps.get())
 
 	def setCommandCmbbox(self):
 		if self.v1.get() == 'Mcu':
 			self.mcu_cb.grid(row=0,column=1, columnspan=2, padx=(10, 0))
 			self.py_cb.grid_remove()
-			self.assignMcuCommand(None)
 		elif self.v1.get() == 'Python':
 			self.mcu_cb.grid_remove()
 			self.py_cb.grid(row=0,column=1, columnspan=2, padx=(10, 0))
-			self.assignPythonCommand(None)
 
 	def locateCameraCmbbox(self):
 		import clr
@@ -310,9 +254,9 @@ class GUI:
 		self.camera_dic['Disable'] = max(list(self.camera_dic.values())) + 1
 		dev_num = len(self.camera_dic)
 
-		if self.cameraID.get() > dev_num - 1:
+		if self.settings.camera_id.get() > dev_num - 1:
 			print('inappropriate camera ID! -> set to 0')
-			self.cameraID.set(0)
+			self.settings.camera_id.set(0)
 			if dev_num == 0: print('No camera devices can be found.')
 
 		# locate a combobox instead of an entry
@@ -322,7 +266,7 @@ class GUI:
 		self.camera_entry['values'] = [device for device in self.camera_dic.keys()]
 		self.camera_entry.bind('<<ComboboxSelected>>', self.assignCamera)
 		if not dev_num == 0:
-			self.camera_entry.current(self.cameraID.get())
+			self.camera_entry.current(self.settings.camera_id.get())
 
 	def activateSerial(self):
 		if self.ser.isOpened():
@@ -331,9 +275,8 @@ class GUI:
 			self.keyPress = None
 			self.activateSerial()
 		else:
-			if self.ser.openSerial(self.comPort.get()):
-				self.settings['com_port'] = self.comPort.get()
-				print('COM Port ' + str(self.comPort.get()) + ' connected successfully')
+			if self.ser.openSerial(self.settings.com_port.get()):
+				print('COM Port ' + str(self.settings.com_port.get()) + ' connected successfully')
 				self.keyPress = KeyPress(self.ser)
 
 	def createControllerWindow(self):
@@ -346,7 +289,7 @@ class GUI:
 		self.controller = window
 	
 	def activateKeyboard(self):
-		if self.useKeyboard.get() == True:
+		if self.settings.is_use_keyboard.get() == True:
 			# enable Keyboard as controller
 			if self.keyboard is None:
 				self.keyboard = SwitchKeyboardController(self.keyPress)
@@ -357,7 +300,7 @@ class GUI:
 				self.root.bind("<FocusIn>", self.onFocusInController)
 				self.root.bind("<FocusOut>", self.onFocusOutController)
 
-		elif self.useKeyboard.get() == False:
+		else:
 			if os.name == 'nt': # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
 				if not self.keyboard is None:
 					# stop listening to keyboard events
@@ -388,22 +331,49 @@ class GUI:
 		time.sleep(0.0001)
 		self.logArea.see(tk.END)
 
-	def reloadCommand(self):
-		import importlib
-		importlib.reload(McuCommand)
-		importlib.reload(PythonCommand)
-		importlib.reload(UnitCommand)
+	def loadCommands(self):
+		self.py_loader = CommandLoader(util.ospath('Commands\PythonCommands'), PythonCommandBase.PythonCommand)
+		self.mcu_loader = CommandLoader(util.ospath('Commands\McuCommands'), McuCommandBase.McuCommand)
+		
+		self.py_classes = self.py_loader.load()
+		self.mcu_classes = self.mcu_loader.load()
 
+		self.setCommandItems()
+		self.assignCommand()
+	
+	def setCommandItems(self):
+		self.py_cb['values'] = [c.NAME for c in self.py_classes]
+		self.py_cb.current(0)
+		self.mcu_cb['values'] = [c.NAME for c in self.mcu_classes]
+		self.mcu_cb.current(0)
+
+	def assignCommand(self):
+		if self.v1.get() == 'Mcu':
+			self.cur_command = self.mcu_classes[self.mcu_cb.current()]()
+		elif self.v1.get() == 'Python':
+			cmd_class = self.py_classes[self.py_cb.current()]
+
+			if issubclass(cmd_class, PythonCommandBase.ImageProcPythonCommand):
+				self.cur_command = cmd_class(self.camera)
+			else:
+				self.cur_command = cmd_class()
+
+	def reloadCommands(self):
 		if self.v1.get() == 'Mcu':
 			visibledCb = self.mcu_cb
 		elif self.v1.get() == 'Python':
 			visibledCb = self.py_cb
-
 		oldval = visibledCb.get()
+
+		self.py_classes = self.py_loader.reload()
+		self.mcu_classes = self.mcu_loader.reload()
+
+		# Restore the command selecting state if possible
 		self.setCommandItems()
 		if(oldval in visibledCb['values']):
 			visibledCb.set(oldval)
-		print('Reload command modules.')
+		self.assignCommand()
+		print('Finished reloading command modules.')
 
 if __name__ == "__main__":
 	gui = GUI()

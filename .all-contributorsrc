@@ -1,0 +1,55 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "KawaSwitch",
+      "name": "KawaSwitch",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/41296626?v=4",
+      "profile": "https://github.com/KawaSwitch",
+      "contributions": [
+        "code",
+        "maintenance",
+        "doc",
+        "question"
+      ]
+    },
+    {
+      "login": "Moi-poke",
+      "name": "Moi-poke",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/59233665?v=4",
+      "profile": "https://github.com/Moi-poke",
+      "contributions": [
+        "code",
+        "question"
+      ]
+    }
+    {
+      "login": "xv13",
+      "name": "xv13",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/47322147?v=4",
+      "profile": "https://github.com/xv13",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "vyPeony",
+      "name": "vyPeony",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/39150264?v=4",
+      "profile": "https://github.com/vyPeony",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "Poke-Controller",
+  "projectOwner": "KawaSwitch",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
