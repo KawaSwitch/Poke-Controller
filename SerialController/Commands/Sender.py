@@ -22,10 +22,9 @@ class Sender:
 			else:
 				print('not supported OS')
 				return False
-		except IOError:
+		except IOError as e:
 			print('COM Port: can\'t be established')
-			import traceback
-			traceback.print_exc()
+			print(e)
 			return False
 				
 	def closeSerial(self):
@@ -39,6 +38,8 @@ class Sender:
 			self.ser.write((row+'\r\n').encode('utf-8'))
 		except serial.serialutil.SerialException as e:
 			print(e)
+		except AttributeError:
+			print('Attempting to use a port that is not open')
 
 		# Show sending serial datas
 		if self.is_show_serial.get():
