@@ -166,13 +166,20 @@ class Direction:
 		self.stick = stick	
 		self.angle_for_show = angle
 		self.showName = showName
-		angle = math.radians(angle) if isDegree else angle
 
-		# We set stick X and Y from 0 to 255, so they are calculated as below.
-		# X = 127.5*cos(theta) + 127.5
-		# Y = 127.5*sin(theta) + 127.5
-		self.x = math.ceil(127.5 * math.cos(angle) + 127.5)
-		self.y = math.floor(127.5 * math.sin(angle) + 127.5)
+		if isinstance(angle, tuple):
+			# assuming (X, Y)
+			self.x = angle[0]
+			self.y = angle[1]
+			self.showName = '(' + str(self.x) + ', ' + str(self.y) + ')'
+		else:
+			angle = math.radians(angle) if isDegree else angle
+
+			# We set stick X and Y from 0 to 255, so they are calculated as below.
+			# X = 127.5*cos(theta) + 127.5
+			# Y = 127.5*sin(theta) + 127.5
+			self.x = math.ceil(127.5 * math.cos(angle) + 127.5)
+			self.y = math.floor(127.5 * math.sin(angle) + 127.5)
 
 	def __repr__(self):
 		if self.showName:
