@@ -235,36 +235,46 @@ void ParseLine(char* line)
 {
 	char cmd[16];
 	uint16_t p_btns;
-	int ret = sscanf(line, "%s %hx %hhx %hhx %hhx %hhx", cmd, &p_btns,
-				&pc_lx, &pc_ly, &pc_rx, &pc_ry);
+	uint8_t hat;
+
+	// get command
+	int ret = sscanf(line, "%s", cmd);
 
 	if (ret == EOF) {
 		proc_state = DEBUG;
 	} else if (strncmp(cmd, "end", 16) == 0) {
 		proc_state = NONE;
 		ResetDirections();
-	} else if (cmd[0] == 'p') {
+	} else if (cmd[0] >= '0' && cmd[0] <= '9') {
 		memset(&pc_report, 0, sizeof(uint16_t));
 
 		// format [button LeftStickX LeftStickY RightStickX RightStickY HAT] 
 		// button: Y | B | A | X | L | R | ZL | ZR | MINUS | PLUS | LCLICK | RCLICK | HOME | CAP
 		// LeftStick : 0 to 255
 		// RightStick: 0 to 255
+		sscanf(line, "%hx %hhx %hhx %hhx %hhx %hhx", &p_btns, &hat,
+				&pc_lx, &pc_ly, &pc_rx, &pc_ry);
 
-		// HAT : 0(TOP) to 7(TOP_LEFT) in clockwise | 8(CENTER)  currently disabled
-		pc_report.HAT = HAT_CENTER;
+		// HAT : 0(TOP) to 7(TOP_LEFT) in clockwise | 8(CENTER)
+		pc_report.HAT = hat;
 
 		// we use bit array for buttons(2 Bytes), which last 2 bits are flags of directions
 		bool use_right = p_btns & 0x1;
 		bool use_left = p_btns & 0x2;
 
+		// Left stick
 		if (use_left) {
 			pc_report.LX = pc_lx;
 			pc_report.LY = pc_ly;
 		}
-		if (use_right) {
+
+		// Right stick
+		if (use_right & use_left) {
 			pc_report.RX = pc_rx;
 			pc_report.RY = pc_ry;
+		} else if (use_right) {
+			pc_report.RX = pc_lx;
+			pc_report.RY = pc_ly;
 		}
 
 		p_btns >>= 2;

@@ -3,10 +3,8 @@
 
 import math
 from collections import OrderedDict
-from enum import IntFlag, Enum, auto
+from enum import IntFlag, IntEnum, Enum, auto
 
-# Buttons and L stick directions
-# As of now, we don't support HAT buttons though Joystick.c does.
 class Button(IntFlag):
 	Y = auto()
 	B = auto()
@@ -22,6 +20,17 @@ class Button(IntFlag):
 	RCLICK = auto()
 	HOME = auto()
 	CAPTURE = auto()
+
+class Hat(IntEnum):
+	TOP			= 0
+	TOP_RIGHT	= 1
+	RIGHT 		= 2
+	BTM_RIGHT 	= 3
+	BTM 		= 4
+	BTM_LEFT 	= 5
+	LEFT 		= 6
+	TOP_LEFT 	= 7
+	CENTER 		= 8
 
 class Stick(Enum):
 	LEFT = auto()
@@ -47,13 +56,12 @@ class SendFormat:
 	def __init__(self):
 		# This format structure needs to be the same as the one written in Joystick.c
 		self.format = OrderedDict([
-			('cmd', 'p'),
 			('btn', 0),	# send bit array for buttons
+			('hat', Hat.CENTER),
 			('lx', center),
 			('ly', center),
 			('rx', center),
 			('ry', center),
-			('hat', 8),
 		])
 
 		self.L_stick_changed = False
@@ -69,6 +77,15 @@ class SendFormat:
 	
 	def resetAllButtons(self):
 		self.format['btn'] = 0
+	
+	def setHat(self, btns):
+		if not btns:
+			self.format['hat'] = Hat.CENTER
+		else:
+			self.format['hat'] = btns[0] # takes only first element
+	
+	def unsetHat(self):
+		self.format['hat'] = Hat.CENTER
 	
 	def setAnyDirection(self, dirs):
 		for dir in dirs:
@@ -133,7 +150,8 @@ class SendFormat:
 			send_btn |= 0x1
 			str_R = format(self.format['rx'], 'x') + space + format(self.format['ry'], 'x')
 
-		str_format = self.format['cmd'] + space + format(send_btn, 'x') +\
+		str_format = format(send_btn, 'x') +\
+			(space + str(int(self.format['hat']))) +\
 			(space + str_L if self.L_stick_changed else '') +\
 			(space + str_R if self.R_stick_changed else '')
 
@@ -225,6 +243,7 @@ class KeyPress:
 		print(btns)
 
 		self.format.setButton([btn for btn in btns if type(btn) is Button])
+		self.format.setHat([btn for btn in btns if type(btn) is Hat])
 		self.format.setAnyDirection([btn for btn in btns if type(btn) is Direction])
 		self.ser.writeRow(self.format.convert2str())
 
@@ -240,6 +259,7 @@ class KeyPress:
 				tilts.append(tilting)
 
 		self.format.unsetButton([btn for btn in btns if type(btn) is Button])
+		self.format.unsetHat()
 		self.format.unsetDirection(tilts)
 
 		self.ser.writeRow(self.format.convert2str())
