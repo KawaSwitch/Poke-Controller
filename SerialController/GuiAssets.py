@@ -84,11 +84,14 @@ class ControllerGUI:
 		abxy_frame.place(relx=0.2, rely=0.3)
 
 		# HAT
-		# internal implements are not HAT buttons actually (just direction sticks), but we may change later
 		tk.Button(hat_frame, text='UP', command=lambda: UnitCommand.UP().start(ser)).grid(row=0, column=1)
+		tk.Button(hat_frame, text='', command=lambda: UnitCommand.UP_RIGHT().start(ser)).grid(row=0, column=2)
 		tk.Button(hat_frame, text='RIGHT', command=lambda: UnitCommand.RIGHT().start(ser)).grid(row=1, column=2)
+		tk.Button(hat_frame, text='', command=lambda: UnitCommand.DOWN_RIGHT().start(ser)).grid(row=2, column=2)
 		tk.Button(hat_frame, text='DOWN', command=lambda: UnitCommand.DOWN().start(ser)).grid(row=2, column=1)
+		tk.Button(hat_frame, text='', command=lambda: UnitCommand.DOWN_LEFT().start(ser)).grid(row=2, column=0)
 		tk.Button(hat_frame, text='LEFT', command=lambda: UnitCommand.LEFT().start(ser)).grid(row=1, column=0)
+		tk.Button(hat_frame, text='', command=lambda: UnitCommand.UP_LEFT().start(ser)).grid(row=0, column=0)
 		hat_frame.place(relx=0.2, rely=0.6)
 
 		# L side
@@ -104,8 +107,6 @@ class ControllerGUI:
 		tk.Button(joycon_R_frame, text='RCLICK', width=7, command=lambda: UnitCommand.RCLICK().start(ser)).place(x=120, y=205)
 		tk.Button(joycon_R_frame, text='PLUS', width=5, command=lambda: UnitCommand.PLUS().start(ser)).place(x=35, y=70)
 		tk.Button(joycon_R_frame, text='HOME', width=5, command=lambda: UnitCommand.HOME().start(ser)).place(x=50, y=270)
-
-		ttk.Label(self.window, text='or Keyboard can be used').place(x=450, y=270)
 
 		joycon_L_frame.grid(row=0, column=0)
 		joycon_R_frame.grid(row=0, column=1)
