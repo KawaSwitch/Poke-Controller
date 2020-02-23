@@ -16,7 +16,7 @@ from Commands.Keys import KeyPress
 from CommandLoader import CommandLoader
 
 NAME = "Poke-Controller"
-VERSION = "v1.0"
+VERSION = "1.0-beta3"
 
 # Main GUI
 class GUI:
@@ -24,7 +24,7 @@ class GUI:
 		# NOTE: I'm gonna rewrite this function because this is not a good coding style
 
 		self.root = tk.Tk()
-		self.root.title(NAME + '  ' + VERSION)
+		self.root.title(NAME + ' ' + VERSION)
 		self.frame1 = ttk.Frame(
 			self.root,
 			height=720,
