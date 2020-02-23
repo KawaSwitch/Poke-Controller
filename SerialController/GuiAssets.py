@@ -144,12 +144,15 @@ class Dialog(tk.Toplevel):
 		entry.grid(row=0, column=1)
 		return frame, entry
 	
-	def setSelectRadioButton(self, master, text, radio_texts):
+	def setSelectRadioButton(self, master, text, radio_pairs, init_var=0):
 		frame = tk.Frame(master, relief='flat')
 		tk.Label(frame, text=text).grid(row=0, column=0)
+		
 		var = tk.IntVar(value=0)
-		for i, radio_text in enumerate(radio_texts):
-			tk.Radiobutton(frame, value=i, variable=var, text=radio_text).grid(row=1, column=i)
+		for i, (k, text) in enumerate(radio_pairs.items()):
+			tk.Radiobutton(frame, value=k, variable=var, text=text).grid(row=1, column=i)
+		var.set(init_var)
+
 		return frame, var
 
 # GUI of switch controller simulator
