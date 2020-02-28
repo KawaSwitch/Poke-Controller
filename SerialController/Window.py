@@ -307,8 +307,8 @@ class GUI:
 					self.keyboard.stop()
 					self.keyboard = None
 
-					self.root.bind("<FocusIn>", lambda _: None)
-					self.root.bind("<FocusOut>", lambda _: None)
+				self.root.bind("<FocusIn>", lambda _: None)
+				self.root.bind("<FocusOut>", lambda _: None)
 
 	def closingController(self):
 		self.controller.destroy()
@@ -316,13 +316,13 @@ class GUI:
 
 	def onFocusInController(self, event):
 		# enable Keyboard as controller
-		if self.keyboard is None:
+		if event.widget == self.root and self.keyboard is None:
 			self.keyboard = SwitchKeyboardController(self.keyPress)
 			self.keyboard.listen()
 
 	def onFocusOutController(self, event):
 		# stop listening to keyboard events
-		if not self.keyboard is None:
+		if event.widget == self.root and not self.keyboard is None:
 			self.keyboard.stop()
 			self.keyboard = None
 
