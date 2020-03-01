@@ -16,7 +16,7 @@ from Commands.Keys import KeyPress
 from CommandLoader import CommandLoader
 
 NAME = "Poke-Controller"
-VERSION = "v1.0"
+VERSION = "1.0-beta3"
 
 # Main GUI
 class GUI:
@@ -24,7 +24,7 @@ class GUI:
 		# NOTE: I'm gonna rewrite this function because this is not a good coding style
 
 		self.root = tk.Tk()
-		self.root.title(NAME + '  ' + VERSION)
+		self.root.title(NAME + ' ' + VERSION)
 		self.frame1 = ttk.Frame(
 			self.root,
 			height=720,
@@ -307,8 +307,8 @@ class GUI:
 					self.keyboard.stop()
 					self.keyboard = None
 
-					self.root.bind("<FocusIn>", lambda _: None)
-					self.root.bind("<FocusOut>", lambda _: None)
+				self.root.bind("<FocusIn>", lambda _: None)
+				self.root.bind("<FocusOut>", lambda _: None)
 
 	def closingController(self):
 		self.controller.destroy()
@@ -316,13 +316,13 @@ class GUI:
 
 	def onFocusInController(self, event):
 		# enable Keyboard as controller
-		if self.keyboard is None:
+		if event.widget == self.root and self.keyboard is None:
 			self.keyboard = SwitchKeyboardController(self.keyPress)
 			self.keyboard.listen()
 
 	def onFocusOutController(self, event):
 		# stop listening to keyboard events
-		if not self.keyboard is None:
+		if event.widget == self.root and not self.keyboard is None:
 			self.keyboard.stop()
 			self.keyboard = None
 
@@ -332,8 +332,8 @@ class GUI:
 		self.logArea.see(tk.END)
 
 	def loadCommands(self):
-		self.py_loader = CommandLoader(util.ospath('Commands\PythonCommands'), PythonCommandBase.PythonCommand)
-		self.mcu_loader = CommandLoader(util.ospath('Commands\McuCommands'), McuCommandBase.McuCommand)
+		self.py_loader = CommandLoader(util.ospath('Commands/PythonCommands'), PythonCommandBase.PythonCommand)
+		self.mcu_loader = CommandLoader(util.ospath('Commands/McuCommands'), McuCommandBase.McuCommand)
 		
 		self.py_classes = self.py_loader.load()
 		self.mcu_classes = self.mcu_loader.load()

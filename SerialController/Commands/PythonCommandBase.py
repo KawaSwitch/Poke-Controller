@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractclassmethod
 from time import sleep
 import threading
 import cv2
-from .Keys import KeyPress, Button, Direction, Stick
+from .Keys import KeyPress, Button, Hat, Direction, Stick
 from . import CommandBase
 
 # the class For notifying stop signal is sent from Main window
