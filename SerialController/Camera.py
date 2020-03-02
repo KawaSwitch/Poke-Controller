@@ -35,7 +35,8 @@ class Camera:
 		_, self.image_bgr = self.camera.read()
 		return self.image_bgr
 
-	def saveCapture(self):
+	# box(for trim) format: (left, right, up, bottom)
+	def saveCapture(self, box=None):
 		dt_now = datetime.datetime.now()
 		fileName = dt_now.strftime('%Y-%m-%d_%H-%M-%S')+".png"
 
@@ -43,8 +44,13 @@ class Camera:
 			os.makedirs(self.capture_dir)
 
 		save_path = os.path.join(self.capture_dir, fileName)
-		cv2.imwrite(save_path, self.image_bgr)
-		print('capture succeeded: ' + save_path)
+
+		try:
+			image = self.image_bgr if box is None else self.image_bgr[box[2]:box[3], box[0]:box[1]]
+			cv2.imwrite(save_path, image)
+			print('capture succeeded: ' + save_path)
+		except:
+			print('capture failed')
 	
 	def destroy(self):
 		if self.camera is not None and self.camera.isOpened():
