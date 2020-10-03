@@ -1,3 +1,4 @@
 [submodule "lufa"]
 	path = lufa
 	url = https://github.com/abcminiuser/lufa.git
+	ignore = dirty
