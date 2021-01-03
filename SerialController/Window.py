@@ -14,9 +14,11 @@ import Utility as util
 from Commands import PythonCommandBase, McuCommandBase, Sender
 from Commands.Keys import KeyPress
 from CommandLoader import CommandLoader
+from Menubar import PokeController_Menubar
 
 NAME = "Poke-Controller"
 VERSION = "1.0-beta3"
+
 
 # Main GUI
 class GUI:
@@ -25,6 +27,8 @@ class GUI:
 
 		self.root = tk.Tk()
 		self.root.title(NAME + ' ' + VERSION)
+
+
 		self.frame1 = ttk.Frame(
 			self.root,
 			height=720,
@@ -89,7 +93,8 @@ class GUI:
 
 		self.v1 = tk.StringVar(value='Python')
 		self.rb1 = ttk.Radiobutton(self.lf, text='Mcu', value='Mcu', variable=self.v1, command=self.setCommandCmbbox)
-		self.rb2 = ttk.Radiobutton(self.lf, text='Python', value='Python', variable=self.v1, command=self.setCommandCmbbox)
+		self.rb2 = ttk.Radiobutton(self.lf, text='Python', value='Python', variable=self.v1,
+								   command=self.setCommandCmbbox)
 		self.reloadCommandButton = ttk.Button(self.lf, text='Reload', command=self.reloadCommands)
 
 		self.reloadButton = ttk.Button(self.camera_f1, text='Reload Cam', command=self.openCamera)
@@ -130,14 +135,14 @@ class GUI:
 		self.partition1 = ttk.Label(self.camera_f1, text=' / ')
 		self.partition2 = ttk.Label(self.camera_f1, text=' / ')
 
-		self.frame1.grid(row=0,column=0,sticky='nwse')
-		self.logArea.grid(row=0,column=7,rowspan=5, sticky='nwse')
+		self.frame1.grid(row=0, column=0, sticky='nwse')
+		self.logArea.grid(row=0, column=7, rowspan=5, sticky='nwse')
 
 		# camera
-		self.camera_lf.grid(row=0,column=0,columnspan=3, sticky='nw')
-		self.camera_f1.grid(row=0,column=0, sticky='nw')
-		self.camera_f2.grid(row=2,column=0, sticky='nw', pady=(5, 0))
-		self.preview.grid(row=1,column=0,columnspan=7, sticky='nw')
+		self.camera_lf.grid(row=0, column=0, columnspan=3, sticky='nw')
+		self.camera_f1.grid(row=0, column=0, sticky='nw')
+		self.camera_f2.grid(row=2, column=0, sticky='nw', pady=(5, 0))
+		self.preview.grid(row=1, column=0, columnspan=7, sticky='nw')
 		self.label1.pack(side=tk.LEFT)
 		self.camera_entry.pack(side=tk.LEFT, padx=5)
 
@@ -150,9 +155,9 @@ class GUI:
 		self.fps_cb.pack(side=tk.LEFT, padx=5)
 
 		# serial
-		self.serial_lf.grid(row=1,column=0, sticky='nw')
-		self.serial_f1.grid(row=0,column=0, sticky='nw')
-		self.serial_f2.grid(row=1,column=0, sticky='nw', pady=(5, 0))
+		self.serial_lf.grid(row=1, column=0, sticky='nw')
+		self.serial_f1.grid(row=0, column=0, sticky='nw')
+		self.serial_f2.grid(row=1, column=0, sticky='nw', pady=(5, 0))
 		self.label2.pack(side=tk.LEFT)
 		self.entry2.pack(side=tk.LEFT, padx=5)
 		self.reloadComPort.pack(side=tk.LEFT)
@@ -161,15 +166,15 @@ class GUI:
 		# controller simulator
 		self.control_lf.grid(row=1, column=1, sticky='ne')
 		self.cb_use_keyboard.grid(row=0, column=0)
-		self.simpleConButton.grid(row=1, column=0, pady=(5,0))
+		self.simpleConButton.grid(row=1, column=0, pady=(5, 0))
 
 		# commands selection
-		self.lf.grid(row=1,column=2, rowspan=3, sticky='ne')
-		self.rb1.grid(row=0,column=0, sticky='w')
-		self.rb2.grid(row=1,column=0, sticky='w')
+		self.lf.grid(row=1, column=2, rowspan=3, sticky='ne')
+		self.rb1.grid(row=0, column=0, sticky='w')
+		self.rb2.grid(row=1, column=0, sticky='w')
 		self.setCommandCmbbox()
-		self.reloadCommandButton.grid(row=3,column=1, sticky='e', pady=(10, 0))
-		self.startButton.grid(row=3,column=2, sticky='e', pady=(10, 0))
+		self.reloadCommandButton.grid(row=3, column=1, sticky='e', pady=(10, 0))
+		self.startButton.grid(row=3, column=2, sticky='e', pady=(10, 0))
 
 		for child in self.frame1.winfo_children():
 			if not type(child) is ttk.Combobox:
@@ -178,9 +183,13 @@ class GUI:
 		self.root.protocol("WM_DELETE_WINDOW", self.exit)
 		self.preview.startCapture()
 
+
+		self.menu = PokeController_Menubar(self)
+		self.root.config(menu=self.menu)
+
 	def openCamera(self):
 		self.camera.openCamera(self.settings.camera_id.get())
-	
+
 	def assignCamera(self, event):
 		if os.name == 'nt':
 			self.settings.camera_id.set(self.camera_dic[self.cameraName.get()])
@@ -237,11 +246,11 @@ class GUI:
 
 	def setCommandCmbbox(self):
 		if self.v1.get() == 'Mcu':
-			self.mcu_cb.grid(row=0,column=1, columnspan=2, padx=(10, 0))
+			self.mcu_cb.grid(row=0, column=1, columnspan=2, padx=(10, 0))
 			self.py_cb.grid_remove()
 		elif self.v1.get() == 'Python':
 			self.mcu_cb.grid_remove()
-			self.py_cb.grid(row=0,column=1, columnspan=2, padx=(10, 0))
+			self.py_cb.grid(row=0, column=1, columnspan=2, padx=(10, 0))
 
 	def locateCameraCmbbox(self):
 		import clr
@@ -287,21 +296,21 @@ class GUI:
 		window = ControllerGUI(self.root, self.ser)
 		window.protocol("WM_DELETE_WINDOW", self.closingController)
 		self.controller = window
-	
+
 	def activateKeyboard(self):
 		if self.settings.is_use_keyboard.get() == True:
 			# enable Keyboard as controller
 			if self.keyboard is None:
 				self.keyboard = SwitchKeyboardController(self.keyPress)
 				self.keyboard.listen()
-		
+
 			# bind focus
 			if os.name == 'nt':
 				self.root.bind("<FocusIn>", self.onFocusInController)
 				self.root.bind("<FocusOut>", self.onFocusOutController)
 
 		else:
-			if os.name == 'nt': # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
+			if os.name == 'nt':  # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
 				if not self.keyboard is None:
 					# stop listening to keyboard events
 					self.keyboard.stop()
@@ -334,13 +343,14 @@ class GUI:
 	def loadCommands(self):
 		self.py_loader = CommandLoader(util.ospath('Commands/PythonCommands'), PythonCommandBase.PythonCommand)
 		self.mcu_loader = CommandLoader(util.ospath('Commands/McuCommands'), McuCommandBase.McuCommand)
-		
+
 		self.py_classes = self.py_loader.load()
+		print(self.py_classes)
 		self.mcu_classes = self.mcu_loader.load()
 
 		self.setCommandItems()
 		self.assignCommand()
-	
+
 	def setCommandItems(self):
 		self.py_cb['values'] = [c.NAME for c in self.py_classes]
 		self.py_cb.current(0)
@@ -370,10 +380,11 @@ class GUI:
 
 		# Restore the command selecting state if possible
 		self.setCommandItems()
-		if(oldval in visibledCb['values']):
+		if (oldval in visibledCb['values']):
 			visibledCb.set(oldval)
 		self.assignCommand()
 		print('Finished reloading command modules.')
+
 
 if __name__ == "__main__":
 	gui = GUI()
