@@ -120,3 +120,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 SerialController/line_token.ini
+SerialController/awake.bat
