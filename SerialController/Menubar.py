@@ -1,6 +1,6 @@
 import tkinter as tk
-import tkinter.ttk as ttk
 import cv2
+from LineNotify import Line_Notify
 
 
 class PokeController_Menubar(tk.Menu):
@@ -33,11 +33,13 @@ class PokeController_Menubar(tk.Menu):
 		self.menu_command.add('command', command=self.OpenPokeHomeCoop, label='Pokemon Home 連携')
 		# TODO: setup command_id_arg 'false' for menuitem.
 
-	def OpenPokeHomeCoop(self):
+	def OpenPokeHomeCoop(self, GUI):
 		pass
 
 	def LineTokenSetting(self):
-		pass
+
+		LINE = Line_Notify(self.camera)
+		LINE.send_text_n_image("CAPTURE")
 
 	def exit(self):
 		if self.ser.isOpened():

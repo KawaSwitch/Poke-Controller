@@ -11,6 +11,7 @@
 *.exe
 *.json
 LUFA/
+.idea/
 SerialController/Captures/
 SerialController/settings.poke
 
@@ -118,3 +119,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+SerialController/line_token.ini

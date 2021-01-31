@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, os
+import sys
+import os
 import importlib
 import tkinter as tk
 from tkinter import ttk
@@ -186,6 +187,7 @@ class GUI:
 
 		self.menu = PokeController_Menubar(self)
 		self.root.config(menu=self.menu)
+		print(f'python version: {sys.version}')
 
 	def openCamera(self):
 		self.camera.openCamera(self.settings.camera_id.get())
@@ -345,7 +347,6 @@ class GUI:
 		self.mcu_loader = CommandLoader(util.ospath('Commands/McuCommands'), McuCommandBase.McuCommand)
 
 		self.py_classes = self.py_loader.load()
-		print(self.py_classes)
 		self.mcu_classes = self.mcu_loader.load()
 
 		self.setCommandItems()

@@ -7,10 +7,13 @@ import threading
 import cv2
 from .Keys import KeyPress, Button, Hat, Direction, Stick
 from . import CommandBase
+from LineNotify import Line_Notify
+
 
 # the class For notifying stop signal is sent from Main window
 class StopThread(Exception):
 	pass
+
 
 # Python command
 class PythonCommand(CommandBase.Command):
@@ -20,6 +23,7 @@ class PythonCommand(CommandBase.Command):
 		self.thread = None
 		self.alive = True
 		self.postProcess = None
+		self.Line = Line_Notify()
 
 	@abstractclassmethod
 	def do(self):
@@ -55,7 +59,7 @@ class PythonCommand(CommandBase.Command):
 		self.sendStopRequest()
 
 	def sendStopRequest(self):
-		if self.checkIfAlive(): # try if we can stop now
+		if self.checkIfAlive():  # try if we can stop now
 			self.alive = False
 			print('-- sent a stop request. --')
 
@@ -70,6 +74,18 @@ class PythonCommand(CommandBase.Command):
 		self.wait(duration)
 		self.keys.inputEnd(buttons)
 		self.wait(wait)
+		self.checkIfAlive()
+
+	# press button at duration times(s)
+	def stick(self, buttons, duration=0.1, wait=0.1):
+		self.keys.input(buttons, ifPrint=False)
+		self.wait(duration)
+		self.wait(wait)
+		self.checkIfAlive()
+
+	# press button at duration times(s)
+	def stickEnd(self, buttons):
+		self.keys.inputEnd(buttons)
 		self.checkIfAlive()
 
 	# press button at duration times(s) repeatedly
@@ -117,27 +133,27 @@ class PythonCommand(CommandBase.Command):
 		self.press(Direction.RIGHT)
 		self.press(Direction.RIGHT)
 		self.press(Direction.RIGHT)
-		self.press(Button.A, wait=1.5) # System Settings
+		self.press(Button.A, wait=1.5)  # System Settings
 		self.press(Direction.DOWN, duration=2, wait=0.5)
 
-		self.press(Button.A, wait=0.3) # System Settings > System
+		self.press(Button.A, wait=0.3)  # System Settings > System
 		self.press(Direction.DOWN)
 		self.press(Direction.DOWN)
 		self.press(Direction.DOWN)
 		self.press(Direction.DOWN, wait=0.3)
-		self.press(Button.A, wait=0.2) # Date and Time
+		self.press(Button.A, wait=0.2)  # Date and Time
 		self.press(Direction.DOWN, duration=0.7, wait=0.2)
 
 		# increment and decrement
 		if is_go_back:
 			self.press(Button.A, wait=0.2)
-			self.press(Direction.UP, wait=0.2) # Increment a year
+			self.press(Direction.UP, wait=0.2)  # Increment a year
 			self.press(Direction.RIGHT, duration=1.5)
 			self.press(Button.A, wait=0.5)
 
 			self.press(Button.A, wait=0.2)
 			self.press(Direction.LEFT, duration=1.5)
-			self.press(Direction.DOWN, wait=0.2) # Decrement a year
+			self.press(Direction.DOWN, wait=0.2)  # Decrement a year
 			self.press(Direction.RIGHT, duration=1.5)
 			self.press(Button.A, wait=0.5)
 
@@ -147,18 +163,29 @@ class PythonCommand(CommandBase.Command):
 			self.press(Button.A, wait=0.2)
 			self.press(Direction.RIGHT)
 			self.press(Direction.RIGHT)
-			self.press(Direction.UP, wait=0.2) # increment a day
+			self.press(Direction.UP, wait=0.2)  # increment a day
 			self.press(Direction.RIGHT, duration=1)
 			self.press(Button.A, wait=0.5)
 
 		self.press(Button.HOME, wait=1)
 		self.press(Button.HOME, wait=1)
 
+	def LINE_text(self, txt=""):
+		self.Line.send_text(txt)
+
+
 TEMPLATE_PATH = "./Template/"
+
+
 class ImageProcPythonCommand(PythonCommand):
 	def __init__(self, cam):
 		super(ImageProcPythonCommand, self).__init__()
 		self.camera = cam
+		self.Line = Line_Notify(self.camera)
+
+		self.gsrc = cv2.cuda_GpuMat()
+		self.gtmpl = cv2.cuda_GpuMat()
+		self.gresult = cv2.cuda_GpuMat()
 
 	# Judge if current screenshot contains an image using template matching
 	# It's recommended that you use gray_scale option unless the template color wouldn't be cared for performace
@@ -168,7 +195,7 @@ class ImageProcPythonCommand(PythonCommand):
 		src = self.camera.readFrame()
 		src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
 
-		template = cv2.imread(TEMPLATE_PATH+template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+		template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
 		w, h = template.shape[1], template.shape[0]
 
 		method = cv2.TM_CCOEFF_NORMED
@@ -178,13 +205,43 @@ class ImageProcPythonCommand(PythonCommand):
 		if show_value:
 			print(template_path + ' ZNCC value: ' + str(max_val))
 
-		if max_val > threshold:
-			if use_gray:
-				src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
+		if max_val >= threshold:
+			# if use_gray:
+			# 	src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
+			#
+			# top_left = max_loc
+			# bottom_right = (top_left[0] + w, top_left[1] + h)
+			# cv2.rectangle(src, top_left, bottom_right, (255, 0, 255), 2)
+			return True
+		else:
+			return False
 
-			top_left = max_loc
-			bottom_right = (top_left[0] + w, top_left[1] + h)
-			cv2.rectangle(src, top_left, bottom_right, (255, 0, 255), 2)
+	def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True, show_value=False):
+		src = self.camera.readFrame()
+		src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
+
+
+		self.gsrc.upload(src)
+
+		template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+		self.gtmpl.upload(template)
+
+		method = cv2.TM_CCOEFF_NORMED
+		matcher = cv2.cuda.createTemplateMatching(cv2.CV_8UC1, method)
+		gresult = matcher.match(self.gsrc, self.gtmpl)
+		resultg = gresult.download()
+		_, max_val, _, max_loc = cv2.minMaxLoc(resultg)
+
+		if show_value:
+			print(template_path + ' ZNCC value: ' + str(max_val))
+
+		if max_val >= threshold:
+			# if use_gray:
+			# 	src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
+			#
+			# top_left = max_loc
+			# bottom_right = (top_left[0] + w, top_left[1] + h)
+			# cv2.rectangle(src, top_left, bottom_right, (255, 0, 255), 2)
 			return True
 		else:
 			return False
@@ -203,3 +260,6 @@ class ImageProcPythonCommand(PythonCommand):
 		# remove noise
 		mask = cv2.medianBlur(img_th, 3)
 		return mask
+
+	def LINE_image(self, txt=""):
+		self.Line.send_text_n_image(txt)

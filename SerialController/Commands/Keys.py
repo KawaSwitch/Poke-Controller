@@ -162,10 +162,16 @@ class SendFormat:
 
 # This class handle L stick and R stick at any angles
 class Direction:
-	def __init__(self, stick, angle, isDegree=True, showName=None):
+	def __init__(self, stick, angle, magnification=1.0, isDegree=True, showName=None):
 		self.stick = stick	
 		self.angle_for_show = angle
 		self.showName = showName
+		if magnification > 1.0:
+			self.mag = 1.0
+		elif magnification < 0:
+			self.mag = 0.0
+		else:
+			self.mag = magnification
 
 		if isinstance(angle, tuple):
 			# assuming (X, Y)
@@ -178,8 +184,8 @@ class Direction:
 			# We set stick X and Y from 0 to 255, so they are calculated as below.
 			# X = 127.5*cos(theta) + 127.5
 			# Y = 127.5*sin(theta) + 127.5
-			self.x = math.ceil(127.5 * math.cos(angle) + 127.5)
-			self.y = math.floor(127.5 * math.sin(angle) + 127.5)
+			self.x = math.ceil(127.5 * math.cos(angle) * self.mag + 127.5)
+			self.y = math.floor(127.5 * math.sin(angle) * self.mag + 127.5)
 
 	def __repr__(self):
 		if self.showName:
@@ -238,7 +244,7 @@ class KeyPress:
 		self.format = SendFormat()
 		self.holdButton = []
 	
-	def input(self, btns):
+	def input(self, btns, ifPrint=True):
 		if not isinstance(btns, list):
 			btns = [btns]
 		
@@ -247,7 +253,8 @@ class KeyPress:
 				btns.append(btn)
 
 		# print to log
-		print(btns)
+		if ifPrint:
+			print(btns)
 
 		self.format.setButton([btn for btn in btns if type(btn) is Button])
 		self.format.setHat([btn for btn in btns if type(btn) is Hat])

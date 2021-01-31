@@ -9,6 +9,7 @@ class Camera:
 	def __init__(self):
 		self.camera = None
 		self.capture_size = (1280, 720)
+		# self.capture_size = (1920, 1080)
 		self.capture_dir = "Captures"
 
 	def openCamera(self, cameraId):
@@ -17,6 +18,7 @@ class Camera:
 
 		if os.name == 'nt':
 			self.camera = cv2.VideoCapture(cameraId, cv2.CAP_DSHOW)
+			# self.camera = cv2.VideoCapture(cameraId)
 		else:
 			self.camera = cv2.VideoCapture(cameraId)
 
@@ -24,9 +26,11 @@ class Camera:
 			print("Camera ID " + str(cameraId) + " can't open.")
 			return
 		print("Camera ID " + str(cameraId) + " opened successfully")
-		self.camera.set(cv2.CAP_PROP_FPS, 60)
+		# print(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+		# self.camera.set(cv2.CAP_PROP_FPS, 60)
 		self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.capture_size[0])
 		self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.capture_size[1])
+		# self.camera.set(cv2.CAP_PROP_SETTINGS, 0)
 
 	def isOpened(self):
 		return self.camera.isOpened()
