@@ -76,18 +76,6 @@ class PythonCommand(CommandBase.Command):
 		self.wait(wait)
 		self.checkIfAlive()
 
-	# press button at duration times(s)
-	def stick(self, buttons, duration=0.1, wait=0.1):
-		self.keys.input(buttons, ifPrint=False)
-		self.wait(duration)
-		self.wait(wait)
-		self.checkIfAlive()
-
-	# press button at duration times(s)
-	def stickEnd(self, buttons):
-		self.keys.inputEnd(buttons)
-		self.checkIfAlive()
-
 	# press button at duration times(s) repeatedly
 	def pressRep(self, buttons, repeat, duration=0.1, interval=0.1, wait=0.1):
 		for i in range(0, repeat):
