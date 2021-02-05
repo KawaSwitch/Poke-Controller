@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABCMeta, abstractclassmethod
-from . import Sender
+
 
 class Command:
-	__metaclass__ = ABCMeta
+    __metaclass__ = ABCMeta
 
-	def __init__(self):
-		self.isRunning = False
+    def __init__(self):
+        self.isRunning = False
 
-	@abstractclassmethod
-	def start(self, ser, postProcess=None):
-		pass
+    @abstractclassmethod
+    def start(self, ser, postProcess=None):
+        pass
 
-	@abstractclassmethod
-	def end(self, ser):
-		pass
+    @abstractclassmethod
+    def end(self, ser):
+        pass

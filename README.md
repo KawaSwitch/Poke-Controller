@@ -1,4 +1,46 @@
-# Poke-Controller
+# 機能追加版Poke-Controller
+
+本質的な部分はそのままに、機能を一部追加します
+
+## 変更点
+
+- FPSの設定の追加
+- 画面表示サイズの変更オプションの追加
+- メニュー機能の追加
+
+  現状は以下の機能のみ
+  - LINE連携機能のToken確認
+
+    Usageはそのうち追記します
+  - Pokémon Home連携
+
+    そのうち大幅に変わるかもしれません
+- その他GUIのブラッシュアップ
+- Codeのリファクタリング
+
+  私の開発環境の関係で全体的にPEP8準拠寄りにしました
+  - タブインデントからスペース4つインデントに変更
+  - 不要なimportの削除、並び替えなど最適化
+
+## Installation
+
+必要なライブラリが増えています。 構築した環境にインストールしてください。
+
+```python
+pygubu
+requests
+pandas
+```
+
+## おまけ
+
+OpenCVで行う処理をNVIDIA GPUで動かすためのコードを同梱しています。\
+ただし、pip install でインストール可能なライブラリでは使用できません\
+使用してみたい方は、各自で自分のGPUに対応したオプションでpython用のOpenCVをソースコードからビルドして貰う必要があります。\
+それなりに難易度が高くかなり手間な処理になりますが、余裕がある方は試してみてください。
+
+以下は本家様の説明になります。
+- - -
 
 Pythonで書く！Switchの自動化支援ソフトウェア
 
@@ -8,67 +50,72 @@ Pythonで書く！Switchの自動化支援ソフトウェア
 
 ## セットアップと使い方
 
-- まずはモノの準備  
-	- [Github - wiki](https://github.com/KawaSwitch/Poke-Controller/wiki)
+- まずはモノの準備
+  - [Github - wiki](https://github.com/KawaSwitch/Poke-Controller/wiki)
 
-- 準備ができたら進みましょう  
-	- [Poke-Controllerの使い方](https://github.com/KawaSwitch/Poke-Controller/wiki/Poke-Controller%E3%81%AE%E4%BD%BF%E3%81%84%E6%96%B9)
+- 準備ができたら進みましょう
+  - [Poke-Controllerの使い方](https://github.com/KawaSwitch/Poke-Controller/wiki/Poke-Controller%E3%81%AE%E4%BD%BF%E3%81%84%E6%96%B9)
 
-	- [デフォルトの実装コマンドの確認](https://github.com/KawaSwitch/Poke-Controller/wiki/%E3%83%87%E3%83%95%E3%82%A9%E3%83%AB%E3%83%88%E3%81%AE%E5%AE%9F%E8%A3%85%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)  
+  - [デフォルトの実装コマンドの確認](https://github.com/KawaSwitch/Poke-Controller/wiki/%E3%83%87%E3%83%95%E3%82%A9%E3%83%AB%E3%83%88%E3%81%AE%E5%AE%9F%E8%A3%85%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
 
-	- [新しいコマンドを作成](https://github.com/KawaSwitch/Poke-Controller/wiki/%E6%96%B0%E3%81%97%E3%81%84Python%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%81%AE%E4%BD%9C%E3%82%8A%E6%96%B9)
+  - [新しいコマンドを作成](https://github.com/KawaSwitch/Poke-Controller/wiki/%E6%96%B0%E3%81%97%E3%81%84Python%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%81%AE%E4%BD%9C%E3%82%8A%E6%96%B9)
 
 分からないことや改善要望などがあれば遠慮なく[Issue](https://github.com/KawaSwitch/Poke-Controller/issues)まで  
-[Q&A](https://github.com/KawaSwitch/Poke-Controller/wiki/Q&A)や[解決済みIssue](https://github.com/KawaSwitch/Poke-Controller/issues?q=is%3Aissue+is%3Aclosed)なども役に立つかもしれません  
+[Q&A](https://github.com/KawaSwitch/Poke-Controller/wiki/Q&A)や[解決済みIssue](https://github.com/KawaSwitch/Poke-Controller/issues?q=is%3Aissue+is%3Aclosed)なども役に立つかもしれません
 
 ## クイックビュー
-簡単に機能を見てみましょう  
 
-### コマンド作成用のライブラリの提供  
+簡単に機能を見てみましょう
+
+### コマンド作成用のライブラリの提供
 
 通常のボタン押下  
 `self.press(Button.A) # Aボタンを押して離す`  
-`self.press(Button.A, 0.1, 1) # Aボタンを0.1秒間押して離した後, 1秒待機`  
+`self.press(Button.A, 0.1, 1) # Aボタンを0.1秒間押して離した後, 1秒待機`
 
 左右スティック & HAT(十字)キー  
 `self.press(Direction.RIGHT, 5) # 左スティックを右に5秒間倒す`  
-`self.press(Hat.LEFT) # 十字キー左を押して離す`  
+`self.press(Hat.LEFT) # 十字キー左を押して離す`
 
 同時押し  
-`self.press([Button.A, Button.B]) # AボタンとBボタンを同時に押して離す`  
+`self.press([Button.A, Button.B]) # AボタンとBボタンを同時に押して離す`
 
 ホールド  
 `self.hold([Direction.UP, Direction.R_DOWN], wait=1) # 左スティックを上, 右スティックを下に倒して1秒待つ`  
-`self.press(Button.A) # スティックを倒した状態でAボタンを押して離す`  
+`self.press(Button.A) # スティックを倒した状態でAボタンを押して離す`
 
 [リファレンス](https://github.com/KawaSwitch/Poke-Controller/wiki/Python%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89_%E4%BD%9C%E6%88%90How_to)やデフォルトのコマンドなども参考にして中身を覗いてみましょう  
-作成したコマンドや便利な機能は[プルリク](https://github.com/KawaSwitch/Poke-Controller/pulls)や[Issue](https://github.com/KawaSwitch/Poke-Controller/issues)で頂けると非常に喜びます  
+作成したコマンドや便利な機能は[プルリク](https://github.com/KawaSwitch/Poke-Controller/pulls)や[Issue](https://github.com/KawaSwitch/Poke-Controller/issues)で頂けると非常に喜びます
 
-### Pythonファイル管理  
+### Pythonファイル管理
+
 作成したコマンドのclassは1つのPythonファイルの中にいくつも記述できます  
 またPythonCommandsのフォルダ内であればいくつもフォルダを作成可能です  
-自由に配置していきましょう  
+自由に配置していきましょう
 
 ![](https://github.com/KawaSwitch/Poke-Controller/blob/photo/photos/Wiki/PythonCommandHowTo/command_file_location.PNG)
 
-### 実行時のコマンド切替  
-配置したコマンド群はマウス操作で簡単に切り替えることができます  
+### 実行時のコマンド切替
 
-### リロード機能  
+配置したコマンド群はマウス操作で簡単に切り替えることができます
+
+### リロード機能
+
 Poke-Controllerを動作しながらファイルの変更を再読込して反映することができます  
-こつこつデバグしたい方におすすめ！  
+こつこつデバグしたい方におすすめ！
 
-### 画像認識  
+### 画像認識
 
 キャプチャボードでSwitchの画面を取り込めば, シリアル通信だけでは叶わない操作もできるかも  
 これらもライブラリとして機能を提供しています  
-`self.isContainTemplate('status.png') # テンプレートマッチング`  
+`self.isContainTemplate('status.png') # テンプレートマッチング`
 
 現在の機能([実装内容](https://github.com/KawaSwitch/Poke-Controller/wiki/%E7%94%BB%E5%83%8F%E8%AA%8D%E8%AD%98%E3%81%A8%E3%81%AF))は少ないがアップデート予定  
 ![リリース前GUI](https://github.com/KawaSwitch/Poke-Controller/blob/photo/photos/pokecon_gui_before_release.PNG)
 
-### キーボード操作  
-キーボードをスイッチのコントローラとして使用することができます  
+### キーボード操作
+
+キーボードをスイッチのコントローラとして使用することができます
 
 | Switchコントローラ | キーボード |
 | ---- | ---- |
@@ -85,14 +132,14 @@ Poke-Controllerを動作しながらファイルの変更を再読込して反�
 
 ## リリース
 
-- 過去リリース  
-	- [Github - Releases](https://github.com/KawaSwitch/Poke-Controller/releases)  
+- 過去リリース
+  - [Github - Releases](https://github.com/KawaSwitch/Poke-Controller/releases)
 
-- 進捗状況の確認  
-	- [Github - Project](https://github.com/KawaSwitch/Poke-Controller/projects)  
+- 進捗状況の確認
+  - [Github - Project](https://github.com/KawaSwitch/Poke-Controller/projects)
 
-- ロードマップ  
-	- [リリースについて](https://github.com/KawaSwitch/Poke-Controller/wiki/About-Releases)  
+- ロードマップ
+  - [リリースについて](https://github.com/KawaSwitch/Poke-Controller/wiki/About-Releases)
 
 ## 貢献
 
@@ -119,7 +166,7 @@ Poke-Controllerを動作しながらファイルの変更を再読込して反�
 ## ライセンス
 
 本プロジェクトはMITライセンスです  
-詳細は [LISENCE](https://github.com/KawaSwitch/Poke-Controller/blob/master/LICENSE) を参照ください  
+詳細は [LISENCE](https://github.com/KawaSwitch/Poke-Controller/blob/master/LICENSE) を参照ください
 
 また, 本プロジェクトではLGPLライセンスのDirectShowLib-2005.dllを同梱し使用しています  
 [About DirectShowLib](http://directshownet.sourceforge.net/)  

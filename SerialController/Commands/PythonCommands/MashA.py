@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from Commands.PythonCommandBase import PythonCommand, ImageProcPythonCommand
-from Commands.Keys import KeyPress, Button, Direction, Stick
+from Commands.Keys import Button
+from Commands.PythonCommandBase import PythonCommand
+
 
 # Mash a button A
 # A連打
 class Mash_A(PythonCommand):
-	NAME = 'A連打'
+    NAME = 'A連打'
 
-	def __init__(self):
-		super().__init__()
+    def __init__(self):
+        super().__init__()
 
-	def do(self):
-		while True:
-			self.wait(0.5)
-			self.press(Button.A)
+    def do(self):
+        while True:
+            self.wait(0.5)
+            self.press(Button.A)
