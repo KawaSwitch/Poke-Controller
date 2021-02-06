@@ -2,6 +2,8 @@
 
 本質的な部分はそのままに、機能を一部追加します
 
+![](https://github.com/Moi-Poke/Poke-Controller/blob/photo/photos/poke-con-modded.png)
+
 ## 変更点
 
 - 開発の都合でpythonの動作確認バージョンを3.7としています(とはいえ3.6でも動くはずです。)
