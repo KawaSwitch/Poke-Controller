@@ -11,6 +11,7 @@ class GuiSettings:
 
     def __init__(self):
         self.setting = configparser.ConfigParser()
+        self.setting.optionxform = str
         # print("isExistConfig =", os.path.exists(self.SETTING_PATH))
 
         if not os.path.exists(self.SETTING_PATH):
@@ -52,6 +53,27 @@ class GuiSettings:
         self.setting['Pokemon Home'] = {
             'Season': 1,
             'Single or Double': 'シングル',
+        }
+        # keyconfig
+        self.setting['Key map'] = {
+            'Button.Y': 'y',
+            'Button.B': 'b',
+            'Button.X': 'x',
+            'Button.A': 'a',
+            'Button.L': 'l',
+            'Button.R': 'r',
+            'Button.ZL': 'k',
+            'Button.ZR': 'e',
+            'Button.MINUS': 'm',
+            'Button.PLUS': 'p',
+            'Button.LCLICK': 'q',
+            'Button.RCLICK': 'w',
+            'Button.HOME': 'h',
+            'Button.CAPTURE': 'c',
+            'Direction.UP': 'Key.up',
+            'Direction.RIGHT': 'Key.right',
+            'Direction.DOWN': 'Key.down',
+            'Direction.LEFT': 'Key.left',
         }
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
             self.setting.write(file)

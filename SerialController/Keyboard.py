@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import configparser
+import os
+
 from pynput.keyboard import Key, Listener
 
-from Commands.Keys import Button, Direction
+from Commands.Keys import Direction
+
+
+# import logging
 
 
 # This handles keyboard interactions
@@ -31,32 +37,20 @@ class Keyboard:
 
 # This regards a keyboard inputs as Switch controller
 class SwitchKeyboardController(Keyboard):
+    SETTING_PATH = os.path.join(os.path.dirname(__file__), "settings.ini")
+
     def __init__(self, keyPress):
         super(SwitchKeyboardController, self).__init__()
+        self.setting = configparser.ConfigParser()
+        self.setting.optionxform = str
+        if os.path.isfile(self.SETTING_PATH):
+            self.setting.read(self.SETTING_PATH, encoding='utf-8')
         self.key = keyPress
         self.holding = []
         self.holdingDir = []
-
-        self.key_map = {
-            'y': Button.Y,
-            'b': Button.B,
-            'x': Button.X,
-            'a': Button.A,
-            'l': Button.L,
-            'r': Button.R,
-            'k': Button.ZL,
-            'e': Button.ZR,
-            'm': Button.MINUS,
-            'p': Button.PLUS,
-            'q': Button.LCLICK,
-            'w': Button.RCLICK,
-            'h': Button.HOME,
-            'c': Button.CAPTURE,
-            Key.up: Direction.UP,
-            Key.right: Direction.RIGHT,
-            Key.down: Direction.DOWN,
-            Key.left: Direction.LEFT,
-        }
+        self.key_map = {(i[1] if len(i[1]) == 1 else eval(str(i[1]))): eval(i[0]) for i in
+                        self.setting.items("Key map")}
+        # logging.error(self.key_map)
 
     def on_press(self, key):
         # for debug (show row key data)
