@@ -1,52 +1,79 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import configparser
 import os
-import pickle
 import tkinter as tk
 
 
 class GuiSettings:
-    SETTING_PATH = "./settings.poke"
+    SETTING_PATH = os.path.join(os.path.dirname(__file__), "settings.ini")
 
     def __init__(self):
-        # default values
-        self.camera_id = tk.IntVar(value=0)
-        self.com_port = tk.IntVar(value=0)
-        self.fps = tk.StringVar(value='45')
-        self.show_size = tk.StringVar(value='640x360')
-        self.is_show_realtime = tk.BooleanVar(value=True)
-        self.is_show_serial = tk.BooleanVar(value=False)
-        self.is_use_keyboard = tk.BooleanVar(value=True)
-        # pokehome用の設定
-        self.season = tk.StringVar(value="1")
-        self.is_SingleBattle = tk.StringVar(value="シングル")
+        self.setting = configparser.ConfigParser()
+        # print("isExistConfig =", os.path.exists(self.SETTING_PATH))
+
+        if not os.path.exists(self.SETTING_PATH):
+            # logger.info('Setting file does not exists. Try Generate.')
+            self.generate()
+            self.load()
+        else:
+            self.load()
+
+        # default
+        self.camera_id = tk.IntVar(value=self.setting['General Setting'].getint('camera_id'))
+        self.com_port = tk.IntVar(value=self.setting['General Setting'].getint('com_port'))
+        self.fps = tk.StringVar(value=self.setting['General Setting']['fps'])
+        self.show_size = tk.StringVar(value=self.setting['General Setting'].get('show_size'))
+        self.is_show_realtime = tk.BooleanVar(value=self.setting['General Setting'].getboolean('is_show_realtime'))
+        self.is_show_serial = tk.BooleanVar(value=self.setting['General Setting'].getboolean('is_show_serial'))
+        self.is_use_keyboard = tk.BooleanVar(value=self.setting['General Setting'].getboolean('is_use_keyboard'))
+        # Pokemon Home用の設定
+        self.season = tk.StringVar(value=self.setting['Pokemon Home'].get('Season'))
+        self.is_SingleBattle = tk.StringVar(value=self.setting['Pokemon Home'].get('Single or Double'))
 
     def load(self):
         if os.path.isfile(self.SETTING_PATH):
-            load_settings = pickle.load(open(self.SETTING_PATH, 'rb'))
-
-            # deserialize
-            deserialized = {key: value[1](value=value[0]) for key, value in load_settings.items()}
-
-            if self.__dict__.keys() != deserialized.keys():
-                print('Setting items have been altered.')
-                self.generate()
-                self.load()
-            else:
-                self.__dict__ = deserialized
-        else:
-            print('No setting files can be found.')
-            self.generate()
-            self.load()
+            self.setting.read(self.SETTING_PATH, encoding='utf-8')
 
     def generate(self):
-        self.save()
-        print('A default settings file has been created.')
+        # logger.info('Create Default setting file.')
+        # default
+        self.setting['General Setting'] = {
+            'camera_id': 0,
+            'com_port': 0,
+            'fps': 45,
+            'show_size': '640x360',
+            'is_show_realtime': True,
+            'is_show_serial': False,
+            'is_use_keyboard': True,
+        }
+        # pokemon home用の設定
+        self.setting['Pokemon Home'] = {
+            'Season': 1,
+            'Single or Double': 'シングル',
+        }
+        with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
+            self.setting.write(file)
 
     def save(self, path=None):
         # Some preparations are needed because tkinter related objects are not serializable.
-        data = {key: [value.get(), type(value)] for key, value in self.__dict__.items()}
 
-        f = open(self.SETTING_PATH if path is None else path, 'wb')
-        pickle.dump(data, f)
+        self.setting['General Setting'] = {
+            'camera_id': self.camera_id.get(),
+            'com_port': self.com_port.get(),
+            'fps': self.fps.get(),
+            'show_size': self.show_size.get(),
+            'is_show_realtime': self.is_show_realtime.get(),
+            'is_show_serial': self.is_show_serial.get(),
+            'is_use_keyboard': self.is_use_keyboard.get(),
+        }
+        # pokemon home用の設定
+        self.setting['Pokemon Home'] = {
+            'Season': self.season.get(),
+            'Single or Double': self.is_SingleBattle.get(),
+        }
+
+        with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
+            self.setting.write(file)
+        # logger.debug('Settings file has been saved.')

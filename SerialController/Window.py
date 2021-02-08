@@ -69,7 +69,7 @@ class PokeControllerApp:
         self.label3.grid(padx='5', sticky='ew')
         self.fps_cb = ttk.Combobox(self.camera_f2)
         self.fps = tk.StringVar()
-        self.fps_cb.config(justify='right', state='readonly', textvariable=self.fps, values='60 45 30 15 5')
+        self.fps_cb.config(justify='right', state='readonly', textvariable=self.fps, values=[60, 45, 30, 15, 5])
         self.fps_cb.config(width='5')
         self.fps_cb.grid(column='1', padx='10', row='0', sticky='ew')
         self.fps_cb.bind('<<ComboboxSelected>>', self.applyFps, add='')
@@ -246,7 +246,8 @@ class PokeControllerApp:
 
         self.menu = PokeController_Menubar(self)
         self.root.config(menu=self.menu)
-        print(f'python version: {sys.version}')
+
+        # logging.debug(f'python version: {sys.version}')
 
     def openCamera(self):
         self.camera.openCamera(self.camera_id.get())
