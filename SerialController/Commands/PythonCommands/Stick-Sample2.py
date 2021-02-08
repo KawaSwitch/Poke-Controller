@@ -8,7 +8,7 @@ from Commands.PythonCommandBase import PythonCommand
 
 
 # スティックの動作サンプルコード
-class Stick_Sample2(PythonCommand):
+class StickSample2(PythonCommand):
     NAME = 'スティック2'
 
     def __init__(self):

@@ -6,7 +6,7 @@ from Commands.PythonCommandBase import PythonCommand
 
 
 # スティックの動作サンプルコード
-class Stick_Sample1(PythonCommand):
+class StickSample1(PythonCommand):
     NAME = 'スティック1'
 
     def __init__(self):

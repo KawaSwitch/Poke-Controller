@@ -29,15 +29,10 @@
 
   現状は以下の機能のみ
   - LINE連携機能のToken確認\
-    Python Commandの関数にLine通知コマンドを追加しています。その設定がちゃんとできているかの確認です
-    
-    
-    
+    Python Commandの関数にLine通知コマンドを追加しています。その設定がちゃんとできているかの確認です\
     **Usage**
-    
     - LINE Notifyより通知用のTokenを取得
-      Tokenをline_token.iniの`paste_your_token_here`部分に貼り付け
-      テキスト通知をしたいときは
+      Tokenをline_token.iniの`paste_your_token_here`部分に貼り付け テキスト通知をしたいときは
       ```python
       self.LINE_text("通知したい内容")
       ```
@@ -47,9 +42,7 @@
       self.LINE_image("通知したい内容")
       ```
       と書きます
-    
-    アプリ起動時にLINE Token Check FAILED.と表示される間はtokenが間違っています。
-    
+    - アプリ起動時にLINE Token Check FAILED.と表示される間はtokenが間違っています。
     
   - Pokémon Home連携
 
@@ -76,14 +69,15 @@ numpy
 ```
 
 ## おまけ
-- 好きなな表示サイズがある場合は、Window.pyのそれっぽいところに自分好みのサイズを追記してください。fpsも同様です。
+
+- 好みの表示サイズがある場合は、Window.pyのそれっぽいところに自分好みのサイズを追記してください。fpsも同様です。
 
 - OpenCVで行う処理をNVIDIA GPUで動かすためのコードを同梱しています(TemplateMatchingTimeMeasure.py)。\
-ただし、pip install でインストール可能なライブラリでは使用できません\
-使用してみたい方は、各自で自分のGPUに対応したオプションでpython用のOpenCVをソースコードからビルドして貰う必要があります。\
-それなりに難易度が高くかなり手間な処理になりますが、余裕がある方は試してみてください。\
-`OpenCV + CUDA (+ Windows)`
-などと検索すればビルドの解説ページが出てきます。
+  ただし、pip install でインストール可能なライブラリでは使用できません\
+  使用してみたい方は、各自で自分のGPUに対応したオプションでpython用のOpenCVをソースコードからビルドして貰う必要があります。\
+  それなりに難易度が高くかなり手間な処理になりますが、余裕がある方は試してみてください。\
+  `OpenCV + CUDA (+ Windows)`
+  などと検索すればビルドの解説ページが出てきます。
 
 以下は本家様の説明になります。
 - - -
