@@ -15,10 +15,20 @@ from GuiAssets import CaptureArea, ControllerGUI
 from Keyboard import SwitchKeyboardController
 from Menubar import PokeController_Menubar
 
+# ログ用おまじない
+# from logging import getLogger, StreamHandler, DEBUG
+# logger = getLogger(__name__)
+# handler = StreamHandler()
+# handler.setLevel(DEBUG)
+# logger.setLevel(DEBUG)
+# logger.addHandler(handler)
+# logger.propagate = False
+
+
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "1.0-beta3 (V2.1 Modified by Moi)"
+VERSION = "1.0-beta3 (V2.2 Modified by Moi)"
 
 
 class PokeControllerApp:

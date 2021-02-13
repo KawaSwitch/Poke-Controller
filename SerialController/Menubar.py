@@ -1,6 +1,7 @@
 import cv2
 import tkinter as tk
 
+from KeyConfig import PokeKeycon
 from LineNotify import Line_Notify
 from get_pokestatistics import GetFromHomeGUI
 
@@ -14,6 +15,7 @@ class PokeController_Menubar(tk.Menu):
         self.settings = self.master.settings
         self.camera = self.master.camera
         self.poke_treeview = None
+        self.key_config = None
 
         tk.Menu.__init__(self, self.root, **kw)
         self.menu = tk.Menu(self, tearoff='false')
@@ -35,6 +37,7 @@ class PokeController_Menubar(tk.Menu):
         self.menu_command.add('command', command=self.LineTokenSetting, label='LINE Token Check')
         # TODO: setup command_id_arg 'false' for menuitem.
         self.menu_command.add('command', command=self.OpenPokeHomeCoop, label='Pokemon Home 連携')
+        self.menu_command.add('command', command=self.OpenKeyConfig, label='キーコンフィグ')
 
     # TODO: setup command_id_arg 'false' for menuitem.
 
@@ -52,10 +55,22 @@ class PokeController_Menubar(tk.Menu):
         self.poke_treeview = None
 
     def LineTokenSetting(self):
-
-        LINE = Line_Notify(self.camera)
-        print(LINE)
+        line = Line_Notify(self.camera)
+        print(line)
         # LINE.send_text_n_image("CAPTURE")
+
+    def OpenKeyConfig(self):
+        if self.key_config is not None:
+            self.key_config.focus_force()
+            return
+
+        kc_window = PokeKeycon(self.root)
+        kc_window.protocol("WM_DELETE_WINDOW", self.closingKeyConfig)
+        self.key_config = kc_window
+
+    def closingKeyConfig(self):
+        self.key_config.destroy()
+        self.key_config = None
 
     def exit(self):
         if self.ser.isOpened():

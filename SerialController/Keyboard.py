@@ -6,7 +6,7 @@ import os
 
 from pynput.keyboard import Key, Listener
 
-from Commands.Keys import Direction
+from Commands.Keys import Button, Direction
 
 
 # import logging
@@ -41,6 +41,7 @@ class SwitchKeyboardController(Keyboard):
 
     def __init__(self, keyPress):
         super(SwitchKeyboardController, self).__init__()
+        self.to_use = Button.A
         self.setting = configparser.ConfigParser()
         self.setting.optionxform = str
         if os.path.isfile(self.SETTING_PATH):
