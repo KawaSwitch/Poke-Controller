@@ -60,7 +60,12 @@ class CaptureArea(tk.Canvas):
         self.rx_init, self.ry_init = 0, 0
         self.keys = None
         self.ser = ser
-        self.circle = None
+        self.lcircle = None
+        self.lcircle2 = None
+        self.rcircle = None
+        self.rcircle2 = None
+        self.LStick = None
+        self.RStick = None
         # self.circle =
 
         self.setFps(fps)
@@ -77,7 +82,7 @@ class CaptureArea(tk.Canvas):
 
     def ApplyLStickMouse(self):
         if self.master.is_use_left_stick_mouse.get():
-            self.bind("<ButtonPress-1>", self.mouseLeftPress)
+            self.bind("<ButtonPress-1>", lambda ev: self.mouseLeftPress(ev, self.ser))
             self.bind("<Button1-Motion>", lambda ev: self.mouseLeftPressing(ev, self.ser))
             self.bind("<ButtonRelease-1>", lambda ev: self.mouseLeftRelease(self.ser))
         else:
@@ -87,7 +92,7 @@ class CaptureArea(tk.Canvas):
 
     def ApplyRStickMouse(self):
         if self.master.is_use_right_stick_mouse.get():
-            self.bind("<ButtonPress-3>", self.mouseRightPress)
+            self.bind("<ButtonPress-3>", lambda ev: self.mouseRightPress(ev, self.ser))
             self.bind("<Button3-Motion>", lambda ev: self.mouseRightPressing(ev, self.ser))
             self.bind("<ButtonRelease-3>", lambda ev: self.mouseRightRelease(self.ser))
         else:
@@ -112,39 +117,84 @@ class CaptureArea(tk.Canvas):
         ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
         print('mouse down: show ({}, {}) / capture ({}, {})'.format(x, y, int(x * ratio_x), int(y * ratio_y)))
 
-    def mouseLeftPress(self, event):
+    def mouseLeftPress(self, event, ser):
+        self.config(cursor='dot')
         self.lx_init, self.ly_init = event.x, event.y
-
-        self.circle = self.create_oval(self.lx_init - self.radius, self.ly_init - self.radius,
-                                       self.lx_init + self.radius, self.ly_init + self.radius,
-                                       outline='cyan', tag="lcircle")
+        self.lcircle = self.create_oval(self.lx_init - self.radius, self.ly_init - self.radius,
+                                        self.lx_init + self.radius, self.ly_init + self.radius,
+                                        outline='cyan', tag="lcircle")
+        self.lcircle2 = self.create_oval(self.lx_init - self.radius // 10, self.ly_init - self.radius // 10,
+                                         self.lx_init + self.radius // 10, self.ly_init + self.radius // 10,
+                                         fill="cyan", tag="lcircle2")
+        self.LStick = StickCommand.StickLeft()
+        self.LStick.start(ser)
 
     def mouseLeftPressing(self, event, ser, angle=0):
         langle = np.rad2deg(np.arctan2(self.ly_init - event.y, event.x - self.lx_init))
         mag = np.sqrt((self.ly_init - event.y) ** 2 + (event.x - self.lx_init) ** 2) / self.radius
         logger.debug(self.lx_init - event.x, self.ly_init - event.y, angle)
-        StickCommand.StickLeft().start(ser, langle, r=mag)
+        self.LStick.LStick(langle, r=mag)
+        if mag >= 1:
+            center_x = (self.radius + self.radius // 11) * np.cos(np.deg2rad(langle))
+            center_y = (self.radius + self.radius // 11) * np.sin(np.deg2rad(langle))
+            circ_x_1 = self.lx_init + center_x - self.radius // 10
+            circ_x_2 = self.lx_init + center_x + self.radius // 10
+            circ_y_1 = self.ly_init - center_y - self.radius // 10
+            circ_y_2 = self.ly_init - center_y + self.radius // 10
+        else:
+            circ_x_1 = event.x - self.radius // 10
+            circ_x_2 = event.x + self.radius // 10
+            circ_y_1 = event.y - self.radius // 10
+            circ_y_2 = event.y + self.radius // 10
+
+        self.coords('lcircle2', circ_x_1, circ_y_1, circ_x_2, circ_y_2, )
 
     def mouseLeftRelease(self, ser):
-        StickCommand.StickLeft().end(ser)
+        self.config(cursor='tcross')
+        self.LStick.end(ser)
         self.delete("lcircle")
+        self.delete("lcircle2")
+        self.event_generate('<Motion>', warp=True, x=self.lx_init, y=self.ly_init)
 
-    def mouseRightPress(self, event):
+    def mouseRightPress(self, event, ser):
+        self.config(cursor='dot')
         self.rx_init, self.ry_init = event.x, event.y
+        self.rcircle = self.create_oval(self.rx_init - self.radius, self.ry_init - self.radius,
+                                        self.rx_init + self.radius, self.ry_init + self.radius,
+                                        outline='red', tag="rcircle")
+        self.rcircle2 = self.create_oval(self.rx_init - self.radius // 10, self.ry_init - self.radius // 10,
+                                         self.rx_init + self.radius // 10, self.ry_init + self.radius // 10,
+                                         fill="red", tag="rcircle2")
 
-        self.circle = self.create_oval(self.rx_init - self.radius, self.ry_init - self.radius,
-                                       self.rx_init + self.radius, self.ry_init + self.radius,
-                                       outline='red', tag="rcircle")
+        self.RStick = StickCommand.StickRight()
+        self.RStick.start(ser)
 
     def mouseRightPressing(self, event, ser, angle=0):
         rangle = np.rad2deg(np.arctan2(self.ry_init - event.y, event.x - self.rx_init))
         mag = np.sqrt((self.ry_init - event.y) ** 2 + (event.x - self.rx_init) ** 2) / self.radius
         logger.debug(self.rx_init - event.x, self.ry_init - event.y, angle)
-        StickCommand.StickRight().start(ser, rangle, r=mag)
+        self.RStick.RStick(rangle, r=mag)
+        if mag >= 1:
+            center_x = (self.radius + self.radius // 11) * np.cos(np.deg2rad(rangle))
+            center_y = (self.radius + self.radius // 11) * np.sin(np.deg2rad(rangle))
+            circ_x_1 = self.rx_init + center_x - self.radius // 10
+            circ_x_2 = self.rx_init + center_x + self.radius // 10
+            circ_y_1 = self.ry_init - center_y - self.radius // 10
+            circ_y_2 = self.ry_init - center_y + self.radius // 10
+        else:
+            circ_x_1 = event.x - self.radius // 10
+            circ_x_2 = event.x + self.radius // 10
+            circ_y_1 = event.y - self.radius // 10
+            circ_y_2 = event.y + self.radius // 10
+
+        self.coords('rcircle2', circ_x_1, circ_y_1, circ_x_2, circ_y_2, )
 
     def mouseRightRelease(self, ser):
-        StickCommand.StickRight().end(ser)
+        self.config(cursor='tcross')
+        self.RStick.end(ser)
         self.delete("rcircle")
+        self.delete("rcircle2")
+        self.event_generate('<Motion>', warp=True, x=self.rx_init, y=self.ry_init)
 
     def startCapture(self):
         self.capture()

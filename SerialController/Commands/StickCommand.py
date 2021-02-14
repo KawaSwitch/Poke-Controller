@@ -48,8 +48,10 @@ class StickLeft(StickCommand):
     def __init__(self):
         super().__init__()
 
-    def start(self, ser, angle, r=1.0):
+    def start(self, ser):
         super().start(ser)
+
+    def LStick(self, angle, r=1.0):
         self.stick(Direction(Stick.LEFT, angle, r, showName=f'Angle={angle},r={r}'), duration=0.015, wait=0.0)
 
     def end(self, ser):
@@ -61,8 +63,10 @@ class StickRight(StickCommand):
     def __init__(self):
         super().__init__()
 
-    def start(self, ser, angle, r=1.0):
+    def start(self, ser):
         super().start(ser)
+
+    def RStick(self, angle, r=1.0):
         self.stick(Direction(Stick.RIGHT, angle, r, showName=f'Angle={angle},r={r}'), duration=0.015, wait=0.0)
 
     def end(self, ser):
