@@ -137,15 +137,29 @@ class PokeControllerApp:
         self.serial_lf.grid(column='0', columnspan='2', padx='5', row='1', sticky='nsew')
         self.control_lf = ttk.Labelframe(self.frame_1)
         self.cb_use_keyboard = ttk.Checkbutton(self.control_lf)
+        self.cb_left_stick_mouse = ttk.Checkbutton(self.control_lf)
+        self.cb_right_stick_mouse = ttk.Checkbutton(self.control_lf)
         self.is_use_keyboard = tk.BooleanVar()
+        self.camera_lf.is_use_left_stick_mouse = tk.BooleanVar()
+        self.camera_lf.is_use_right_stick_mouse = tk.BooleanVar()
         self.cb_use_keyboard.config(text='Use Keyboard', variable=self.is_use_keyboard)
         self.cb_use_keyboard.grid(column='0', padx='10', pady='5', sticky='ew')
         self.cb_use_keyboard.rowconfigure('0', weight='1')
         self.cb_use_keyboard.columnconfigure('0', weight='1')
         self.cb_use_keyboard.configure(command=self.activateKeyboard)
+        self.cb_left_stick_mouse.config(text='Use LStick Mouse', variable=self.camera_lf.is_use_left_stick_mouse)
+        self.cb_left_stick_mouse.grid(column='1', row='0', padx='10', pady='5', sticky='ew')
+        self.cb_left_stick_mouse.rowconfigure('0', weight='1')
+        self.cb_left_stick_mouse.columnconfigure('0', weight='1')
+        self.cb_left_stick_mouse.configure(command=self.activate_Left_stick_mouse)
+        self.cb_right_stick_mouse.config(text='Use RStick Mouse', variable=self.camera_lf.is_use_right_stick_mouse)
+        self.cb_right_stick_mouse.grid(column='1', row='1', padx='10', pady='5', sticky='ew')
+        self.cb_right_stick_mouse.rowconfigure('0', weight='1')
+        self.cb_right_stick_mouse.columnconfigure('0', weight='1')
+        self.cb_right_stick_mouse.configure(command=self.activate_Right_stick_mouse)
         self.simpleConButton = ttk.Button(self.control_lf)
         self.simpleConButton.config(text='Controller')
-        self.simpleConButton.grid(column='1', padx='10', pady='5', row='0', sticky='ew')
+        self.simpleConButton.grid(column='0', padx='10', pady='5', row='1', sticky='ew')
         self.simpleConButton.rowconfigure('1', weight='1')
         self.simpleConButton.columnconfigure('0', weight='1')
         self.simpleConButton.configure(command=self.createControllerWindow)
@@ -199,6 +213,7 @@ class PokeControllerApp:
         '''
         ここまで
         '''
+
         # 仮置フレームを削除
         self.frame_1_2.destroy()
 
@@ -242,11 +257,12 @@ class PokeControllerApp:
         self.preview = CaptureArea(self.camera,
                                    self.fps.get(),
                                    self.is_show_realtime,
+                                   self.ser,
                                    self.camera_lf,
                                    *list(map(int, self.show_size.get().split("x")))
                                    )
         self.preview.config(cursor='crosshair')
-        self.preview.grid(column='0', columnspan='7', row='2', padx='5', pady='5')
+        self.preview.grid(column='0', columnspan='7', row='2', padx='5', pady='5', sticky=tk.NSEW)
 
         # Main widget
         self.mainwindow = self.frame_1
@@ -360,6 +376,12 @@ class PokeControllerApp:
         window = ControllerGUI(self.root, self.ser)
         window.protocol("WM_DELETE_WINDOW", self.closingController)
         self.controller = window
+
+    def activate_Left_stick_mouse(self):
+        self.preview.ApplyLStickMouse()
+
+    def activate_Right_stick_mouse(self):
+        self.preview.ApplyRStickMouse()
 
     # def createGetFromHomeWindow(self):
     #     if self.poke_treeview is not None:

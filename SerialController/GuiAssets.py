@@ -4,31 +4,95 @@
 import cv2
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
+import numpy as np
 
 from PIL import Image, ImageTk
 
 from Commands import UnitCommand
+from Commands import StickCommand
+from Commands.Keys import Direction, Stick, Button, Direction, KeyPress
+
+from logging import INFO, StreamHandler, getLogger, DEBUG
+from Commands.PythonCommandBase import PythonCommand, StopThread
+
+logger = getLogger(__name__)
+handler = StreamHandler()
+logging_level = INFO
+handler.setLevel(logging_level)
+logger.setLevel(logging_level)
+logger.addHandler(handler)
+logger.propagate = False
 
 
-class CaptureArea(tk.Label):
-    def __init__(self, camera, fps, is_show, master=None, show_width=640, show_height=360):
-        super().__init__(master, borderwidth=0, cursor='tcross')
+# press button at duration times(s)
+
+class MouseStick(PythonCommand):
+    NAME = 'スティック1'
+
+    def __init__(self):
+        super().__init__()
+
+    def do(self):
+        pass
+
+    def stick(self, buttons, duration=0.1, wait=0.1):
+        self.keys.input(buttons, ifPrint=False)
+        self.wait(duration)
+        self.wait(wait)
+
+    # press button at duration times(s)
+    def stickEnd(self, buttons):
+        self.keys.inputEnd(buttons)
+
+
+class CaptureArea(tk.Canvas):
+    def __init__(self, camera, fps, is_show, ser, master=None, show_width=640, show_height=360):
+        super().__init__(master, borderwidth=0, cursor='tcross', width=show_width, height=show_height)
+        self.master = master
+        self.radius = 60  # 描画する円の半径
         self.camera = camera
         # self.show_size = (640, 360)
         self.show_width = int(show_width)
         self.show_height = int(show_height)
         self.show_size = (self.show_width, self.show_height)
         self.is_show_var = is_show
+        self.x_init, self.y_init = 0, 0
+        self.keys = None
+        self.ser = ser
+        self.circle = None
+        # self.circle =
 
         self.setFps(fps)
-        self.bind("<ButtonPress-1>", self.mouseLeftDown)
+
+        self.bind("<Control-ButtonPress-1>", self.mouseCtrlLeftPress)
 
         # Set disabled image first
         disabled_img = cv2.imread("../Images/disabled.png", cv2.IMREAD_GRAYSCALE)
         disabled_pil = Image.fromarray(disabled_img)
-        self.diabled_tk = ImageTk.PhotoImage(disabled_pil)
-        self.im = self.diabled_tk
-        self.configure(image=self.diabled_tk)
+        self.disabled_tk = ImageTk.PhotoImage(disabled_pil)
+        self.im = self.disabled_tk
+        # self.configure(image=self.disabled_tk)  # labelからキャンバスに変更したので微修正
+        self.im_ = self.create_image(0, 0, image=self.disabled_tk, anchor=tk.NW)
+
+    def ApplyLStickMouse(self):
+        if self.master.is_use_left_stick_mouse.get():
+            self.bind("<ButtonPress-1>", self.mouseLeftPress)
+            self.bind("<Button1-Motion>", lambda ev: self.mouseLeftPressing(ev, self.ser))
+            self.bind("<ButtonRelease-1>", lambda ev: self.mouseLeftRelease(self.ser))
+        else:
+            self.unbind("<ButtonPress-1>")
+            self.unbind("<Button1-Motion>")
+            self.unbind("<ButtonRelease-1>")
+
+    def ApplyRStickMouse(self):
+        if self.master.is_use_right_stick_mouse.get():
+            self.bind("<ButtonPress-3>", self.mouseRightPress)
+            self.bind("<Button3-Motion>", lambda ev: self.mouseRightPressing(ev, self.ser))
+            self.bind("<ButtonRelease-3>", lambda ev: self.mouseRightRelease(self.ser))
+        else:
+            self.unbind("<ButtonPress-3>")
+            self.unbind("<Button3-Motion>")
+            self.unbind("<ButtonRelease-3>")
 
     def setFps(self, fps):
         # self.next_frames = int(16 * (60 / int(fps)))
@@ -38,13 +102,46 @@ class CaptureArea(tk.Label):
         self.show_width = int(show_width)
         self.show_height = int(show_height)
         self.show_size = (self.show_width, self.show_height)
+        self.config(width=self.show_width, height=self.show_height)
         print("Show size set to {0} x {1}".format(self.show_width, self.show_height))
 
-    def mouseLeftDown(self, event):
+    def mouseCtrlLeftPress(self, event):
         x, y = event.x, event.y
         ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
         ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
         print('mouse down: show ({}, {}) / capture ({}, {})'.format(x, y, int(x * ratio_x), int(y * ratio_y)))
+
+    def mouseLeftPress(self, event):
+        self.x_init, self.y_init = event.x, event.y
+
+        self.circle = self.create_oval(self.x_init - self.radius, self.y_init - self.radius,
+                                       self.x_init + self.radius, self.y_init + self.radius, outline='yellow')
+
+    def mouseLeftPressing(self, event, ser, angle=0):
+        angle = np.rad2deg(np.arctan2(self.y_init - event.y, event.x - self.x_init))
+        mag = np.sqrt((self.y_init - event.y) ** 2 + (event.x - self.x_init) ** 2) / self.radius
+        logger.debug(self.x_init - event.x, self.y_init - event.y, angle)
+        StickCommand.StickLeft().start(ser, angle, r=mag)
+
+    def mouseLeftRelease(self, ser):
+        StickCommand.StickLeft().end(ser)
+        self.delete(self.circle)
+
+    def mouseRightPress(self, event):
+        self.x_init, self.y_init = event.x, event.y
+
+        self.circle = self.create_oval(self.x_init - self.radius, self.y_init - self.radius,
+                                       self.x_init + self.radius, self.y_init + self.radius, outline='yellow')
+
+    def mouseRightPressing(self, event, ser, angle=0):
+        angle = np.rad2deg(np.arctan2(self.y_init - event.y, event.x - self.x_init))
+        mag = np.sqrt((self.y_init - event.y) ** 2 + (event.x - self.x_init) ** 2) / self.radius
+        logger.debug(self.x_init - event.x, self.y_init - event.y, angle)
+        StickCommand.StickRight().start(ser, angle, r=mag)
+
+    def mouseRightRelease(self, ser):
+        StickCommand.StickRight().end(ser)
+        self.delete(self.circle)
 
     def startCapture(self):
         self.capture()
@@ -62,10 +159,12 @@ class CaptureArea(tk.Label):
             image_tk = ImageTk.PhotoImage(image_pil)
 
             self.im = image_tk
-            self.configure(image=image_tk)
+            # self.configure( image=image_tk)
+            self.itemconfig(self.im_, image=image_tk)
         else:
-            self.im = self.diabled_tk
-            self.configure(image=self.diabled_tk)
+            self.im = self.disabled_tk
+            # self.configure(image=self.disabled_tk)
+            self.itemconfig(self.im_, image=self.disabled_tk)
 
         self.after(self.next_frames, self.capture)
 

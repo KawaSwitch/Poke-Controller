@@ -323,33 +323,36 @@ class KeyPress:
         self.format.unsetHat()
         self.format.unsetDirection(tilts)
 
-        # ここから
-        if self.continuous_time == -1:
-            self.continuous_time = 1
-        if self.continuous_time < 0.025:
-            pass
-        else:
-            # 0.16秒未満の入力は0.05に変換
-            if (self.ed - self.st) < 0.15:
-                self.out3 = 0.05
+        try:
+            # ここから
+            if self.continuous_time == -1:
+                self.continuous_time = 1
+            if self.continuous_time < 0.025:
+                pass
             else:
-                self.out3 = self.ed - self.st
-            # 0.05以外の表示桁数調整
-            if self.out3 == 0.05:
-                self.out2 = '{:.2f}'.format(self.out3)
-            else:
-                self.out2 = '{:.3f}'.format(self.out3)
-            # コマンドに変換
-            try:
+                # 0.16秒未満の入力は0.05に変換
+                if (self.ed - self.st) < 0.15:
+                    self.out3 = 0.05
+                else:
+                    self.out3 = self.ed - self.st
+                # 0.05以外の表示桁数調整
                 if self.out3 == 0.05:
-                    print('self.press({}.{},duration={},wait={})'.format(self.bt, self.out, self.out2, '0.04'))
-                elif '0.00' not in self.out2 and self.bt != '' and self.out != '':
-                    print('self.press({}.{},duration={})'.format(self.bt, self.out, self.out2))
-            except:
-                print(self.out2)
-        # 入力後時間計測開始
-        self.st0 = time.time()
-        # ここまで
+                    self.out2 = '{:.2f}'.format(self.out3)
+                else:
+                    self.out2 = '{:.3f}'.format(self.out3)
+                # コマンドに変換
+                try:
+                    if self.out3 == 0.05:
+                        print('self.press({}.{},duration={},wait={})'.format(self.bt, self.out, self.out2, '0.04'))
+                    elif '0.00' not in self.out2 and self.bt != '' and self.out != '':
+                        print('self.press({}.{},duration={})'.format(self.bt, self.out, self.out2))
+                except:
+                    print(self.out2)
+            # 入力後時間計測開始
+            self.st0 = time.time()
+            # ここまで
+        except AttributeError:
+            pass
 
         self.ser.writeRow(self.format.convert2str())
 
