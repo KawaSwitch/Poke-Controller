@@ -1,4 +1,4 @@
-# 機能追加版Poke-Controller
+# Poke-Controller MODIFIED
 
 本質的な部分はそのままに、機能を一部追加します
 
