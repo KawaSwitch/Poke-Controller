@@ -262,6 +262,7 @@ class KeyPress:
         self.ser = ser
         self.format = SendFormat()
         self.holdButton = []
+        self.btn_name2 = ['LEFT', 'RIGHT', 'UP', 'DOWN', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT']
 
     def input(self, btns, ifPrint=True):
         if not isinstance(btns, list):
@@ -271,25 +272,21 @@ class KeyPress:
             if not btn in btns:
                 btns.append(btn)
         # print to log-------------------------------------
-
-        # 既存のログ出力
-        # print(btns)
         # 入力したボタンの抽出
         key = str(btns[0])
-        key = key.replace('Button', '')
-        key = key.replace('Stick.LEFT', '')
-        # ボタンのリスト
-        btn_name1 = ['Y', 'B', 'A', 'X', 'L', 'R', 'R_CLICK', 'PLUS', 'HOME', 'CAPTURE']
-        btn_name2 = ['LEFT', 'RIGHT', 'UP', 'DOWN', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT']
+        key = key.replace('Button.', '')
+        key = key.replace('<Stick.LEFT, ', '')
+        key = key.replace('>', '')
+        # print(key)
         # ボタンのリストからButtonかDirectionか判定
-        for s in btn_name1:
-            if s in key:
-                self.out = s
-                self.bt = 'Button'
-        for s in btn_name2:
+        for s in self.btn_name2:
             if s in key:
                 self.out = s
                 self.bt = 'Direction'
+                break
+        else:
+            self.out = key
+            self.bt = 'Button'
 
         self.st2 = time.time()
         # 次の入力までの待機時間の表示
@@ -298,7 +295,7 @@ class KeyPress:
         # self.st3 ='{:.3f}'.format(self.st2 - self.st0)
         # print('self.wait({})'.format(self.st3))
         except:
-            self.continuous_time = -1
+            self.continuous_time = 9999.9
 
         # ここまで-----------------------------------------
         self.format.setButton([btn for btn in btns if type(btn) is Button])
@@ -325,29 +322,26 @@ class KeyPress:
 
         try:
             # ここから
-            if self.continuous_time == -1:
-                self.continuous_time = 1
+            if self.continuous_time == 9999.9:
+                self.continuous_time = 1.0
             if self.continuous_time < 0.025:
                 pass
             else:
-                # 0.16秒未満の入力は0.05に変換
+                # 0.15秒未満の入力は0.05に変換
                 if (self.ed - self.st) < 0.15:
                     self.out3 = 0.05
-                else:
-                    self.out3 = self.ed - self.st
-                # 0.05以外の表示桁数調整
-                if self.out3 == 0.05:
                     self.out2 = '{:.2f}'.format(self.out3)
                 else:
+                    self.out3 = self.ed - self.st
                     self.out2 = '{:.3f}'.format(self.out3)
                 # コマンドに変換
                 try:
-                    if self.out3 == 0.05:
-                        print('self.press({}.{},duration={},wait={})'.format(self.bt, self.out, self.out2, '0.04'))
-                    elif '0.00' not in self.out2 and self.bt != '' and self.out != '':
+                    if '0.00' not in self.out2:
                         print('self.press({}.{},duration={})'.format(self.bt, self.out, self.out2))
+                    elif self.out3 == 0.05:
+                        print('self.press({}.{},duration={},wait={})'.format(self.bt, self.out, self.out2, '0.04'))
                 except:
-                    print(self.out2)
+                    print('duration =', self.out2)
             # 入力後時間計測開始
             self.st0 = time.time()
             # ここまで
