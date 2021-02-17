@@ -205,34 +205,37 @@ class ImageProcPythonCommand(PythonCommand):
         else:
             return False
 
-    def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True, show_value=False):
-        src = self.camera.readFrame()
-        src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
+    try:
+        def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True, show_value=False):
+            src = self.camera.readFrame()
+            src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
 
-        self.gsrc.upload(src)
+            self.gsrc.upload(src)
 
-        template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
-        self.gtmpl.upload(template)
+            template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+            self.gtmpl.upload(template)
 
-        method = cv2.TM_CCOEFF_NORMED
-        matcher = cv2.cuda.createTemplateMatching(cv2.CV_8UC1, method)
-        gresult = matcher.match(self.gsrc, self.gtmpl)
-        resultg = gresult.download()
-        _, max_val, _, max_loc = cv2.minMaxLoc(resultg)
+            method = cv2.TM_CCOEFF_NORMED
+            matcher = cv2.cuda.createTemplateMatching(cv2.CV_8UC1, method)
+            gresult = matcher.match(self.gsrc, self.gtmpl)
+            resultg = gresult.download()
+            _, max_val, _, max_loc = cv2.minMaxLoc(resultg)
 
-        if show_value:
-            print(template_path + ' ZNCC value: ' + str(max_val))
+            if show_value:
+                print(template_path + ' ZNCC value: ' + str(max_val))
 
-        if max_val >= threshold:
-            # if use_gray:
-            # 	src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
-            #
-            # top_left = max_loc
-            # bottom_right = (top_left[0] + w, top_left[1] + h)
-            # cv2.rectangle(src, top_left, bottom_right, (255, 0, 255), 2)
-            return True
-        else:
-            return False
+            if max_val >= threshold:
+                # if use_gray:
+                # 	src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
+                #
+                # top_left = max_loc
+                # bottom_right = (top_left[0] + w, top_left[1] + h)
+                # cv2.rectangle(src, top_left, bottom_right, (255, 0, 255), 2)
+                return True
+            else:
+                return False
+    except ModuleNotFoundError:
+        pass
 
     # Get interframe difference binarized image
     # フレーム間差分により2値化された画像を取得
