@@ -519,7 +519,7 @@ class StdoutRedirector(object):
         self.text_space.configure(state='normal')
         self.text_space.insert('end', string)
         self.text_space.see('end')
-        self.text_space.update_idletasks()
+        # self.text_space.update_idletasks()
         self.text_space.configure(state='disabled')
 
     def flush(self):

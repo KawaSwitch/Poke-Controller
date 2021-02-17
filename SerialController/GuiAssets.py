@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import datetime
+import os
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 import numpy as np
@@ -58,6 +60,8 @@ class CaptureArea(tk.Canvas):
         self.is_show_var = is_show
         self.lx_init, self.ly_init = 0, 0
         self.rx_init, self.ry_init = 0, 0
+        self.min_x, self.min_y = 0, 0
+        self.max_x, self.max_y = 0, 0
         self.keys = None
         self.ser = ser
         self.lcircle = None
@@ -66,11 +70,15 @@ class CaptureArea(tk.Canvas):
         self.rcircle2 = None
         self.LStick = None
         self.RStick = None
+        self.ss = None
         # self.circle =
 
         self.setFps(fps)
 
         self.bind("<Control-ButtonPress-1>", self.mouseCtrlLeftPress)
+        self.bind("<Control-Shift-ButtonPress-1>", self.StartRangeSS)
+        self.bind("<Control-Shift-Button1-Motion>", self.MotionRangeSS)
+        self.bind("<Control-Shift-ButtonRelease-1>", self.ReleaseRangeSS)
 
         # Set disabled image first
         disabled_img = cv2.imread("../Images/disabled.png", cv2.IMREAD_GRAYSCALE)
@@ -99,6 +107,88 @@ class CaptureArea(tk.Canvas):
             self.unbind("<ButtonPress-3>")
             self.unbind("<Button3-Motion>")
             self.unbind("<ButtonRelease-3>")
+
+    def StartRangeSS(self, event):
+        self.ss = self.camera.image_bgr
+        if self.master.is_use_left_stick_mouse.get():
+            self.unbind("<ButtonPress-1>")
+            self.unbind("<Button1-Motion>")
+            self.unbind("<ButtonRelease-1>")
+        if self.master.is_use_right_stick_mouse.get():
+            self.unbind("<ButtonPress-3>")
+            self.unbind("<Button3-Motion>")
+            self.unbind("<ButtonRelease-3>")
+
+        self.min_x, self.min_y = event.x, event.y
+        self.delete('SelectArea')
+        self.create_rectangle(self.min_x,
+                              self.min_y,
+                              self.min_x + 1,
+                              self.min_y + 1,
+                              outline='red',
+                              tag='SelectArea')
+
+        ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
+        ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
+        print('mouse down: show ({}, {}) / capture ({}, {})'.format(self.min_x, self.min_y,
+                                                                    int(self.min_x * ratio_x),
+                                                                    int(self.min_y * ratio_y)))
+
+        if self.master.is_use_left_stick_mouse.get():
+            self.bind("<ButtonPress-1>", lambda ev: self.mouseLeftPress(ev, self.ser))
+            self.bind("<Button1-Motion>", lambda ev: self.mouseLeftPressing(ev, self.ser))
+            self.bind("<ButtonRelease-1>", lambda ev: self.mouseLeftRelease(self.ser))
+        if self.master.is_use_right_stick_mouse.get():
+            self.bind("<ButtonPress-3>", lambda ev: self.mouseRightPress(ev, self.ser))
+            self.bind("<Button3-Motion>", lambda ev: self.mouseRightPressing(ev, self.ser))
+            self.bind("<ButtonRelease-3>", lambda ev: self.mouseRightRelease(self.ser))
+
+    def MotionRangeSS(self, event):
+        if event.x < 0:
+            self.max_x = 0
+        else:
+            self.max_x = min(self.show_width, event.x)
+        if event.y < 0:
+            self.max_y = 0
+        else:
+            self.max_y = min(self.show_height, event.y)
+        self.coords('SelectArea', self.min_x, self.min_y, self.max_x + 1, self.max_y + 1)
+        self.coords('SelectAreaFilled', self.min_x, self.min_y, self.max_x + 1, self.max_y + 1)
+
+    def ReleaseRangeSS(self, event):
+        # self.max_x, self.max_y = event.x, event.y
+        ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
+        ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
+        filename = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + ".png"
+        save_path = os.path.join("Captures", filename)
+        print('mouse up: show ({}, {}) / capture ({}, {})'.format(self.max_x, self.max_y,
+                                                                  int(self.max_x * ratio_x),
+                                                                  int(self.max_y * ratio_y)))
+        if self.min_x > self.max_x:
+            self.min_x, self.max_x = self.max_x, self.min_x
+        if self.min_y > self.max_y:
+            self.min_y, self.max_y = self.max_y, self.min_y
+
+        image = self.ss[int(self.min_y * ratio_y):int(self.max_y * ratio_y),
+                int(self.min_x * ratio_x):int(self.max_x * ratio_x)]
+        try:
+            cv2.imwrite(save_path, image)
+        except cv2.error:
+            print("Capture Failed")
+            pass
+
+        print('capture succeeded: ' + save_path)
+        t = 0
+        self.after(250, self.delete('SelectArea'))
+
+        if self.master.is_use_left_stick_mouse.get():
+            self.bind("<ButtonPress-1>", lambda ev: self.mouseLeftPress(ev, self.ser))
+            self.bind("<Button1-Motion>", lambda ev: self.mouseLeftPressing(ev, self.ser))
+            self.bind("<ButtonRelease-1>", lambda ev: self.mouseLeftRelease(self.ser))
+        if self.master.is_use_right_stick_mouse.get():
+            self.bind("<ButtonPress-3>", lambda ev: self.mouseRightPress(ev, self.ser))
+            self.bind("<Button3-Motion>", lambda ev: self.mouseRightPressing(ev, self.ser))
+            self.bind("<ButtonRelease-3>", lambda ev: self.mouseRightRelease(self.ser))
 
     def setFps(self, fps):
         # self.next_frames = int(16 * (60 / int(fps)))
