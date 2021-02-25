@@ -9,15 +9,34 @@ from PIL import Image
 
 class Line_Notify:
 
-    def __init__(self, camera=None):
-        token_file = configparser.ConfigParser()
-        token_file.read(os.path.dirname(__file__) + '\\line_token.ini', 'UTF-8')
+    def __init__(self, camera=None, token_name='token'):
+        self.res = None
+        self.token_file = configparser.ConfigParser()
+        self.open_file_with_utf8()
         self.camera = camera
-        self.line_notify_token = token_file['LINE']['token']
+        self.line_notify_token = self.token_file['LINE'][token_name]
         self.headers = {'Authorization': f'Bearer {self.line_notify_token}'}
         self.chk_token = requests.get('https://notify-api.line.me/api/status', headers=self.headers)
+        self.res = self.chk_token
         self.status = self.chk_token.status_code
         self.chk_token_json = self.chk_token.json()
+
+    def open_file_with_utf8(self):
+        """
+        utf-8 のファイルを BOM ありかどうかを自動判定して読み込む
+        """
+        is_with_bom = self.is_utf8_file_with_bom(os.path.dirname(__file__) + '\\line_token.ini')
+
+        encoding = 'utf-8-sig' if is_with_bom else 'utf-8'
+
+        self.token_file.read(os.path.dirname(__file__) + '\\line_token.ini', encoding)
+
+    def is_utf8_file_with_bom(self, filename):
+        """
+        utf-8 ファイルが BOM ありかどうかを判定する
+        """
+        line_first = open(filename, encoding='utf-8').readline()
+        return line_first[0] == '\ufeff'
 
     def __str__(self):
         if self.status == 401:
@@ -32,8 +51,8 @@ class Line_Notify:
         line_notify_api = 'https://notify-api.line.me/api/notify'
         headers = {'Authorization': f'Bearer {self.line_notify_token}'}
         data = {'Message': f'{notification_message}'}
-        res = requests.post(line_notify_api, headers=headers, data=data)
-        if res.status_code == 200:
+        self.res = requests.post(line_notify_api, headers=headers, data=data)
+        if self.res.status_code == 200:
             print("[LINE]テキストを送信しました。")
         else:
             print("[LINE]テキストの送信に失敗しました。")
@@ -59,11 +78,24 @@ class Line_Notify:
         headers = {'Authorization': f'Bearer {self.line_notify_token}'}
         data = {'Message': f'{notification_message}'}
         files = {'imageFile': b_frame}
-        res = requests.post(line_notify_api, headers=headers, params=data, files=files)
-        if res.status_code == 200:
+        self.res = requests.post(line_notify_api, headers=headers, params=data, files=files)
+        if self.res.status_code == 200:
             print("[LINE]テキストと画像を送信しました。")
         else:
             print("[LINE]テキストと画像の送信に失敗しました。")
+
+    def getRateLimit(self):
+        try:
+            print('X-RateLimit-Limit: ' + self.res.headers['X-RateLimit-Limit'])
+            print('X-RateLimit-ImageLimit: ' + self.res.headers['X-RateLimit-ImageLimit'])
+            print('X-RateLimit-Remaining: ' + self.res.headers['X-RateLimit-Remaining'])
+            print('X-RateLimit-ImageRemaining: ' + self.res.headers['X-RateLimit-ImageRemaining'])
+            import datetime
+            dt = datetime.datetime.fromtimestamp(int(self.res.headers['X-RateLimit-Reset']),
+                                                 datetime.timezone(datetime.timedelta(hours=9)))
+            print(dt)
+        except AttributeError:
+            pass
 
 
 if __name__ == "__main__":
@@ -73,3 +105,5 @@ if __name__ == "__main__":
        401  アクセストークンが無効
     '''
     LINE = Line_Notify()
+    print(LINE)
+    LINE.getRateLimit()
