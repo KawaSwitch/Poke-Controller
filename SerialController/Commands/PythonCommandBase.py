@@ -159,8 +159,8 @@ class PythonCommand(CommandBase.Command):
         self.press(Button.HOME, wait=1)
         self.press(Button.HOME, wait=1)
 
-    def LINE_text(self, txt=""):
-        self.Line.send_text(txt)
+    def LINE_text(self, txt="", token='token'):
+        self.Line.send_text(txt, token)
 
 
 TEMPLATE_PATH = "./Template/"
@@ -252,5 +252,5 @@ class ImageProcPythonCommand(PythonCommand):
         mask = cv2.medianBlur(img_th, 3)
         return mask
 
-    def LINE_image(self, txt=""):
-        self.Line.send_text_n_image(txt)
+    def LINE_image(self, txt="", token='token'):
+        self.Line.send_text_n_image(txt, token)

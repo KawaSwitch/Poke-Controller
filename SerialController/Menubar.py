@@ -16,6 +16,7 @@ class PokeController_Menubar(tk.Menu):
         self.camera = self.master.camera
         self.poke_treeview = None
         self.key_config = None
+        self.line = None
 
         tk.Menu.__init__(self, self.root, **kw)
         self.menu = tk.Menu(self, tearoff='false')
@@ -55,8 +56,10 @@ class PokeController_Menubar(tk.Menu):
         self.poke_treeview = None
 
     def LineTokenSetting(self):
-        line = Line_Notify(self.camera)
-        print(line)
+        if self.line is None:
+            self.line = Line_Notify(self.camera)
+        print(self.line)
+        self.line.getRateLimit()
         # LINE.send_text_n_image("CAPTURE")
 
     def OpenKeyConfig(self):

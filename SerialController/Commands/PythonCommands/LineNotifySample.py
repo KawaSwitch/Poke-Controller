@@ -3,15 +3,16 @@
 
 from Commands.Keys import Button
 from Commands.PythonCommandBase import PythonCommand
-from LineNotify import Line_Notify
+from Commands.PythonCommandBase import ImageProcPythonCommand
 
 
-class LineSample(PythonCommand):
+class LineSample(ImageProcPythonCommand):
     NAME = 'LINE通知サンプル'
 
-    def __init__(self):
-        super().__init__()
-        self.Line = Line_Notify(token_name="Another_token")
+    def __init__(self, cam):
+        super().__init__(cam)
 
     def do(self):
-        self.LINE_text("これはLINE通知のサンプルプログラムです")
+        self.LINE_text("これはデフォルトのトークンへの通知")
+        self.LINE_text("これは他のトークンへのテキスト通知", token='token_2')
+        self.LINE_image("これは他のトークンへのテキスト+画像通知", token='token_2')
