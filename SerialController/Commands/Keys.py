@@ -165,6 +165,7 @@ class SendFormat:
         self.L_stick_changed = False
         self.R_stick_changed = False
 
+        # print(str_format)
         return str_format  # the last space is not needed
 
 
@@ -288,7 +289,7 @@ class KeyPress:
             self.out = key
             self.bt = 'Button'
 
-        self.st2 = time.time()
+        self.st2 = time.perf_counter()
         # 次の入力までの待機時間の表示
         try:
             self.continuous_time = self.st2 - self.st0
@@ -302,10 +303,10 @@ class KeyPress:
         self.format.setHat([btn for btn in btns if type(btn) is Hat])
         self.format.setAnyDirection([btn for btn in btns if type(btn) is Direction])
         self.ser.writeRow(self.format.convert2str())
-        self.st = time.time()
+        self.st = time.perf_counter()
 
     def inputEnd(self, btns):
-        self.ed = time.time()
+        self.ed = time.perf_counter()
         if not isinstance(btns, list):
             btns = [btns]
 
@@ -343,7 +344,7 @@ class KeyPress:
                 except:
                     print('duration =', self.out2)
             # 入力後時間計測開始
-            self.st0 = time.time()
+            self.st0 = time.perf_counter()
             # ここまで
         except AttributeError:
             pass

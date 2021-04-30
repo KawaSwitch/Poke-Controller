@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import datetime
 import os
+import time
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 import numpy as np
+import datetime
+from collections import deque
 
 from PIL import Image, ImageTk
 
@@ -14,9 +16,16 @@ from Commands import UnitCommand
 from Commands import StickCommand
 from Commands.Keys import Direction, Stick, Button, Direction, KeyPress
 
+import logging
 from logging import INFO, StreamHandler, getLogger, DEBUG
 from Commands.PythonCommandBase import PythonCommand, StopThread
 
+try:
+    os.makedirs('log')
+except FileExistsError:
+    pass
+
+isTakeLog = False
 logger = getLogger(__name__)
 handler = StreamHandler()
 logging_level = INFO
@@ -24,12 +33,25 @@ handler.setLevel(logging_level)
 logger.setLevel(logging_level)
 logger.addHandler(handler)
 logger.propagate = False
+nowtime = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S')
+if isTakeLog:
+    LS = logging.FileHandler(filename=f"log\\{nowtime}_LStick.log", encoding='utf-8')
+    LS.setLevel(logging.DEBUG)
+    LSTICK_logger = logging.getLogger("L_STICK")
+    LSTICK_logger.setLevel(logging.DEBUG)
+    LSTICK_logger.addHandler(LS)
+
+    RS = logging.FileHandler(filename=f"log\\{nowtime}_RStick.log", encoding='utf-8')
+    RS.setLevel(logging.DEBUG)
+    RSTICK_logger = logging.getLogger("R_STICK")
+    RSTICK_logger.setLevel(logging.DEBUG)
+    RSTICK_logger.addHandler(RS)
 
 
 # press button at duration times(s)
 
 class MouseStick(PythonCommand):
-    NAME = 'スティック1'
+    NAME = 'MOUSEスティック'
 
     def __init__(self):
         super().__init__()
@@ -70,7 +92,13 @@ class CaptureArea(tk.Canvas):
         self.rcircle2 = None
         self.LStick = None
         self.RStick = None
+        self.calc_time = None
         self.ss = None
+        self.dq = None
+        self._langle = None
+        self._lmag = None
+        self._rangle = None
+        self._rmag = None
         # self.circle =
 
         self.setFps(fps)
@@ -208,6 +236,10 @@ class CaptureArea(tk.Canvas):
         print('mouse down: show ({}, {}) / capture ({}, {})'.format(x, y, int(x * ratio_x), int(y * ratio_y)))
 
     def mouseLeftPress(self, event, ser):
+        if self.master.is_use_right_stick_mouse.get():
+            self.unbind("<ButtonPress-3>")
+            self.unbind("<Button3-Motion>")
+            self.unbind("<ButtonRelease-3>")
         self.config(cursor='dot')
         self.lx_init, self.ly_init = event.x, event.y
         self.lcircle = self.create_oval(self.lx_init - self.radius, self.ly_init - self.radius,
@@ -218,12 +250,39 @@ class CaptureArea(tk.Canvas):
                                          fill="cyan", tag="lcircle2")
         self.LStick = StickCommand.StickLeft()
         self.LStick.start(ser)
+        if self.dq is None:
+            self.dq = deque()
+        else:
+            self.dq.clear()
+
+        if self.calc_time is None:
+            self.calc_time = time.perf_counter()
+        else:
+            # LSTICK_logger.debug(f"{0},{0},{time.perf_counter() - self.calc_time}")
+            self.dq.append([0, 0, time.perf_counter() - self.calc_time])
+        self._langle = None
+        self._lmag = None
 
     def mouseLeftPressing(self, event, ser, angle=0):
+        # _time = self.calc_time
         langle = np.rad2deg(np.arctan2(self.ly_init - event.y, event.x - self.lx_init))
         mag = np.sqrt((self.ly_init - event.y) ** 2 + (event.x - self.lx_init) ** 2) / self.radius
-        logger.debug(self.lx_init - event.x, self.ly_init - event.y, angle)
-        self.LStick.LStick(langle, r=mag)
+        if mag <= 0:
+            mag = 0
+        elif mag >= 1:
+            mag = 1
+        if (self._langle and self._lmag) is not None:
+            _time = time.perf_counter()
+            if _time - self.calc_time > 0.05:
+                # thread_1 = threading.Thread(target=self.LStick.LStick,
+                #                             args=(langle,),
+                #                             kwargs={'r': mag, 'duration': _time - self.calc_time})
+                # thread_1.start()
+                self.LStick.LStick(langle, r=mag)
+                self.dq.append([langle,
+                                mag,
+                                _time - self.calc_time])
+                self.calc_time = _time
         if mag >= 1:
             center_x = (self.radius + self.radius // 11) * np.cos(np.deg2rad(langle))
             center_y = (self.radius + self.radius // 11) * np.sin(np.deg2rad(langle))
@@ -238,15 +297,31 @@ class CaptureArea(tk.Canvas):
             circ_y_2 = event.y + self.radius // 10
 
         self.coords('lcircle2', circ_x_1, circ_y_1, circ_x_2, circ_y_2, )
+        self._langle = langle
+        self._lmag = mag
 
     def mouseLeftRelease(self, ser):
         self.config(cursor='tcross')
         self.LStick.end(ser)
         self.delete("lcircle")
         self.delete("lcircle2")
-        self.event_generate('<Motion>', warp=True, x=self.lx_init, y=self.ly_init)
+        if self.master.is_use_right_stick_mouse.get():
+            self.bind("<ButtonPress-3>", lambda ev: self.mouseRightPress(ev, self.ser))
+            self.bind("<Button3-Motion>", lambda ev: self.mouseRightPressing(ev, self.ser))
+            self.bind("<ButtonRelease-3>", lambda ev: self.mouseRightRelease(self.ser))
+        # self.event_generate('<Motion>', warp=True, x=self.lx_init, y=self.ly_init)
+        self.dq.append([self._langle,
+                        self._lmag,
+                        time.perf_counter() - self.calc_time])
+        if isTakeLog:
+            for _ in self.dq:
+                LSTICK_logger.debug(",".join(list(map(str, _))))
 
     def mouseRightPress(self, event, ser):
+        if self.master.is_use_left_stick_mouse.get():
+            self.unbind("<ButtonPress-1>")
+            self.unbind("<Button1-Motion>")
+            self.unbind("<ButtonRelease-1>")
         self.config(cursor='dot')
         self.rx_init, self.ry_init = event.x, event.y
         self.rcircle = self.create_oval(self.rx_init - self.radius, self.ry_init - self.radius,
@@ -258,12 +333,36 @@ class CaptureArea(tk.Canvas):
 
         self.RStick = StickCommand.StickRight()
         self.RStick.start(ser)
+        if self.dq is None:
+            self.dq = deque()
+        else:
+            self.dq.clear()
+
+        if self.calc_time is None:
+            self.calc_time = time.perf_counter()
+        else:
+            # LSTICK_logger.debug(f"{0},{0},{time.perf_counter() - self.calc_time}")
+            self.dq.append([0, 0, time.perf_counter() - self.calc_time])
+        self._rangle = None
+        self._rmag = None
 
     def mouseRightPressing(self, event, ser, angle=0):
         rangle = np.rad2deg(np.arctan2(self.ry_init - event.y, event.x - self.rx_init))
         mag = np.sqrt((self.ry_init - event.y) ** 2 + (event.x - self.rx_init) ** 2) / self.radius
-        logger.debug(self.rx_init - event.x, self.ry_init - event.y, angle)
-        self.RStick.RStick(rangle, r=mag)
+        if mag <= 0:
+            mag = 0
+        elif mag >= 1:
+            mag = 1
+        if (self._langle and self._lmag) is not None:
+            _time = time.perf_counter()
+            if _time - self.calc_time > 0.05:
+                # thread_1 = threading.Thread(target=self.RStick.RStick,
+                #                             args=(rangle,),
+                #                             kwargs={'r': mag, 'duration': _time - self.calc_time})
+                # thread_1.start()
+                self.RStick.RStick(rangle, r=mag)
+                self.dq.append([rangle, mag, _time - self.calc_time])
+                self.calc_time = _time
         if mag >= 1:
             center_x = (self.radius + self.radius // 11) * np.cos(np.deg2rad(rangle))
             center_y = (self.radius + self.radius // 11) * np.sin(np.deg2rad(rangle))
@@ -278,13 +377,25 @@ class CaptureArea(tk.Canvas):
             circ_y_2 = event.y + self.radius // 10
 
         self.coords('rcircle2', circ_x_1, circ_y_1, circ_x_2, circ_y_2, )
+        self._rangle = rangle
+        self._rmag = mag
 
     def mouseRightRelease(self, ser):
         self.config(cursor='tcross')
         self.RStick.end(ser)
         self.delete("rcircle")
         self.delete("rcircle2")
-        self.event_generate('<Motion>', warp=True, x=self.rx_init, y=self.ry_init)
+        if self.master.is_use_left_stick_mouse.get():
+            self.bind("<ButtonPress-1>", lambda ev: self.mouseLeftPress(ev, self.ser))
+            self.bind("<Button1-Motion>", lambda ev: self.mouseLeftPressing(ev, self.ser))
+            self.bind("<ButtonRelease-1>", lambda ev: self.mouseLeftRelease(self.ser))
+        # self.event_generate('<Motion>', warp=True, x=self.rx_init, y=self.ry_init)
+        self.dq.append([self._rangle,
+                        self._rmag,
+                        time.perf_counter() - self.calc_time])
+        if isTakeLog:
+            for _ in self.dq:
+                RSTICK_logger.debug(",".join(list(map(str, _))))
 
     def startCapture(self):
         self.capture()
