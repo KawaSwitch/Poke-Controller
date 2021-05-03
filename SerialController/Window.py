@@ -91,7 +91,7 @@ class PokeControllerApp:
         self.show_size_label.grid(column='3', padx='5', row='0', sticky='ew')
         self.show_size_cb = ttk.Combobox(self.camera_f2)
         self.show_size = tk.StringVar()
-        self.show_size_cb.config(textvariable=self.show_size, state='readonly', values='640x360 1280x720')
+        self.show_size_cb.config(textvariable=self.show_size, state='readonly', values='640x360 1280x720 1920x1080')
         self.show_size_cb.grid(column='4', padx='10', row='0', sticky='ew')
         self.show_size_cb.bind('<<ComboboxSelected>>', self.applyWindowSize, add='')
         self.camera_f2.grid(column='0', columnspan='7', row='3', sticky='nsew')

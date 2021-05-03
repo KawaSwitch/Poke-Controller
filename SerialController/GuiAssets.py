@@ -187,8 +187,6 @@ class CaptureArea(tk.Canvas):
         # self.max_x, self.max_y = event.x, event.y
         ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
         ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
-        filename = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + ".png"
-        save_path = os.path.join("Captures", filename)
         print('mouse up: show ({}, {}) / capture ({}, {})'.format(self.max_x, self.max_y,
                                                                   int(self.max_x * ratio_x),
                                                                   int(self.max_y * ratio_y)))
@@ -197,15 +195,11 @@ class CaptureArea(tk.Canvas):
         if self.min_y > self.max_y:
             self.min_y, self.max_y = self.max_y, self.min_y
 
-        image = self.ss[int(self.min_y * ratio_y):int(self.max_y * ratio_y),
-                int(self.min_x * ratio_x):int(self.max_x * ratio_x)]
-        try:
-            cv2.imwrite(save_path, image)
-        except cv2.error:
-            print("Capture Failed")
-            pass
+        self.camera.saveCapture(crop=1,
+                                crop_ax=[
+                                    int(self.min_x * ratio_x), int(self.min_y * ratio_x),
+                                    int(self.max_x * ratio_x), int(self.max_y * ratio_x)])
 
-        print('capture succeeded: ' + save_path)
         t = 0
         self.after(250, self.delete('SelectArea'))
 
