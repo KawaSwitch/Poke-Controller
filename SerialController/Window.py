@@ -414,7 +414,11 @@ class PokeControllerApp:
         # pythonコマンドは画像認識を使うかどうかで分岐している
         cmd_class = self.py_classes[self.py_cb.current()]
         if issubclass(cmd_class, PythonCommandBase.ImageProcPythonCommand):
-            self.py_cur_command = cmd_class(self.camera)
+            try:  # 画像認識の際に認識位置を表示する引数追加。互換性のため従来のはexceptに。
+                self.py_cur_command = cmd_class(self.camera, self.preview)
+            except TypeError:
+                self.py_cur_command = cmd_class(self.camera)
+
         else:
             self.py_cur_command = cmd_class()
 
