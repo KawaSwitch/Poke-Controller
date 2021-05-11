@@ -18,6 +18,6 @@ class ImageRecRect(ImageProcPythonCommand):
                                             show_position=True,  # このオプションをFalseにすると枠が非表示になります
                                             show_only_true_rect=True,  # このオプションをFalseにすると、
                                             # 認識できなかった場合に最も近い部分に赤枠を表示します
-                                            ms=1000  # 枠の表示時間(ミリ秒)  デフォルトは2500msです
+                                            ms=1000  # 枠の表示時間(ミリ秒)  デフォルトは2000msです
                                             )
             # self.wait(1)
