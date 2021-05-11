@@ -253,7 +253,6 @@ class PokeControllerApp:
         self.ser = Sender.Sender(self.is_show_serial)
         self.activateSerial()
         self.activateKeyboard()
-        self.loadCommands()
         self.preview = CaptureArea(self.camera,
                                    self.fps.get(),
                                    self.is_show_realtime,
@@ -263,6 +262,7 @@ class PokeControllerApp:
                                    )
         self.preview.config(cursor='crosshair')
         self.preview.grid(column='0', columnspan='7', row='2', padx='5', pady='5', sticky=tk.NSEW)
+        self.loadCommands()
 
         # Main widget
         self.mainwindow = self.frame_1
@@ -418,6 +418,9 @@ class PokeControllerApp:
                 self.py_cur_command = cmd_class(self.camera, self.preview)
             except TypeError:
                 self.py_cur_command = cmd_class(self.camera)
+            except:
+                self.py_cur_command = cmd_class(self.camera)
+
 
         else:
             self.py_cur_command = cmd_class()

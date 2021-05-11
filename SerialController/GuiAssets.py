@@ -419,16 +419,19 @@ class CaptureArea(tk.Canvas):
     def saveCapture(self):
         self.camera.saveCapture()
 
-    def ImgRect(self, x1, y1, x2, y2, outline, tag):
+    def ImgRect(self, x1, y1, x2, y2, outline, tag, ms):
 
         ratio_x = float(self.show_size[0] / self.camera.capture_size[0])
         ratio_y = float(self.show_size[1] / self.camera.capture_size[1])
+        self.create_rectangle((x1 - 1.0) * ratio_x, (y1 - 1.0) * ratio_y, (x2 + 1.0) * ratio_x, (y2 + 1.0) * ratio_y,
+                              width=4.5,
+                              outline="white", tag=tag)
         self.create_rectangle(x1 * ratio_x, y1 * ratio_y, x2 * ratio_x, y2 * ratio_y, width=2.5,
                               outline=outline, tag=tag)
-        self.after(2500, self.deleteImageRect)
+        self.after(ms, self.deleteImageRect, tag)
 
-    def deleteImageRect(self):
-        self.delete("ImageRecRect")
+    def deleteImageRect(self, tag):
+        self.delete(tag)
 
 
 # GUI of switch controller simulator

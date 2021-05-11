@@ -5,6 +5,8 @@ import cv2
 import threading
 from abc import abstractclassmethod
 from time import sleep
+import random
+import time
 
 from LineNotify import Line_Notify
 from . import CommandBase
@@ -182,7 +184,8 @@ class ImageProcPythonCommand(PythonCommand):
     # It's recommended that you use gray_scale option unless the template color wouldn't be cared for performace
     # 現在のスクリーンショットと指定した画像のテンプレートマッチングを行います
     # 色の違いを考慮しないのであればパフォーマンスの点からuse_grayをTrueにしてグレースケール画像を使うことを推奨します
-    def isContainTemplate(self, template_path, threshold=0.7, use_gray=True, show_value=False, show_position=True):
+    def isContainTemplate(self, template_path, threshold=0.7, use_gray=True,
+                          show_value=False, show_position=True, show_only_true_rect=True, ms=2000):
         src = self.camera.readFrame()
         src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
 
@@ -198,25 +201,29 @@ class ImageProcPythonCommand(PythonCommand):
 
         top_left = max_loc
         bottom_right = (top_left[0] + w + 1, top_left[1] + h + 1)
+        tag = str(time.perf_counter()) + str(random.random())
         if max_val >= threshold:
             if self.gui is not None and show_position:
                 # self.gui.delete("ImageRecRect")
                 self.gui.ImgRect(*top_left,
                                  *bottom_right,
                                  outline='blue',
-                                 tag="ImageRecRect")
+                                 tag=tag,
+                                 ms=ms)
             return True
         else:
-            if self.gui is not None and show_position:
+            if self.gui is not None and show_position and not show_only_true_rect:
                 # self.gui.delete("ImageRecRect")
                 self.gui.ImgRect(*top_left,
                                  *bottom_right,
-                                 outline='blue',
-                                 tag="ImageRecRect")
+                                 outline='red',
+                                 tag=tag,
+                                 ms=ms)
             return False
 
     try:
-        def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True, show_value=False):
+        def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True,
+                                 show_value=False, not_show_false=True):
             src = self.camera.readFrame()
             src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
 
