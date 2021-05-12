@@ -28,7 +28,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "1.0-beta3 (v2.7.0 Modified)"
+VERSION = "1.0-beta3 (v2.8.1 Modified)"
 
 
 class PokeControllerApp:
