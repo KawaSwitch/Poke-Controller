@@ -104,7 +104,11 @@ class Line_Notify:
                 dt = datetime.datetime.fromtimestamp(int(self.res[i].headers['X-RateLimit-Reset']),
                                                      datetime.timezone(datetime.timedelta(hours=9)))
                 print('Reset time:', dt, '\n')
-        except AttributeError or KeyError:
+        except AttributeError as e:
+            # self._logger.error(e)
+            pass
+        except KeyError  as e:
+            # self._logger.error(e)
             pass
 
 
