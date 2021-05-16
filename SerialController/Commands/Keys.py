@@ -5,6 +5,8 @@ import math
 import time
 from collections import OrderedDict
 from enum import Enum, IntEnum, IntFlag, auto
+import queue
+from logging import getLogger, DEBUG, NullHandler
 
 
 class Button(IntFlag):
@@ -22,6 +24,7 @@ class Button(IntFlag):
     RCLICK = auto()
     HOME = auto()
     CAPTURE = auto()
+    print(locals())
 
 
 class Hat(IntEnum):
@@ -61,6 +64,12 @@ max = 255
 # serial format
 class SendFormat:
     def __init__(self):
+
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
         # This format structure needs to be the same as the one written in Joystick.c
         self.format = OrderedDict([
             ('btn', 0),  # send bit array for buttons
@@ -156,11 +165,12 @@ class SendFormat:
         if self.R_stick_changed:
             send_btn |= 0x1
             str_R = format(self.format['rx'], 'x') + space + format(self.format['ry'], 'x')
-
-        str_format = format(send_btn, 'x') + \
+        # format(send_btn, 'x') + \
+        # print(hex(send_btn))
+        str_format = format(send_btn, '#06x') + \
                      (space + str(int(self.format['hat']))) + \
-                     (space + str_L if self.L_stick_changed else '') + \
-                     (space + str_R if self.R_stick_changed else '')
+                     (space + str_L if self.L_stick_changed else ' 80 80') + \
+                     (space + str_R if self.R_stick_changed else ' 80 80')
 
         self.L_stick_changed = False
         self.R_stick_changed = False
@@ -172,6 +182,12 @@ class SendFormat:
 # This class handle L stick and R stick at any angles
 class Direction:
     def __init__(self, stick, angle, magnification=1.0, isDegree=True, showName=None):
+
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
         self.stick = stick
         self.angle_for_show = angle
         self.showName = showName
@@ -204,7 +220,7 @@ class Direction:
             return "<{}, {}[deg]>".format(self.stick, self.angle_for_show)
 
     def __eq__(self, other):
-        if (not type(other) is Direction):
+        if not type(other) is Direction:
             return False
 
         if self.stick == other.stick and self.angle_for_show == other.angle_for_show:
@@ -260,55 +276,56 @@ Direction.R_UP_LEFT = Direction(Stick.RIGHT, 135, showName='UP_LEFT')
 # handles serial input to Joystick.c
 class KeyPress:
     def __init__(self, ser):
+
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
+        self.q = queue.Queue()
         self.ser = ser
         self.format = SendFormat()
         self.holdButton = []
         self.btn_name2 = ['LEFT', 'RIGHT', 'UP', 'DOWN', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT']
 
+        self.pushing_to_show = None
+        self.pushing = None
+        self.pushing2 = None
+        self._pushing = None
+        self._chk_neutral = None
+        self.NEUTRAL = dict(self.format.format)
+
+        self.input_time_0 = time.perf_counter()
+        self.input_time_1 = time.perf_counter()
+        self.inputEnd_time_0 = time.perf_counter()
+        self.was_neutral = True
+
     def input(self, btns, ifPrint=True):
+        self._pushing = dict(self.format.format)
         if not isinstance(btns, list):
             btns = [btns]
 
         for btn in self.holdButton:
             if not btn in btns:
                 btns.append(btn)
-        # print to log-------------------------------------
-        # 入力したボタンの抽出
-        key = str(btns[0])
-        key = key.replace('Button.', '')
-        key = key.replace('<Stick.LEFT, ', '')
-        key = key.replace('>', '')
-        # print(key)
-        # ボタンのリストからButtonかDirectionか判定
-        for s in self.btn_name2:
-            if s in key:
-                self.out = s
-                self.bt = 'Direction'
-                break
-        else:
-            self.out = key
-            self.bt = 'Button'
 
-        self.st2 = time.perf_counter()
-        # 次の入力までの待機時間の表示
-        try:
-            self.continuous_time = self.st2 - self.st0
-        # self.st3 ='{:.3f}'.format(self.st2 - self.st0)
-        # print('self.wait({})'.format(self.st3))
-        except:
-            self.continuous_time = 9999.9
-
-        # ここまで-----------------------------------------
         self.format.setButton([btn for btn in btns if type(btn) is Button])
         self.format.setHat([btn for btn in btns if type(btn) is Hat])
         self.format.setAnyDirection([btn for btn in btns if type(btn) is Direction])
-        self.ser.writeRow(self.format.convert2str())
-        self.st = time.perf_counter()
 
-    def inputEnd(self, btns):
+        self.ser.writeRow(self.format.convert2str())
+        self.input_time_0 = time.perf_counter()
+
+        # self._logger.debug(f": {list(map(str,self.format.format.values()))}")
+
+    def inputEnd(self, btns, ifPrint=True):
+        # self._logger.debug(f"input end: {btns}")
+        self.pushing2 = dict(self.format.format)
+
         self.ed = time.perf_counter()
         if not isinstance(btns, list):
             btns = [btns]
+        # self._logger.debug(btns)
 
         # get tilting direction from angles
         tilts = []
@@ -316,39 +333,11 @@ class KeyPress:
             tiltings = dir.getTilting()
             for tilting in tiltings:
                 tilts.append(tilting)
+        # self._logger.debug(tilts)
 
         self.format.unsetButton([btn for btn in btns if type(btn) is Button])
         self.format.unsetHat()
         self.format.unsetDirection(tilts)
-
-        try:
-            # ここから
-            if self.continuous_time == 9999.9:
-                self.continuous_time = 1.0
-            if self.continuous_time < 0.025:
-                pass
-            else:
-                # 0.15秒未満の入力は0.05に変換
-                if (self.ed - self.st) < 0.15:
-                    self.out3 = 0.05
-                    self.out2 = '{:.2f}'.format(self.out3)
-                else:
-                    self.out3 = self.ed - self.st
-                    self.out2 = '{:.3f}'.format(self.out3)
-                # コマンドに変換
-                try:
-                    if '0.00' not in self.out2:
-                        print('self.press({}.{},duration={})'.format(self.bt, self.out, self.out2))
-                    elif self.out3 == 0.05:
-                        print('self.press({}.{},duration={},wait={})'.format(self.bt, self.out, self.out2, '0.04'))
-                except:
-                    print('duration =', self.out2)
-            # 入力後時間計測開始
-            self.st0 = time.perf_counter()
-            # ここまで
-        except AttributeError:
-            pass
-
         self.ser.writeRow(self.format.convert2str())
 
     def hold(self, btns):
@@ -358,10 +347,10 @@ class KeyPress:
         for btn in btns:
             if btn in self.holdButton:
                 print('Warning: ' + btn.name + ' is already in holding state')
+                self._logger.warning(f"Warning: {btn.name} is already in holding state")
                 return
 
             self.holdButton.append(btn)
-
         self.input(btns)
 
     def holdEnd(self, btns):

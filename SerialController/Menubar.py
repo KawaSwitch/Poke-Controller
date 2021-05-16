@@ -4,10 +4,16 @@ import tkinter as tk
 from KeyConfig import PokeKeycon
 from LineNotify import Line_Notify
 from get_pokestatistics import GetFromHomeGUI
+from logging import getLogger, DEBUG, NullHandler
 
 
 class PokeController_Menubar(tk.Menu):
     def __init__(self, master, **kw):
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
         self.master = master
         self.root = self.master.root
         self.ser = self.master.ser
@@ -35,6 +41,7 @@ class PokeController_Menubar(tk.Menu):
     # TODO: setup command_id_arg 'false' for menuitem.
 
     def AssignMenuCommand(self):
+        self._logger.debug("Assigning menu command")
         self.menu_command.add('command', command=self.LineTokenSetting, label='LINE Token Check')
         # TODO: setup command_id_arg 'false' for menuitem.
         self.menu_command.add('command', command=self.OpenPokeHomeCoop, label='Pokemon Home 連携')
@@ -43,6 +50,7 @@ class PokeController_Menubar(tk.Menu):
     # TODO: setup command_id_arg 'false' for menuitem.
 
     def OpenPokeHomeCoop(self):
+        self._logger.debug("Open Pokemon home cooperate window")
         if self.poke_treeview is not None:
             self.poke_treeview.focus_force()
             return
@@ -52,10 +60,12 @@ class PokeController_Menubar(tk.Menu):
         self.poke_treeview = window2
 
     def closingGetFromHome(self):
+        self._logger.debug("Close Pokemon home cooperate window")
         self.poke_treeview.destroy()
         self.poke_treeview = None
 
     def LineTokenSetting(self):
+        self._logger.debug("Show line API")
         if self.line is None:
             self.line = Line_Notify(self.camera)
         print(self.line)
@@ -63,6 +73,7 @@ class PokeController_Menubar(tk.Menu):
         # LINE.send_text_n_image("CAPTURE")
 
     def OpenKeyConfig(self):
+        self._logger.debug("Open KeyConfig window")
         if self.key_config is not None:
             self.key_config.focus_force()
             return
@@ -72,10 +83,12 @@ class PokeController_Menubar(tk.Menu):
         self.key_config = kc_window
 
     def closingKeyConfig(self):
+        self._logger.debug("Close KeyConfig window")
         self.key_config.destroy()
         self.key_config = None
 
     def exit(self):
+        self._logger.debug("Close Menubar")
         if self.ser.isOpened():
             self.ser.closeSerial()
             print("serial disconnected")

@@ -2,6 +2,7 @@ import cv2
 import os
 import sys
 import tkinter.ttk as ttk
+from logging import getLogger, DEBUG, NullHandler
 
 from pygubu.widgets.scrollbarhelper import ScrollbarHelper
 
@@ -10,29 +11,26 @@ import Utility as util
 from Camera import Camera
 from CommandLoader import CommandLoader
 from Commands import McuCommandBase, PythonCommandBase, Sender
+import PokeConLogger
 from Commands.Keys import KeyPress
 from GuiAssets import CaptureArea, ControllerGUI
 from Keyboard import SwitchKeyboardController
 from Menubar import PokeController_Menubar
 
-# ログ用おまじない
-# from logging import getLogger, StreamHandler, DEBUG
-# logger = getLogger(__name__)
-# handler = StreamHandler()
-# handler.setLevel(DEBUG)
-# logger.setLevel(DEBUG)
-# logger.addHandler(handler)
-# logger.propagate = False
-
-
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "1.0-beta3 (v2.7.0 Modified)"
+VERSION = "v3.0.0 Modified"  # based on 1.0-beta3
 
 
 class PokeControllerApp:
     def __init__(self, master=None):
+
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
         self.root = master
         self.root.title(NAME + ' ' + VERSION)
         # self.root.resizable(0, 0)
@@ -241,7 +239,8 @@ class PokeControllerApp:
                 self.camera_entry.config(state='disable')
             except:
                 # Locate an entry instead whenever dll is not imported successfully
-                self.camera_name_fromDLL.set("nt environment but some error occurred while showing Camera name")
+                self.camera_name_fromDLL.set("An error occurred while displaying the camera names in NT environment.")
+                self._logger.warning("An error occurred while displaying the camera names in NT environment.")
                 self.Camera_Name.config(state='disable')
         else:
             self.camera_name_fromDLL.set("Not nt environment so that cannot show Camera name.")
@@ -253,7 +252,6 @@ class PokeControllerApp:
         self.ser = Sender.Sender(self.is_show_serial)
         self.activateSerial()
         self.activateKeyboard()
-        self.loadCommands()
         self.preview = CaptureArea(self.camera,
                                    self.fps.get(),
                                    self.is_show_realtime,
@@ -263,6 +261,7 @@ class PokeControllerApp:
                                    )
         self.preview.config(cursor='crosshair')
         self.preview.grid(column='0', columnspan='7', row='2', padx='5', pady='5', sticky=tk.NSEW)
+        self.loadCommands()
 
         # Main widget
         self.mainwindow = self.frame_1
@@ -293,13 +292,16 @@ class PokeControllerApp:
 
         self.camera_dic[str(max(list(self.camera_dic.keys())) + 1)] = 'Disable'
         self.Camera_Name['values'] = [device for device in self.camera_dic.values()]
+        self._logger.debug(f"Camera list: {[device for device in self.camera_dic.values()]}")
         dev_num = len(self.camera_dic)
 
         if self.camera_id.get() > dev_num - 1:
             print('Inappropriate camera ID! -> set to 0')
+            self._logger.debug('Inappropriate camera ID! -> set to 0')
             self.camera_id.set(0)
             if dev_num == 0:
                 print('No camera devices can be found.')
+                self._logger.debug('No camera devices can be found.')
         #
         self.camera_entry.bind('<KeyRelease>', self.assignCamera)
         self.Camera_Name.current(self.camera_id.get())
@@ -332,6 +334,7 @@ class PokeControllerApp:
         else:
             if self.ser.openSerial(self.com_port.get()):
                 print('COM Port ' + str(self.com_port.get()) + ' connected successfully')
+                self._logger.debug('COM Port ' + str(self.com_port.get()) + ' connected successfully')
                 self.keyPress = KeyPress(self.ser)
 
     def activateKeyboard(self):
@@ -414,7 +417,14 @@ class PokeControllerApp:
         # pythonコマンドは画像認識を使うかどうかで分岐している
         cmd_class = self.py_classes[self.py_cb.current()]
         if issubclass(cmd_class, PythonCommandBase.ImageProcPythonCommand):
-            self.py_cur_command = cmd_class(self.camera)
+            try:  # 画像認識の際に認識位置を表示する引数追加。互換性のため従来のはexceptに。
+                self.py_cur_command = cmd_class(self.camera, self.preview)
+            except TypeError:
+                self.py_cur_command = cmd_class(self.camera)
+            except:
+                self.py_cur_command = cmd_class(self.camera)
+
+
         else:
             self.py_cur_command = cmd_class()
 
@@ -439,15 +449,18 @@ class PokeControllerApp:
             self.py_cb.set(oldval_py)
         self.assignCommand()
         print('Finished reloading command modules.')
+        self._logger.info("Reloaded commands.")
 
     def startPlay(self):
         if self.cur_command is None:
             print('No commands have been assigned yet.')
+            self._logger.info('No commands have been assigned yet.')
 
         # set and init selected command
         self.assignCommand()
 
         print(self.startButton["text"] + ' ' + self.cur_command.NAME)
+        self._logger.info(self.startButton["text"] + ' ' + self.cur_command.NAME)
         self.cur_command.start(self.ser, self.stopPlayPost)
 
         self.startButton["text"] = "Stop"
@@ -456,6 +469,7 @@ class PokeControllerApp:
 
     def stopPlay(self):
         print(self.startButton["text"] + ' ' + self.cur_command.NAME)
+        self._logger.info(self.startButton["text"] + ' ' + self.cur_command.NAME)
         self.startButton["state"] = "disabled"
         self.cur_command.end(self.ser)
 
@@ -466,12 +480,14 @@ class PokeControllerApp:
         self.reloadCommandButton["state"] = "normal"
 
     def run(self):
+        self._logger.debug("Start Poke-Controller")
         self.mainwindow.mainloop()
 
     def exit(self):
         if self.ser.isOpened():
             self.ser.closeSerial()
             print("Serial disconnected")
+            # self._logger.info("Serial disconnected")
 
         # stop listening to keyboard events
         if not self.keyboard is None:
@@ -528,6 +544,9 @@ class StdoutRedirector(object):
 
 if __name__ == '__main__':
     import tkinter as tk
+
+    logger = PokeConLogger.root_logger()
+    # logger.info('The root logger is created.')
 
     root = tk.Tk()
     app = PokeControllerApp(root)

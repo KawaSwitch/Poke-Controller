@@ -5,6 +5,9 @@ import cv2
 import threading
 from abc import abstractclassmethod
 from time import sleep
+import random
+import time
+from logging import getLogger, DEBUG, NullHandler
 
 from LineNotify import Line_Notify
 from . import CommandBase
@@ -26,6 +29,11 @@ class PythonCommand(CommandBase.Command):
         self.postProcess = None
         self.Line = Line_Notify()
 
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
     @abstractclassmethod
     def do(self):
         pass
@@ -40,10 +48,12 @@ class PythonCommand(CommandBase.Command):
                 self.finish()
         except StopThread:
             print('-- finished successfully. --')
+            self._logger.info("Command finished successfully")
         except:
             if self.keys is None:
                 self.keys = KeyPress(ser)
             print('interrupt')
+            self._logger.warning('Command stopped unexpectedly')
             import traceback
             traceback.print_exc()
             self.keys.end()
@@ -63,6 +73,7 @@ class PythonCommand(CommandBase.Command):
         if self.checkIfAlive():  # try if we can stop now
             self.alive = False
             print('-- sent a stop request. --')
+            self._logger.info("Sending stop request")
 
     # NOTE: Use this function if you want to get out from a command loop by yourself
     def finish(self):
@@ -109,6 +120,7 @@ class PythonCommand(CommandBase.Command):
                 self.postProcess = None
 
             # raise exception for exit working thread
+            self._logger.info('Exit from command successfully')
             raise StopThread('exit successfully')
         else:
             return True
@@ -118,6 +130,7 @@ class PythonCommand(CommandBase.Command):
     def timeLeap(self, is_go_back=True):
         self.press(Button.HOME, wait=1)
         self.press(Direction.DOWN)
+        self.press(Direction.RIGHT)
         self.press(Direction.RIGHT)
         self.press(Direction.RIGHT)
         self.press(Direction.RIGHT)
@@ -167,10 +180,18 @@ TEMPLATE_PATH = "./Template/"
 
 
 class ImageProcPythonCommand(PythonCommand):
-    def __init__(self, cam):
+    def __init__(self, cam, gui=None):
         super(ImageProcPythonCommand, self).__init__()
+
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
+
         self.camera = cam
         self.Line = Line_Notify(self.camera)
+
+        self.gui = gui
 
         self.gsrc = cv2.cuda_GpuMat()
         self.gtmpl = cv2.cuda_GpuMat()
@@ -180,7 +201,8 @@ class ImageProcPythonCommand(PythonCommand):
     # It's recommended that you use gray_scale option unless the template color wouldn't be cared for performace
     # 現在のスクリーンショットと指定した画像のテンプレートマッチングを行います
     # 色の違いを考慮しないのであればパフォーマンスの点からuse_grayをTrueにしてグレースケール画像を使うことを推奨します
-    def isContainTemplate(self, template_path, threshold=0.7, use_gray=True, show_value=False):
+    def isContainTemplate(self, template_path, threshold=0.7, use_gray=True,
+                          show_value=False, show_position=True, show_only_true_rect=True, ms=2000):
         src = self.camera.readFrame()
         src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
 
@@ -194,19 +216,31 @@ class ImageProcPythonCommand(PythonCommand):
         if show_value:
             print(template_path + ' ZNCC value: ' + str(max_val))
 
+        top_left = max_loc
+        bottom_right = (top_left[0] + w + 1, top_left[1] + h + 1)
+        tag = str(time.perf_counter()) + str(random.random())
         if max_val >= threshold:
-            # if use_gray:
-            # 	src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
-            #
-            # top_left = max_loc
-            # bottom_right = (top_left[0] + w, top_left[1] + h)
-            # cv2.rectangle(src, top_left, bottom_right, (255, 0, 255), 2)
+            if self.gui is not None and show_position:
+                # self.gui.delete("ImageRecRect")
+                self.gui.ImgRect(*top_left,
+                                 *bottom_right,
+                                 outline='blue',
+                                 tag=tag,
+                                 ms=ms)
             return True
         else:
+            if self.gui is not None and show_position and not show_only_true_rect:
+                # self.gui.delete("ImageRecRect")
+                self.gui.ImgRect(*top_left,
+                                 *bottom_right,
+                                 outline='red',
+                                 tag=tag,
+                                 ms=ms)
             return False
 
     try:
-        def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True, show_value=False):
+        def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True,
+                                 show_value=False, not_show_false=True):
             src = self.camera.readFrame()
             src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
 
@@ -226,7 +260,7 @@ class ImageProcPythonCommand(PythonCommand):
 
             if max_val >= threshold:
                 # if use_gray:
-                # 	src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
+                #     src = cv2.cvtColor(src, cv2.COLOR_GRAY2BGR)
                 #
                 # top_left = max_loc
                 # bottom_right = (top_left[0] + w, top_left[1] + h)

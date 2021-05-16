@@ -3,6 +3,12 @@ import inspect
 import os
 from glob import glob
 from os.path import join, relpath
+from logging import getLogger, DEBUG, NullHandler
+
+logger = getLogger(__name__)
+logger.addHandler(NullHandler())
+logger.setLevel(DEBUG)
+logger.propagate = True
 
 
 def ospath(path):
@@ -35,6 +41,7 @@ def getModuleNames(base_path):
 def importAllModules(base_path, mod_names=None):
     modules = []
     for name in getModuleNames(base_path) if mod_names is None else mod_names:
+        logger.debug(f"Import module: {name}")
         modules.append(importlib.import_module(name))
 
     return modules

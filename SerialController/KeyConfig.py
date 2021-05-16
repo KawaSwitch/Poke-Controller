@@ -2,16 +2,9 @@ import configparser
 import os
 import tkinter as tk
 import tkinter.ttk as ttk
-from logging import INFO, StreamHandler, getLogger
+from logging import getLogger, DEBUG, NullHandler
 
 from pynput.keyboard import Listener
-
-logger = getLogger(__name__)
-handler = StreamHandler()
-handler.setLevel(INFO)
-logger.setLevel(INFO)
-logger.addHandler(handler)
-logger.propagate = False
 
 
 class PokeKeycon:
@@ -24,6 +17,11 @@ class PokeKeycon:
         self.listener = None
         self.setting = configparser.ConfigParser()
         self.setting.optionxform = str
+
+        self._logger = getLogger(__name__)
+        self._logger.addHandler(NullHandler())
+        self._logger.setLevel(DEBUG)
+        self._logger.propagate = True
 
         self.kc.resizable(False, False)
 
@@ -251,6 +249,7 @@ class PokeKeycon:
             on_press=lambda ev: self.on_press(ev, var=var),
             on_release=lambda ev: self.on_release(ev, var=var, button_name=button_name))
         self.listener.start()
+        self._logger.debug("Activate key config window")
 
     def onFocusOutController(self, event):
         self.listener.stop()
@@ -267,7 +266,7 @@ class PokeKeycon:
 
     def on_release(self, key, var, button_name):
         try:
-            logger.debug(var.get())
+            self._logger.debug(f"Released key :{var.get()}")
             self.setting['Key map'][button_name] = var.get()
         except:
             pass
@@ -315,9 +314,11 @@ class PokeKeycon:
     def apply_setting(self):
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
             self.setting.write(file)
+        self.listener.stop()
 
     def close(self):
         self.kc.withdraw()
+        self.listener.stop()
 
     def bind(self, event, func):
         self.kc.bind(event, func)
@@ -331,6 +332,7 @@ class PokeKeycon:
 
     def destroy(self):
         self.kc.destroy()
+        self.listener.stop()
 
 
 if __name__ == '__main__':
