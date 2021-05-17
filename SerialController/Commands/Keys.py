@@ -24,7 +24,6 @@ class Button(IntFlag):
     RCLICK = auto()
     HOME = auto()
     CAPTURE = auto()
-    print(locals())
 
 
 class Hat(IntEnum):
