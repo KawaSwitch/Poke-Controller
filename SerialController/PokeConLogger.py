@@ -5,6 +5,10 @@ This code has copied from https://qiita.com/Esfahan/items/275b0f124369ccf8cf18
 # -*- coding:utf-8 -*-
 from logging import Formatter, handlers, StreamHandler, getLogger, DEBUG
 import logging
+import datetime as dt
+
+now = dt.datetime.now()
+time = now.strftime('%Y%m%d-%H%M%S')
 
 mapping = {
     "TRACE": " trace ]",
@@ -27,6 +31,7 @@ class ColorfulHandler(logging.StreamHandler):
 def root_logger():
     # logging.basicConfig(handlers=[ColorfulHandler()], level=logging.DEBUG)
     # root loggerを取得
+
     logger = getLogger()
 
     # formatterを作成
@@ -37,8 +42,16 @@ def root_logger():
     handler = StreamHandler()
     handler.setFormatter(formatter)
 
+    # ローテーティングファイルハンドラを作成
+    rh = logging.FileHandler(
+        r'./log/log_' + time + '.log',
+        encoding='utf-8',
+    )
+    rh.setFormatter(formatter)
+
     # loggerにhandlerを設定、イベント捕捉のためのレベルを設定
     logger.addHandler(handler)
+    logger.addHandler(rh)
     # log levelを設定
     logger.setLevel(DEBUG)
     # logger.debug("hello")

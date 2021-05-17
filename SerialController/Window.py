@@ -507,6 +507,7 @@ class PokeControllerApp:
 
         self.camera.destroy()
         cv2.destroyAllWindows()
+        self._logger.debug("Stop Poke Controller")
         self.root.destroy()
 
     def closingController(self):
