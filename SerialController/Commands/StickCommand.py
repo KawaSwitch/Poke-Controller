@@ -7,12 +7,15 @@ from . import CommandBase
 import numpy as np
 from .Keys import Button, Hat, KeyPress, Direction, Stick
 
+from logging import Formatter, handlers, StreamHandler, getLogger, DEBUG
+
 
 # Single button command
 class StickCommand(CommandBase.Command):
     def __init__(self):
         super().__init__()
         self.key = None
+        self._logger = getLogger(__name__)
 
     def start(self, ser, postProcess=None):
         self.isRunning = True
@@ -48,6 +51,7 @@ class StickCommand(CommandBase.Command):
 class StickLeft(StickCommand):
     def __init__(self):
         super().__init__()
+        self._logger = getLogger(__name__)
 
     def start(self, ser, postprocess=None):
         super().start(ser)
@@ -67,6 +71,7 @@ class StickLeft(StickCommand):
 class StickRight(StickCommand):
     def __init__(self):
         super().__init__()
+        self._logger = getLogger(__name__)
 
     def start(self, ser):
         super().start(ser)

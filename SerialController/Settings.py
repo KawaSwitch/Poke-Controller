@@ -4,22 +4,28 @@
 import configparser
 import os
 import tkinter as tk
+from logging import getLogger, DEBUG, NullHandler
 
 
 class GuiSettings:
     SETTING_PATH = os.path.join(os.path.dirname(__file__), "settings.ini")
 
     def __init__(self):
+
+        self._logger = getLogger(__name__)
         self.setting = configparser.ConfigParser()
         self.setting.optionxform = str
         # print("isExistConfig =", os.path.exists(self.SETTING_PATH))
 
         if not os.path.exists(self.SETTING_PATH):
-            # logger.info('Setting file does not exists. Try Generate.')
+            self._logger.debug('Setting file does not exists.')
             self.generate()
             self.load()
+            self._logger.debug('Settings file has been generated.')
         else:
+            self._logger.debug('Setting file exists.')
             self.load()
+            self._logger.debug('Settings file has been loaded.')
 
         # default
         self.camera_id = tk.IntVar(value=self.setting['General Setting'].getint('camera_id'))
@@ -98,4 +104,4 @@ class GuiSettings:
 
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
             self.setting.write(file)
-        # logger.debug('Settings file has been saved.')
+        self._logger.debug('Settings file has been saved.')
