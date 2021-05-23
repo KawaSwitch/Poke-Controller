@@ -36,6 +36,7 @@ class PokeKeycon:
         # build ui
         self.key_config_frame = ttk.Frame(self.kc)
         self.frame_2 = ttk.Frame(self.key_config_frame, style='Frame1.TFrame')
+
         self.label_ZL = ttk.Label(self.frame_2)
         self.label_ZL.configure(padding='5', text='ZL', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_ZL.grid(sticky='e')
@@ -43,6 +44,7 @@ class PokeKeycon:
         self.ZL = tk.StringVar()
         self.entry_ZL.configure(state='readonly', textvariable=self.ZL)
         self.entry_ZL.grid(column='1', padx='5', pady='5', row='0')
+
         self.label_L = ttk.Label(self.frame_2)
         self.label_L.configure(padding='5', text='L', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_L.grid(row='1', sticky='e')
@@ -50,6 +52,7 @@ class PokeKeycon:
         self.L = tk.StringVar()
         self.entry_L.configure(state='readonly', textvariable=self.L)
         self.entry_L.grid(column='1', padx='5', pady='5', row='1')
+
         self.label_MINUS = ttk.Label(self.frame_2)
         self.label_MINUS.configure(padding='5', text='MINUS', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_MINUS.grid(row='2', sticky='e')
@@ -57,6 +60,7 @@ class PokeKeycon:
         self.MINUS = tk.StringVar()
         self.entry_MINUS.configure(state='readonly', textvariable=self.MINUS)
         self.entry_MINUS.grid(column='1', padx='5', pady='5', row='2')
+
         self.label_HAT_UP = ttk.Label(self.frame_2)
         self.label_HAT_UP.configure(padding='5', text='HAT UP', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_HAT_UP.grid(row='3', sticky='e')
@@ -67,6 +71,7 @@ class PokeKeycon:
         self.entry_HAT_UP.delete('0', 'end')
         self.entry_HAT_UP.insert('0', _text_)
         self.entry_HAT_UP.grid(column='1', padx='5', pady='5', row='3')
+
         self.label__HAT_LEFT = ttk.Label(self.frame_2)
         self.label__HAT_LEFT.configure(padding='5', text='HAT LEFT', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label__HAT_LEFT.grid(row='4', sticky='e')
@@ -77,6 +82,7 @@ class PokeKeycon:
         self.entry_HAT_LEFT.delete('0', 'end')
         self.entry_HAT_LEFT.insert('0', _text_)
         self.entry_HAT_LEFT.grid(column='1', padx='5', pady='5', row='4')
+
         self.label_HAT_RIGHT = ttk.Label(self.frame_2)
         self.label_HAT_RIGHT.configure(padding='5', text='HAT RIGHT', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_HAT_RIGHT.grid(row='5', sticky='e')
@@ -87,6 +93,7 @@ class PokeKeycon:
         self.entry_HAT_RIGHT.delete('0', 'end')
         self.entry_HAT_RIGHT.insert('0', _text_)
         self.entry_HAT_RIGHT.grid(column='1', padx='5', pady='5', row='5')
+
         self.label_HAT_DOWN = ttk.Label(self.frame_2)
         self.label_HAT_DOWN.configure(padding='5', text='HAT DOWN', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_HAT_DOWN.grid(row='6', sticky='e')
@@ -97,6 +104,7 @@ class PokeKeycon:
         self.entry_HAT_DOWN.delete('0', 'end')
         self.entry_HAT_DOWN.insert('0', _text_)
         self.entry_HAT_DOWN.grid(column='1', padx='5', pady='5', row='6')
+
         self.label_CAPTURE = ttk.Label(self.frame_2)
         self.label_CAPTURE.configure(padding='5', text='CAPTURE', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_CAPTURE.grid(row='7', sticky='e')
@@ -318,7 +326,8 @@ class PokeKeycon:
 
     def close(self):
         self.kc.withdraw()
-        self.listener.stop()
+        if self.listener is not None:
+            self.listener.stop()
 
     def bind(self, event, func):
         self.kc.bind(event, func)
@@ -331,8 +340,9 @@ class PokeKeycon:
         self.kc.deiconify()
 
     def destroy(self):
+        if self.listener is not None:
+            self.listener.stop()
         self.kc.destroy()
-        self.listener.stop()
 
 
 if __name__ == '__main__':

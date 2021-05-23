@@ -7,7 +7,7 @@ import os
 from pynput.keyboard import Key, Listener
 from logging import getLogger, DEBUG, NullHandler
 
-from Commands.Keys import Button, Direction
+from Commands.Keys import Button, Direction, Hat
 
 
 # import logging
@@ -67,6 +67,7 @@ class SwitchKeyboardController(Keyboard):
         self.holdingDir = []
         self.key_map = {(i[1] if len(i[1]) == 1 else eval(str(i[1]))): eval(i[0]) for i in
                         self.setting.items("Key map")}
+        self._logger.debug(self.key_map)
         # logging.error(self.key_map)
 
         self._logger.debug('Initialization finished')
@@ -78,6 +79,10 @@ class SwitchKeyboardController(Keyboard):
         if key is None:
             print('unknown key has input')
             self._logger.warning('Unknown key has input')
+
+        # self._logger.debug(f"key type is {type(key)}")
+        # self._logger.debug(f"key  is '{key}'")
+        # self._logger.debug(f"holding is {self.holding}")
 
         try:
             if key.char in self.holding:
@@ -122,6 +127,7 @@ class SwitchKeyboardController(Keyboard):
                 self.inputDir(self.holdingDir)
 
     def inputDir(self, dirs):
+        # self._logger.debug(dirs)
         if len(dirs) == 0:
             return
         elif len(dirs) == 1:

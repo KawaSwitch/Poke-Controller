@@ -20,7 +20,17 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.1 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.1.1 Modified"  # based on 1.0-beta3
+
+'''
+Todo:
+・デバッグ用にPoke-Controller本体にコントローラーを接続して動かしたい
+
+・keyboardからHatを動かせないから、Hatを動かせるようにしたい
+→モンハンのメニューの選択はHatで選ばれる
+
+・画像認識の時の枠を設定でON/OFFできると嬉しい
+'''
 
 
 class PokeControllerApp:
