@@ -59,7 +59,8 @@ class StickLeft(StickCommand):
 
     def LStick(self, angle, r=1.0, duration=0.015):
         self.key.ser.writeRow(
-            f'2 8 {hex(int(128 + r * 127.5 * np.cos(np.deg2rad(angle))))} {hex(int(128 - r * 127.5 * np.sin(np.deg2rad(angle))))}'
+            f'2 8 {hex(int(128 + r * 127.5 * np.cos(np.deg2rad(angle))))} {hex(int(128 - r * 127.5 * np.sin(np.deg2rad(angle))))} 80 80',
+            is_show=False
         )
         # self.stick(Direction(Stick.LEFT, angle, r, showName=f'Angle={angle},r={r}'), duration=duration, wait=0)
 
@@ -78,7 +79,8 @@ class StickRight(StickCommand):
 
     def RStick(self, angle, r=1.0, duration=0.015):
         self.key.ser.writeRow(
-            f'1 8 {hex(int(128 + r * 127.5 * np.cos(np.deg2rad(angle))))} {hex(int(128 - r * 127.5 * np.sin(np.deg2rad(angle))))}'
+            f'1 8 80 80 {hex(int(128 + r * 127.5 * np.cos(np.deg2rad(angle))))} {hex(int(128 - r * 127.5 * np.sin(np.deg2rad(angle))))}',
+            is_show=False
         )
 
     def end(self, ser):
