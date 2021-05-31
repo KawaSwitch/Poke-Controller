@@ -65,44 +65,32 @@ class PokeKeycon:
         self.label_HAT_UP.configure(padding='5', text='HAT UP', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_HAT_UP.grid(row='3', sticky='e')
         self.entry_HAT_UP = ttk.Entry(self.frame_2)
-        self.HAT_UP = tk.StringVar(value='DISABLED')
-        self.entry_HAT_UP.configure(state='disabled', textvariable=self.HAT_UP)
-        _text_ = '''DISABLED'''
-        self.entry_HAT_UP.delete('0', 'end')
-        self.entry_HAT_UP.insert('0', _text_)
+        self.HAT_UP = tk.StringVar()
+        self.entry_HAT_UP.configure(state='readonly', textvariable=self.HAT_UP)
         self.entry_HAT_UP.grid(column='1', padx='5', pady='5', row='3')
 
         self.label__HAT_LEFT = ttk.Label(self.frame_2)
         self.label__HAT_LEFT.configure(padding='5', text='HAT LEFT', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label__HAT_LEFT.grid(row='4', sticky='e')
         self.entry_HAT_LEFT = ttk.Entry(self.frame_2)
-        self.HAT_LEFT = tk.StringVar(value='DISABLED')
-        self.entry_HAT_LEFT.configure(state='disabled', textvariable=self.HAT_LEFT)
-        _text_ = '''DISABLED'''
-        self.entry_HAT_LEFT.delete('0', 'end')
-        self.entry_HAT_LEFT.insert('0', _text_)
+        self.HAT_LEFT = tk.StringVar()
+        self.entry_HAT_LEFT.configure(state='readonly', textvariable=self.HAT_LEFT)
         self.entry_HAT_LEFT.grid(column='1', padx='5', pady='5', row='4')
 
         self.label_HAT_RIGHT = ttk.Label(self.frame_2)
         self.label_HAT_RIGHT.configure(padding='5', text='HAT RIGHT', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_HAT_RIGHT.grid(row='5', sticky='e')
         self.entry_HAT_RIGHT = ttk.Entry(self.frame_2)
-        self.HAT_RIGHT = tk.StringVar(value='DISABLED')
-        self.entry_HAT_RIGHT.configure(state='disabled', textvariable=self.HAT_RIGHT)
-        _text_ = '''DISABLED'''
-        self.entry_HAT_RIGHT.delete('0', 'end')
-        self.entry_HAT_RIGHT.insert('0', _text_)
+        self.HAT_RIGHT = tk.StringVar()
+        self.entry_HAT_RIGHT.configure(state='readonly', textvariable=self.HAT_RIGHT)
         self.entry_HAT_RIGHT.grid(column='1', padx='5', pady='5', row='5')
 
         self.label_HAT_DOWN = ttk.Label(self.frame_2)
         self.label_HAT_DOWN.configure(padding='5', text='HAT DOWN', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_HAT_DOWN.grid(row='6', sticky='e')
         self.entry_HAT_DOWN = ttk.Entry(self.frame_2)
-        self.HAT_DOWN = tk.StringVar(value='DISABLED')
-        self.entry_HAT_DOWN.configure(state='disabled', textvariable=self.HAT_DOWN)
-        _text_ = '''DISABLED'''
-        self.entry_HAT_DOWN.delete('0', 'end')
-        self.entry_HAT_DOWN.insert('0', _text_)
+        self.HAT_DOWN = tk.StringVar()
+        self.entry_HAT_DOWN.configure(state='readonly', textvariable=self.HAT_DOWN)
         self.entry_HAT_DOWN.grid(column='1', padx='5', pady='5', row='6')
 
         self.label_CAPTURE = ttk.Label(self.frame_2)
@@ -112,6 +100,7 @@ class PokeKeycon:
         self.CAPTURE = tk.StringVar()
         self.entry_CAPTURE.configure(state='readonly', textvariable=self.CAPTURE)
         self.entry_CAPTURE.grid(column='1', padx='5', pady='5', row='7')
+
         self.label_LCLICK = ttk.Label(self.frame_2)
         self.label_LCLICK.configure(padding='5', text='L CLICK', background='#00c3e3', font='{游ゴシック} 12 {bold}')
         self.label_LCLICK.grid(row='8', sticky='e')
@@ -119,12 +108,14 @@ class PokeKeycon:
         self.LCLICK = tk.StringVar()
         self.entry_LCLICK.configure(state='readonly', textvariable=self.LCLICK)
         self.entry_LCLICK.grid(column='1', padx='5', pady='5', row='8')
+
         self.frame_2.configure(height='200', padding='10', relief='groove', width='200')
         self.frame_2.grid(column='0', row='1', sticky='nsew')
         self.frame_2.rowconfigure('1', pad='5')
         self.frame_2.columnconfigure('0', pad='5')
 
         self.frame_2_3 = ttk.Frame(self.key_config_frame, style='Frame2.TFrame')
+
         self.label_ZR = ttk.Label(self.frame_2_3)
         self.label_ZR.configure(padding='5', text='ZR', background='#ff4554', foreground='#ffffff',
                                 font='{游ゴシック} 12 {bold}')
@@ -133,6 +124,7 @@ class PokeKeycon:
         self.ZR = tk.StringVar()
         self.entry_ZR.configure(state='readonly', textvariable=self.ZR)
         self.entry_ZR.grid(column='1', padx='5', pady='5', row='0')
+
         self.label_R = ttk.Label(self.frame_2_3)
         self.label_R.configure(padding='5', text='R', background='#ff4554', foreground='#ffffff',
                                font='{游ゴシック} 12 {bold}')
@@ -141,6 +133,7 @@ class PokeKeycon:
         self.R = tk.StringVar()
         self.entry_R.configure(state='readonly', textvariable=self.R)
         self.entry_R.grid(column='1', padx='5', pady='5', row='1')
+
         self.label_PLUS = ttk.Label(self.frame_2_3)
         self.label_PLUS.configure(padding='5', text='PLUS', background='#ff4554', foreground='#ffffff',
                                   font='{游ゴシック} 12 {bold}')
@@ -149,6 +142,7 @@ class PokeKeycon:
         self.PLUS = tk.StringVar()
         self.entry_PLUS.configure(state='readonly', textvariable=self.PLUS)
         self.entry_PLUS.grid(column='1', padx='5', pady='5', row='2')
+
         self.label_A = ttk.Label(self.frame_2_3)
         self.label_A.configure(padding='5', text='A', background='#ff4554', foreground='#ffffff',
                                font='{游ゴシック} 12 {bold}')
@@ -157,6 +151,7 @@ class PokeKeycon:
         self.A = tk.StringVar()
         self.entry_A.configure(state='readonly', textvariable=self.A)
         self.entry_A.grid(column='1', padx='5', pady='5', row='3')
+
         self.label__B = ttk.Label(self.frame_2_3)
         self.label__B.configure(padding='5', text='B', background='#ff4554', foreground='#ffffff',
                                 font='{游ゴシック} 12 {bold}')
@@ -165,6 +160,7 @@ class PokeKeycon:
         self.B = tk.StringVar()
         self.entry_B.configure(state='readonly', textvariable=self.B)
         self.entry_B.grid(column='1', padx='5', pady='5', row='4')
+
         self.label_X = ttk.Label(self.frame_2_3)
         self.label_X.configure(padding='5', text='X', background='#ff4554', foreground='#ffffff',
                                font='{游ゴシック} 12 {bold}')
@@ -173,6 +169,7 @@ class PokeKeycon:
         self.X = tk.StringVar()
         self.entry_X.configure(state='readonly', textvariable=self.X)
         self.entry_X.grid(column='1', padx='5', pady='5', row='5')
+
         self.label_Y = ttk.Label(self.frame_2_3)
         self.label_Y.configure(padding='5', text='Y', background='#ff4554', foreground='#ffffff',
                                font='{游ゴシック} 12 {bold}')
@@ -181,6 +178,7 @@ class PokeKeycon:
         self.Y = tk.StringVar()
         self.entry_Y.configure(state='readonly', textvariable=self.Y)
         self.entry_Y.grid(column='1', padx='5', pady='5', row='6')
+
         self.label_HOME = ttk.Label(self.frame_2_3)
         self.label_HOME.configure(padding='5', text='HOME', background='#ff4554', foreground='#ffffff',
                                   font='{游ゴシック} 12 {bold}')
@@ -189,6 +187,7 @@ class PokeKeycon:
         self.HOME = tk.StringVar()
         self.entry_HOME.configure(state='readonly', textvariable=self.HOME)
         self.entry_HOME.grid(column='1', padx='5', pady='5', row='7')
+
         self.label_RCLICK = ttk.Label(self.frame_2_3)
         self.label_RCLICK.configure(padding='5', text='R CLICK', background='#ff4554', foreground='#ffffff',
                                     font='{游ゴシック} 12 {bold}')
@@ -197,6 +196,7 @@ class PokeKeycon:
         self.RCLICK = tk.StringVar()
         self.entry_RCLICK.configure(state='readonly', textvariable=self.RCLICK)
         self.entry_RCLICK.grid(column='1', padx='5', pady='5', row='8')
+
         self.frame_2_3.configure(height='200', padding='10', relief='groove', width='200')
         self.frame_2_3.grid(column='1', row='1', sticky='nsew')
         self.frame_2_3.rowconfigure('1', pad='5')
@@ -247,6 +247,15 @@ class PokeKeycon:
         self.entry_HOME.bind('<FocusIn>', lambda x: self.onFocusInController(self.HOME, 'Button.HOME'))
         self.entry_HOME.bind('<FocusOut>', self.onFocusOutController)
 
+        self.entry_HAT_UP.bind('<FocusIn>', lambda x: self.onFocusInController(self.HAT_UP, 'Hat.TOP'))
+        self.entry_HAT_UP.bind('<FocusOut>', self.onFocusOutController)
+        self.entry_HAT_RIGHT.bind('<FocusIn>', lambda x: self.onFocusInController(self.HAT_RIGHT, 'Hat.RIGHT'))
+        self.entry_HAT_RIGHT.bind('<FocusOut>', self.onFocusOutController)
+        self.entry_HAT_DOWN.bind('<FocusIn>', lambda x: self.onFocusInController(self.HAT_DOWN, 'Hat.BTM'))
+        self.entry_HAT_DOWN.bind('<FocusOut>', self.onFocusOutController)
+        self.entry_HAT_LEFT.bind('<FocusIn>', lambda x: self.onFocusInController(self.HAT_LEFT, 'Hat.LEFT'))
+        self.entry_HAT_LEFT.bind('<FocusOut>', self.onFocusOutController)
+
     def run(self):
         self.mainwindow.mainloop()
 
@@ -274,8 +283,9 @@ class PokeKeycon:
 
     def on_release(self, key, var, button_name):
         try:
+            spc = button_name.split(".")[0]
             self._logger.debug(f"Released key :{var.get()}")
-            self.setting['Key map'][button_name] = var.get()
+            self.setting[f'KeyMap-{spc}'][button_name] = var.get()
         except:
             pass
         # print(f'{key} released')
@@ -284,45 +294,56 @@ class PokeKeycon:
         if os.path.isfile(self.SETTING_PATH):
             self.setting.read(self.SETTING_PATH, encoding='utf-8')
 
-        self.ZL.set(self.setting['Key map']['Button.ZL'])
-        self.L.set(self.setting['Key map']['Button.L'])
-        self.LCLICK.set(self.setting['Key map']['Button.LCLICK'])
-        self.ZR.set(self.setting['Key map']['Button.ZR'])
-        self.R.set(self.setting['Key map']['Button.R'])
-        self.RCLICK.set(self.setting['Key map']['Button.RCLICK'])
-        self.MINUS.set(self.setting['Key map']['Button.MINUS'])
-        self.CAPTURE.set(self.setting['Key map']['Button.CAPTURE'])
-        self.A.set(self.setting['Key map']['Button.A'])
-        self.B.set(self.setting['Key map']['Button.B'])
-        self.X.set(self.setting['Key map']['Button.X'])
-        self.Y.set(self.setting['Key map']['Button.Y'])
-        self.PLUS.set(self.setting['Key map']['Button.PLUS'])
-        self.HOME.set(self.setting['Key map']['Button.HOME'])
+        self.ZL.set(self.setting['KeyMap-Button']['Button.ZL'])
+        self.L.set(self.setting['KeyMap-Button']['Button.L'])
+        self.LCLICK.set(self.setting['KeyMap-Button']['Button.LCLICK'])
+        self.ZR.set(self.setting['KeyMap-Button']['Button.ZR'])
+        self.R.set(self.setting['KeyMap-Button']['Button.R'])
+        self.RCLICK.set(self.setting['KeyMap-Button']['Button.RCLICK'])
+        self.MINUS.set(self.setting['KeyMap-Button']['Button.MINUS'])
+        self.CAPTURE.set(self.setting['KeyMap-Button']['Button.CAPTURE'])
+        self.A.set(self.setting['KeyMap-Button']['Button.A'])
+        self.B.set(self.setting['KeyMap-Button']['Button.B'])
+        self.X.set(self.setting['KeyMap-Button']['Button.X'])
+        self.Y.set(self.setting['KeyMap-Button']['Button.Y'])
+        self.PLUS.set(self.setting['KeyMap-Button']['Button.PLUS'])
+        self.HOME.set(self.setting['KeyMap-Button']['Button.HOME'])
+        self.HAT_UP.set(self.setting['KeyMap-Hat']['Hat.TOP'])
+        self.HAT_DOWN.set(self.setting['KeyMap-Hat']['Hat.BTM'])
+        self.HAT_LEFT.set(self.setting['KeyMap-Hat']['Hat.LEFT'])
+        self.HAT_RIGHT.set(self.setting['KeyMap-Hat']['Hat.RIGHT'])
 
     def save_config(self):
 
-        self.setting['Key map']['Button.ZL'] = self.ZL.get()
-        self.setting['Key map']['Button.L'] = self.L.get()
-        self.setting['Key map']['Button.LCLICK'] = self.LCLICK.get()
-        self.setting['Key map']['Button.ZR'] = self.ZR.get()
-        self.setting['Key map']['Button.R'] = self.R.get()
-        self.setting['Key map']['Button.RCLICK'] = self.RCLICK.get()
-        self.setting['Key map']['Button.MINUS'] = self.MINUS.get()
-        self.setting['Key map']['Button.CAPTURE'] = self.CAPTURE.get()
-        self.setting['Key map']['Button.A'] = self.A.get()
-        self.setting['Key map']['Button.B'] = self.B.get()
-        self.setting['Key map']['Button.X'] = self.X.get()
-        self.setting['Key map']['Button.Y'] = self.Y.get()
-        self.setting['Key map']['Button.PLUS'] = self.PLUS.get()
-        self.setting['Key map']['Button.HOME'] = self.HOME.get()
+        self.setting['KeyMap-Button']['Button.ZL'] = self.ZL.get()
+        self.setting['KeyMap-Button']['Button.L'] = self.L.get()
+        self.setting['KeyMap-Button']['Button.LCLICK'] = self.LCLICK.get()
+        self.setting['KeyMap-Button']['Button.ZR'] = self.ZR.get()
+        self.setting['KeyMap-Button']['Button.R'] = self.R.get()
+        self.setting['KeyMap-Button']['Button.RCLICK'] = self.RCLICK.get()
+        self.setting['KeyMap-Button']['Button.MINUS'] = self.MINUS.get()
+        self.setting['KeyMap-Button']['Button.CAPTURE'] = self.CAPTURE.get()
+        self.setting['KeyMap-Button']['Button.A'] = self.A.get()
+        self.setting['KeyMap-Button']['Button.B'] = self.B.get()
+        self.setting['KeyMap-Button']['Button.X'] = self.X.get()
+        self.setting['KeyMap-Button']['Button.Y'] = self.Y.get()
+        self.setting['KeyMap-Button']['Button.PLUS'] = self.PLUS.get()
+        self.setting['KeyMap-Button']['Button.HOME'] = self.HOME.get()
+
+        self.setting['KeyMap-Hat']['Hat.TOP'] = self.HAT_UP.get()
+        self.setting['KeyMap-Hat']['Hat.RIGHT'] = self.HAT_RIGHT.get()
+        self.setting['KeyMap-Hat']['Hat.BTM'] = self.HAT_DOWN.get()
+        self.setting['KeyMap-Hat']['Hat.LEFT'] = self.HAT_LEFT.get()
 
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
             self.setting.write(file)
 
     def apply_setting(self):
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
+            self._logger.debug("Apply key setting")
             self.setting.write(file)
-        self.listener.stop()
+        if self.listener is not None:
+            self.listener.stop()
 
     def close(self):
         self.kc.withdraw()

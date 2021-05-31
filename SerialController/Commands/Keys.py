@@ -81,6 +81,7 @@ class SendFormat:
 
         self.L_stick_changed = False
         self.R_stick_changed = False
+        self.Hat_pos = Hat.CENTER
 
     def setButton(self, btns):
         for btn in btns:
@@ -94,13 +95,17 @@ class SendFormat:
         self.format['btn'] = 0
 
     def setHat(self, btns):
+        # self._logger.debug(btns)
         if not btns:
-            self.format['hat'] = Hat.CENTER
+            self.format['hat'] = self.Hat_pos
         else:
+            self.Hat_pos = btns[0]
             self.format['hat'] = btns[0]  # takes only first element
 
     def unsetHat(self):
-        self.format['hat'] = Hat.CENTER
+        # if self.Hat_pos is not Hat.CENTER:
+        self.Hat_pos = Hat.CENTER
+        self.format['hat'] = self.Hat_pos
 
     def setAnyDirection(self, dirs):
         for dir in dirs:
@@ -149,11 +154,13 @@ class SendFormat:
         self.format['ry'] = center
         self.L_stick_changed = True
         self.R_stick_changed = True
+        self.Hat_pos = Hat.CENTER
 
     def convert2str(self):
         str_format = ''
         str_L = ''
         str_R = ''
+        str_Hat = ''
         space = ' '
 
         # set bits array with stick flags
@@ -164,10 +171,12 @@ class SendFormat:
         if self.R_stick_changed:
             send_btn |= 0x1
             str_R = format(self.format['rx'], 'x') + space + format(self.format['ry'], 'x')
+        # if self.Hat_changed:
+        str_Hat = str(int(self.format['hat']))
         # format(send_btn, 'x') + \
         # print(hex(send_btn))
         str_format = format(send_btn, '#06x') + \
-                     (space + str(int(self.format['hat']))) + \
+                     (space + str_Hat) + \
                      (space + str_L if self.L_stick_changed else ' 80 80') + \
                      (space + str_R if self.R_stick_changed else ' 80 80')
 
@@ -260,6 +269,7 @@ Direction.LEFT = Direction(Stick.LEFT, -180, showName='LEFT')
 Direction.UP_RIGHT = Direction(Stick.LEFT, 45, showName='UP_RIGHT')
 Direction.DOWN_RIGHT = Direction(Stick.LEFT, -45, showName='DOWN_RIGHT')
 Direction.DOWN_LEFT = Direction(Stick.LEFT, -135, showName='DOWN_LEFT')
+Direction.DOWN_LEFT = Direction(Stick.LEFT, -135, showName='DOWN_LEFT')
 Direction.UP_LEFT = Direction(Stick.LEFT, 135, showName='UP_LEFT')
 # Right stick for ease of use
 Direction.R_UP = Direction(Stick.RIGHT, 90, showName='UP')
@@ -317,7 +327,7 @@ class KeyPress:
 
         # self._logger.debug(f": {list(map(str,self.format.format.values()))}")
 
-    def inputEnd(self, btns, ifPrint=True):
+    def inputEnd(self, btns, ifPrint=True, unset_hat=False):
         # self._logger.debug(f"input end: {btns}")
         self.pushing2 = dict(self.format.format)
 
@@ -335,7 +345,8 @@ class KeyPress:
         # self._logger.debug(tilts)
 
         self.format.unsetButton([btn for btn in btns if type(btn) is Button])
-        self.format.unsetHat()
+        if unset_hat:
+            self.format.unsetHat()
         self.format.unsetDirection(tilts)
         self.ser.writeRow(self.format.convert2str())
 

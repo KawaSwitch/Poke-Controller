@@ -20,7 +20,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.1.1 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
@@ -28,6 +28,7 @@ Todo:
 
 ・keyboardからHatを動かせないから、Hatを動かせるようにしたい
 →モンハンのメニューの選択はHatで選ばれる
+---> Done
 
 ・画像認識の時の枠を設定でON/OFFできると嬉しい
 '''
