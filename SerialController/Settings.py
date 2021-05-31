@@ -80,11 +80,11 @@ class GuiSettings:
             'Direction.UP': 'Key.up',
             'Direction.RIGHT': 'Key.right',
             'Direction.DOWN': 'Key.down',
-            'Direction.LEFT': 'None',
-            'Direction.UP_RIGHT': 'None',
-            'Direction.DOWN_RIGHT': 'None',
-            'Direction.DOWN_LEFT': 'None',
-            'Direction.UP_LEFT': 'None'
+            'Direction.LEFT': 'Key.left',
+            'Direction.UP_RIGHT': '20001',
+            'Direction.DOWN_RIGHT': '20002',
+            'Direction.DOWN_LEFT': '20010',
+            'Direction.UP_LEFT': '20011'
         }
         self.setting['KeyMap-Hat'] = {
             'Hat.TOP': '10000',
