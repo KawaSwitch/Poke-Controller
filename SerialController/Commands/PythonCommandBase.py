@@ -203,3 +203,8 @@ class ImageProcPythonCommand(PythonCommand):
 		# remove noise
 		mask = cv2.medianBlur(img_th, 3)
 		return mask
+
+	# Take a screenshot (saved in /SerialController/Captures/)
+	# スクリーンショットを取得
+	def saveCapture(self, filename):
+		self.camera.saveCapture(filename)

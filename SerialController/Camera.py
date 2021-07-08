@@ -35,14 +35,18 @@ class Camera:
 		_, self.image_bgr = self.camera.read()
 		return self.image_bgr
 
-	def saveCapture(self):
+	def saveCapture(self, name=''):
 		dt_now = datetime.datetime.now()
-		fileName = dt_now.strftime('%Y-%m-%d_%H-%M-%S')+".png"
+
+		# Use the current time as the file name if not specified
+		filename = dt_now.strftime('%Y-%m-%d_%H-%M-%S') if len(str(name)) == 0 else name
+		ext = '.png'
+		path = str(filename) + ext
 
 		if not os.path.exists(self.capture_dir):
 			os.makedirs(self.capture_dir)
 
-		save_path = os.path.join(self.capture_dir, fileName)
+		save_path = os.path.join(self.capture_dir, path)
 		cv2.imwrite(save_path, self.image_bgr)
 		print('capture succeeded: ' + save_path)
 	
