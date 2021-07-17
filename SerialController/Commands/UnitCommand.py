@@ -163,7 +163,10 @@ class UP(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.TOP)
+        self.key.input(Hat.TOP)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class UP_RIGHT(UnitCommand):
@@ -172,7 +175,10 @@ class UP_RIGHT(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.TOP_RIGHT)
+        self.key.input(Hat.TOP_RIGHT)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class RIGHT(UnitCommand):
@@ -181,7 +187,10 @@ class RIGHT(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.RIGHT)
+        self.key.input(Hat.RIGHT)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class DOWN_RIGHT(UnitCommand):
@@ -190,7 +199,10 @@ class DOWN_RIGHT(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.BTM_RIGHT)
+        self.key.input(Hat.BTM_RIGHT)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class DOWN(UnitCommand):
@@ -199,7 +211,10 @@ class DOWN(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.BTM)
+        self.key.input(Hat.BTM)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class DOWN_LEFT(UnitCommand):
@@ -208,7 +223,10 @@ class DOWN_LEFT(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.BTM_LEFT)
+        self.key.input(Hat.BTM_LEFT)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class LEFT(UnitCommand):
@@ -217,7 +235,10 @@ class LEFT(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.LEFT)
+        self.key.input(Hat.LEFT)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
 
 
 class UP_LEFT(UnitCommand):
@@ -226,4 +247,7 @@ class UP_LEFT(UnitCommand):
 
     def start(self, ser):
         super().start(ser)
-        self.press(Hat.TOP_LEFT)
+        self.key.input(Hat.TOP_LEFT)
+        self.wait(0.1)
+        self.key.input(Hat.CENTER)
+        self.key = None
