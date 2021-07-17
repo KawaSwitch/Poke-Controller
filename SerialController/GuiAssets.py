@@ -248,8 +248,8 @@ class CaptureArea(tk.Canvas):
         self.lcircle2 = self.create_oval(self.lx_init - self.radius // 10, self.ly_init - self.radius // 10,
                                          self.lx_init + self.radius // 10, self.ly_init + self.radius // 10,
                                          fill="cyan", tag="lcircle2")
-        self.LStick = StickCommand.StickLeft()
-        self.LStick.start(ser)
+        # self.LStick = StickCommand.StickLeft()
+        # self.LStick.start(ser)
         if isTakeLog:
             if self.dq is None:
                 self.dq = deque()
@@ -280,13 +280,25 @@ class CaptureArea(tk.Canvas):
                 #                             args=(langle,),
                 #                             kwargs={'r': mag, 'duration': _time - self.calc_time})
                 # thread_1.start()
-                self.LStick.LStick(langle, r=mag)
+                self.ser.writeRow(
+                    f'3 8 '
+                    f'{hex(int(128 + mag * 127.5 * np.cos(np.deg2rad(langle))))} '
+                    f'{hex(int(128 - mag * 127.5 * np.sin(np.deg2rad(langle))))} '
+                    f'80 80',
+                    is_show=False
+                )
                 self.dq.append([langle,
                                 mag,
                                 _time - self.calc_time])
                 self.calc_time = _time
         elif not isTakeLog:
-            self.LStick.LStick(langle, r=mag)
+            self.ser.writeRow(
+                f'3 8 '
+                f'{hex(int(128 + mag * 127.5 * np.cos(np.deg2rad(langle))))} '
+                f'{hex(int(128 - mag * 127.5 * np.sin(np.deg2rad(langle))))}'
+                f' 80 80',
+                is_show=False
+            )
 
         if mag >= 1:
             center_x = (self.radius + self.radius // 11) * np.cos(np.deg2rad(langle))
@@ -307,7 +319,10 @@ class CaptureArea(tk.Canvas):
 
     def mouseLeftRelease(self, ser):
         self.config(cursor='tcross')
-        self.LStick.end(ser)
+        self.ser.writeRow(
+            f'3 8 80 80',
+            is_show=False
+        )
         self.delete("lcircle")
         self.delete("lcircle2")
         if self.master.is_use_right_stick_mouse.get():
@@ -322,9 +337,7 @@ class CaptureArea(tk.Canvas):
 
     def mouseRightPress(self, event, ser):
         if self.master.is_use_left_stick_mouse.get():
-            self.unbind("<ButtonPress-1>")
-            self.unbind("<Button1-Motion>")
-            self.unbind("<ButtonRelease-1>")
+            self.UnbindLeftClick()
         self.config(cursor='dot')
         self.rx_init, self.ry_init = event.x, event.y
         self.rcircle = self.create_oval(self.rx_init - self.radius, self.ry_init - self.radius,
@@ -334,8 +347,8 @@ class CaptureArea(tk.Canvas):
                                          self.rx_init + self.radius // 10, self.ry_init + self.radius // 10,
                                          fill="red", tag="rcircle2")
 
-        self.RStick = StickCommand.StickRight()
-        self.RStick.start(ser)
+        # self.RStick = StickCommand.StickRight()
+        # self.RStick.start(ser)
         if isTakeLog:
             if self.dq is None:
                 self.dq = deque()
@@ -364,11 +377,22 @@ class CaptureArea(tk.Canvas):
                 #                             args=(rangle,),
                 #                             kwargs={'r': mag, 'duration': _time - self.calc_time})
                 # thread_1.start()
-                self.RStick.RStick(rangle, r=mag)
+                # self.RStick.RStick(rangle, r=mag)
+                self.ser.writeRow(
+                    f'3 8 80 80 '
+                    f'{hex(int(128 + mag * 127.5 * np.cos(np.deg2rad(rangle))))} '
+                    f'{hex(int(128 - mag * 127.5 * np.sin(np.deg2rad(rangle))))}',
+                    is_show=False
+                )
                 self.dq.append([rangle, mag, _time - self.calc_time])
                 self.calc_time = _time
         elif not isTakeLog:
-            self.LStick.LStick(rangle, r=mag)
+            self.ser.writeRow(
+                f'3 8 80 80 '
+                f'{hex(int(128 + mag * 127.5 * np.cos(np.deg2rad(rangle))))} '
+                f'{hex(int(128 - mag * 127.5 * np.sin(np.deg2rad(rangle))))}',
+                is_show=False
+            )
         if mag >= 1:
             center_x = (self.radius + self.radius // 11) * np.cos(np.deg2rad(rangle))
             center_y = (self.radius + self.radius // 11) * np.sin(np.deg2rad(rangle))
@@ -388,13 +412,15 @@ class CaptureArea(tk.Canvas):
 
     def mouseRightRelease(self, ser):
         self.config(cursor='tcross')
-        self.RStick.end(ser)
+        self.ser.writeRow(
+            f'3 8 80 80 80 80',
+            is_show=False
+        )
         self.delete("rcircle")
         self.delete("rcircle2")
         if self.master.is_use_left_stick_mouse.get():
-            self.bind("<ButtonPress-1>", lambda ev: self.mouseLeftPress(ev, self.ser))
-            self.bind("<Button1-Motion>", lambda ev: self.mouseLeftPressing(ev, self.ser))
-            self.bind("<ButtonRelease-1>", lambda ev: self.mouseLeftRelease(self.ser))
+            self.BindLeftClick()
+
         # self.event_generate('<Motion>', warp=True, x=self.rx_init, y=self.ry_init)
         if isTakeLog:
             self.dq.append([self._rangle,

@@ -69,7 +69,7 @@ class Sender:
         self._logger.debug("Checking if serial communication is open")
         return not self.ser is None and self.ser.isOpen()
 
-    def writeRow(self, row, is_show=True):
+    def writeRow(self, row, is_show=False):
         try:
             self.time_bef = time.perf_counter()
             if self.before is not None and self.before != 'end' and is_show:

@@ -165,11 +165,12 @@ class SendFormat:
 
         # set bits array with stick flags
         send_btn = int(self.format['btn']) << 2
+        send_btn |= 0x3
         if self.L_stick_changed:
-            send_btn |= 0x2
+            # send_btn |= 0x2
             str_L = format(self.format['lx'], 'x') + space + format(self.format['ly'], 'x')
         if self.R_stick_changed:
-            send_btn |= 0x1
+            # send_btn |= 0x1
             str_R = format(self.format['rx'], 'x') + space + format(self.format['ry'], 'x')
         # if self.Hat_changed:
         str_Hat = str(int(self.format['hat']))
