@@ -42,11 +42,12 @@ def root_logger():
     handler = StreamHandler()
     handler.setFormatter(formatter)
 
-    # ローテーティングファイルハンドラを作成
+    # ファイルハンドラを作成
     rh = logging.FileHandler(
         r'./log/log_' + time + '.log',
         encoding='utf-8',
     )
+
     rh.setFormatter(formatter)
 
     # loggerにhandlerを設定、イベント捕捉のためのレベルを設定

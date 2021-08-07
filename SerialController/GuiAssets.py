@@ -224,12 +224,16 @@ class CaptureArea(tk.Canvas):
         self._logger.info("Show size set to {0} x {1}".format(self.show_width, self.show_height))
 
     def mouseCtrlLeftPress(self, event):
+        _img = cv2.cvtColor(self.camera.image_bgr, cv2.COLOR_BGR2RGB)
         if self.master.is_use_left_stick_mouse.get():
             self.UnbindLeftClick()
         x, y = event.x, event.y
         ratio_x = float(self.camera.capture_size[0] / self.show_size[0])
         ratio_y = float(self.camera.capture_size[1] / self.show_size[1])
         print('Mouse down: Show ({}, {}) / Capture ({}, {})'.format(x, y, int(x * ratio_x), int(y * ratio_y)))
+        print(f"Color [R: {_img[int(y * ratio_y), int(x * ratio_x)][0]}, "
+              f"G: {_img[int(y * ratio_y), int(x * ratio_x)][1]}, "
+              f"B: {_img[int(y * ratio_y), int(x * ratio_x)][2]}]")
         self._logger.info(
             'Mouse down: Show ({}, {}) / Capture ({}, {})'.format(x, y, int(x * ratio_x), int(y * ratio_y)))
 

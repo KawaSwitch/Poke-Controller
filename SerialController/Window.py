@@ -2,7 +2,7 @@ import cv2
 import os
 import sys
 import tkinter.ttk as ttk
-from logging import getLogger, DEBUG, NullHandler
+from logging import StreamHandler, getLogger, DEBUG, NullHandler
 
 from pygubu.widgets.scrollbarhelper import ScrollbarHelper
 
@@ -20,7 +20,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.1 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.3 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
@@ -39,6 +39,7 @@ class PokeControllerApp:
 
         self._logger = getLogger(__name__)
         self._logger.addHandler(NullHandler())
+
         self._logger.setLevel(DEBUG)
         self._logger.propagate = True
 
@@ -537,7 +538,7 @@ class PokeControllerApp:
 class StdoutRedirector(object):
     """
     標準出力をtextウィジェットにリダイレクトするクラス
-    update_idletasks()で出力のたびに随時更新(従来はfor loopのときなどにまとめて出力されることがあった)
+    重いので止めました →# update_idletasks()で出力のたびに随時更新(従来はfor loopのときなどにまとめて出力されることがあった)
     """
 
     def __init__(self, text_widget):
