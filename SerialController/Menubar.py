@@ -17,6 +17,8 @@ class PokeController_Menubar(tk.Menu):
         self.master = master
         self.root = self.master.root
         self.ser = self.master.ser
+        self.preview = self.master.preview
+        self.show_size_cb = self.master.show_size_cb
         self.keyboard = self.master.keyboard
         self.settings = self.master.settings
         self.camera = self.master.camera
@@ -46,6 +48,7 @@ class PokeController_Menubar(tk.Menu):
         # TODO: setup command_id_arg 'false' for menuitem.
         self.menu_command.add('command', command=self.OpenPokeHomeCoop, label='Pokemon Home 連携')
         self.menu_command.add('command', command=self.OpenKeyConfig, label='キーコンフィグ')
+        self.menu_command.add('command', command=self.ResetWindowSize, label='画面サイズのリセット')
 
     # TODO: setup command_id_arg 'false' for menuitem.
 
@@ -86,6 +89,11 @@ class PokeController_Menubar(tk.Menu):
         self._logger.debug("Close KeyConfig window")
         self.key_config.destroy()
         self.key_config = None
+
+    def ResetWindowSize(self):
+        self._logger.debug("Reset window size")
+        self.preview.setShowsize(360, 640)
+        self.show_size_cb.current(0)
 
     def exit(self):
         self._logger.debug("Close Menubar")
