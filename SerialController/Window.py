@@ -2,6 +2,7 @@ import cv2
 import os
 import sys
 import tkinter.ttk as ttk
+import tkinter.messagebox as tkmsg
 from logging import StreamHandler, getLogger, DEBUG, NullHandler
 
 from pygubu.widgets.scrollbarhelper import ScrollbarHelper
@@ -20,7 +21,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.4 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.5 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
@@ -275,6 +276,14 @@ class PokeControllerApp:
         self.preview.grid(column='0', columnspan='7', row='2', padx='5', pady='5', sticky=tk.NSEW)
         self.loadCommands()
 
+        self.show_size_tmp = self.show_size_cb['values'].index(self.show_size_cb.get())
+        self.root.bind('<Key-F5>', self.ReloadCommandWithF5)
+        self._logger.debug("Bind F5 key to reload commands")
+        self.root.bind('<Key-F6>', self.StartCommandWithF6)
+        self._logger.debug("Bind F6 key to execute commands")
+        self.root.bind('<Key-Escape>', self.StopCommandWithEsc)
+        self._logger.debug("Bind Escape key to stop commands")
+
         # Main widget
         self.mainwindow = self.frame_1
 
@@ -336,6 +345,18 @@ class PokeControllerApp:
     def applyWindowSize(self, event=None):
         width, height = map(int, self.show_size.get().split("x"))
         self.preview.setShowsize(height, width)
+        if self.show_size_tmp != self.show_size_cb['values'].index(self.show_size_cb.get()):
+            ret = tkmsg.askokcancel('確認', "この画面サイズに変更しますか？")
+        else:
+            return
+
+        if ret:
+            self.show_size_tmp = self.show_size_cb['values'].index(self.show_size_cb.get())
+        else:
+            self.show_size_cb.current(self.show_size_tmp)
+            width_bef, height_bef = map(int, self.show_size.get().split("x"))
+            self.preview.setShowsize(height_bef, width_bef)
+            # self.show_size_tmp = self.show_size_cb['values'].index(self.show_size_cb.get())
 
     def activateSerial(self):
         if self.ser.isOpened():
@@ -463,7 +484,7 @@ class PokeControllerApp:
         print('Finished reloading command modules.')
         self._logger.info("Reloaded commands.")
 
-    def startPlay(self):
+    def startPlay(self, *event):
         if self.cur_command is None:
             print('No commands have been assigned yet.')
             self._logger.info('No commands have been assigned yet.')
@@ -496,31 +517,33 @@ class PokeControllerApp:
         self.mainwindow.mainloop()
 
     def exit(self):
-        if self.ser.isOpened():
-            self.ser.closeSerial()
-            print("Serial disconnected")
-            # self._logger.info("Serial disconnected")
+        ret = tkmsg.askyesno('確認', 'Poke Controllerを終了しますか？')
+        if ret:
+            if self.ser.isOpened():
+                self.ser.closeSerial()
+                print("Serial disconnected")
+                # self._logger.info("Serial disconnected")
 
-        # stop listening to keyboard events
-        if not self.keyboard is None:
-            self.keyboard.stop()
-            self.keyboard = None
+            # stop listening to keyboard events
+            if not self.keyboard is None:
+                self.keyboard.stop()
+                self.keyboard = None
 
-        # save settings
-        self.settings.is_show_realtime.set(self.is_show_realtime.get())
-        self.settings.is_show_serial.set(self.is_show_serial.get())
-        self.settings.is_use_keyboard.set(self.is_use_keyboard.get())
-        self.settings.fps.set(self.fps.get())
-        self.settings.show_size.set(self.show_size.get())
-        self.settings.com_port.set(self.com_port.get())
-        self.settings.camera_id.set(self.camera_id.get())
+            # save settings
+            self.settings.is_show_realtime.set(self.is_show_realtime.get())
+            self.settings.is_show_serial.set(self.is_show_serial.get())
+            self.settings.is_use_keyboard.set(self.is_use_keyboard.get())
+            self.settings.fps.set(self.fps.get())
+            self.settings.show_size.set(self.show_size.get())
+            self.settings.com_port.set(self.com_port.get())
+            self.settings.camera_id.set(self.camera_id.get())
 
-        self.settings.save()
+            self.settings.save()
 
-        self.camera.destroy()
-        cv2.destroyAllWindows()
-        self._logger.debug("Stop Poke Controller")
-        self.root.destroy()
+            self.camera.destroy()
+            cv2.destroyAllWindows()
+            self._logger.debug("Stop Poke Controller")
+            self.root.destroy()
 
     def closingController(self):
         self.controller.destroy()
@@ -533,6 +556,20 @@ class PokeControllerApp:
     def loadSettings(self):
         self.settings = Settings.GuiSettings()
         self.settings.load()
+
+    def ReloadCommandWithF5(self, *event):
+        self.reloadCommands()
+
+    def StartCommandWithF6(self, *event):
+        if self.startButton["text"] == "Stop":
+            print("Command is now working!")
+            self._logger.debug("Command is now working!")
+        elif self.startButton["text"] == "Start":
+            self.startPlay()
+
+    def StopCommandWithEsc(self, *event):
+        if self.startButton["text"] == "Stop":
+            self.stopPlay()
 
 
 class StdoutRedirector(object):
