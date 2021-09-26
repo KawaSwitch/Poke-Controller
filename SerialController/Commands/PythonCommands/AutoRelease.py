@@ -3,6 +3,7 @@
 
 from Commands.PythonCommandBase import PythonCommand, ImageProcPythonCommand
 from Commands.Keys import KeyPress, Button, Direction, Stick
+import GuiAssets
 
 # auto releaseing pokemons
 class AutoRelease(ImageProcPythonCommand):
@@ -19,7 +20,7 @@ class AutoRelease(ImageProcPythonCommand):
 
 		for i in range(0, self.row):
 			for j in range(0, self.col):
-				if not self.cam.isOpened():
+				if not self.is_use_ir:
 					self.Release()
 				else:
 					# if shiny, then skip
@@ -48,3 +49,33 @@ class AutoRelease(ImageProcPythonCommand):
 		self.press(Direction.UP, wait=0.2)
 		self.press(Button.A, wait=1.5)
 		self.press(Button.A, wait=0.3)
+	
+	def openOptionDialog(self, root):
+		self.option = Dialog(root, self.NAME, self.cam).option
+		return self.option != None
+
+	def apply(self):
+		self.is_use_ir = self.option['is_use_ir']
+
+class Dialog(GuiAssets.Dialog):
+	def __init__(self, parent, title, cam):
+		self.cam = cam
+		super().__init__(parent, title)
+
+	def body(self, master):
+		frame = None
+		if self.cam.isOpened():
+			frame, self.var = self.setSelectRadioButton(master, "画像認識", {1:"使用する", 0:"使用しない"}, init_var=1)
+		else:
+			frame, self.var = self.setSelectRadioButton(master, "画像認識", {0:"使用しない"})
+		frame.grid(row=0)
+
+	def validate(self):
+		try:
+			self.option = {
+				'is_use_ir': self.var.get() & self.cam.isOpened()
+			}
+			return 1
+		except ValueError:
+			tk.messagebox.showwarning("Input Value Error", "不正な入力値です.\nPlease try again.")
+			return 0

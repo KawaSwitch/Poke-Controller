@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
+import tkinter.messagebox
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 import cv2
@@ -59,6 +60,100 @@ class CaptureArea(tk.Label):
 
 	def saveCapture(self):
 		self.camera.saveCapture()
+
+# The modal dialog
+# based from here: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm
+class Dialog(tk.Toplevel):
+	def __init__(self, parent, title = None):
+		tk.Toplevel.__init__(self, parent)
+		self.transient(parent)
+		self.option = None
+
+		if title:
+			self.title(title)
+
+		self.parent = parent
+		self.result = None
+
+		body = tk.Frame(self)
+		self.initial_focus = self.body(body)
+		body.pack(padx=5, pady=5)
+
+		self.setButtonbox()
+
+		if not self.initial_focus:
+			self.initial_focus = self
+
+		self.protocol("WM_DELETE_WINDOW", self.cancel)
+
+		self.geometry("+%d+%d" % (parent.winfo_rootx(),
+								  parent.winfo_rooty()))
+
+		self.initial_focus.focus_set()
+		self.wait_window(self)
+
+	# Create dialog body that returns widget that should have initial focus.  
+	# This method should be overridden.
+	def body(self, master):
+		pass
+
+	# Add standard button box. Override if you don't want the standard buttons.
+	def setButtonbox(self):
+		box = tk.Frame(self)
+
+		w = tk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
+		w.pack(side=tk.LEFT, padx=5, pady=5)
+		w = tk.Button(box, text="Cancel", width=10, command=self.cancel)
+		w.pack(side=tk.LEFT, padx=5, pady=5)
+
+		self.bind("<Return>", self.ok)
+		self.bind("<Escape>", self.cancel)
+
+		box.pack()
+
+	def ok(self, event=None):
+		if not self.validate():
+			self.initial_focus.focus_set() # put focus back
+			return
+
+		self.withdraw()
+		self.update_idletasks()
+
+		self.apply()
+		self.cancel()
+
+	def cancel(self, event=None):
+		# put focus back to the parent window
+		self.parent.focus_set()
+		self.destroy()
+
+	def validate(self):
+		return 1 # override
+
+	def apply(self):
+		pass # override
+
+	## -- Set syntax-sugars
+	def setLabel(self, master, text):
+		return tk.Label(master, text=text)
+	
+	def setLabelWithEntry(self, master, text):
+		frame = tk.Frame(master, relief='flat')
+		tk.Label(frame, text=text).grid(row=0, column=0)
+		entry = tk.Entry(frame)
+		entry.grid(row=0, column=1)
+		return frame, entry
+	
+	def setSelectRadioButton(self, master, text, radio_pairs, init_var=0):
+		frame = tk.Frame(master, relief='flat')
+		tk.Label(frame, text=text).grid(row=0, column=0)
+		
+		var = tk.IntVar(value=0)
+		for i, (k, text) in enumerate(radio_pairs.items()):
+			tk.Radiobutton(frame, value=k, variable=var, text=text).grid(row=1, column=i)
+		var.set(init_var)
+
+		return frame, var
 
 # GUI of switch controller simulator
 class ControllerGUI:

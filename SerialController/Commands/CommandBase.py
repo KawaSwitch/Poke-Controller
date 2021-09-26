@@ -17,3 +17,17 @@ class Command:
 	@abstractclassmethod
 	def end(self, ser):
 		pass
+
+	def startWithOption(self, root, ser, postProcess=None):
+		if self.openOptionDialog(root):
+			self.apply()
+			self.start(ser, postProcess)
+			return True
+		else:
+			return False
+
+	def openOptionDialog(self, root):
+		return True
+
+	def apply(self):
+		pass
