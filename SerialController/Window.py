@@ -4,6 +4,7 @@ import sys
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkmsg
 from logging import StreamHandler, getLogger, DEBUG, NullHandler
+import subprocess
 
 from pygubu.widgets.scrollbarhelper import ScrollbarHelper
 
@@ -21,7 +22,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.5 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.6 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
@@ -80,10 +81,19 @@ class PokeControllerApp:
         self.separator_2 = ttk.Separator(self.camera_lf)
         self.separator_2.config(orient='vertical')
         self.separator_2.grid(column='5', row='0', sticky='ns')
-        self.captureButton = ttk.Button(self.camera_lf)
+        self.capture_f = ttk.Frame(self.camera_lf)
+        self.captureButton = ttk.Button(self.capture_f)
         self.captureButton.config(text='Capture')
-        self.captureButton.grid(column='6', row='0')
+        self.captureButton.grid(column='0', row='0')
         self.captureButton.configure(command=self.saveCapture)
+        self.open_folder_img = tk.PhotoImage(file="./assets/icons8-OpenDir-16.png")
+        # self.bg = self.bg.subsample(3, 3)
+        self.OpencaptureButton = ttk.Button(self.capture_f)
+        self.OpencaptureButton.config(image=self.open_folder_img)
+        self.OpencaptureButton.grid(column='1', row='0')
+        self.OpencaptureButton.configure(command=self.OpenCaptureDir)
+
+        self.capture_f.grid(column='6', row='0', sticky='ns')
         self.camera_f2 = ttk.Frame(self.camera_lf)
         self.label3 = ttk.Label(self.camera_f2)
         self.label3.config(text='FPS:')
@@ -187,7 +197,10 @@ class PokeControllerApp:
         # self.Poke_statistic_lf.config(height='200', text='PokemonHome連携', width='200')
         # self.Poke_statistic_lf.grid(column='1', padx='5', row='2', sticky='nsew')
         self.lf = ttk.Labelframe(self.frame_1)
-        self.Command_nb = ttk.Notebook(self.lf)
+
+        self.Commands_f = ttk.Frame(self.lf)
+        self.Commands_2_f = ttk.Frame(self.lf)
+        self.Command_nb = ttk.Notebook(self.Commands_f)
         self.py_cb = ttk.Combobox(self.Command_nb)
         self.py_name = tk.StringVar()
         self.py_cb.config(state='readonly', textvariable=self.py_name)
@@ -198,15 +211,24 @@ class PokeControllerApp:
         self.mcu_cb.config(state='readonly', textvariable=self.mcu_name)
         self.mcu_cb.pack(side='top')
         self.Command_nb.add(self.mcu_cb, padding='5', text='Mcu Command')
-        self.Command_nb.grid(column='0', columnspan='2', padx='5', pady='5', row='0', sticky='ew')
-        self.reloadCommandButton = ttk.Button(self.lf)
+        self.Command_nb.pack(fill="both", expand=True, padx='5', pady='5', side='left')
+
+        self.OpenCommandDirButton = ttk.Button(self.Commands_f)
+        self.OpenCommandDirButton.config(image=self.open_folder_img)
+        self.OpenCommandDirButton.pack(fill="y", expand=False, side='left', ipadx='5', pady='15')
+        self.OpenCommandDirButton.configure(command=self.OpenCommandDir)
+
+        self.reloadCommandButton = ttk.Button(self.Commands_2_f)
         self.reloadCommandButton.config(text='Reload')
         self.reloadCommandButton.grid(column='0', padx='5', pady='5', row='1', sticky='ew')
         self.reloadCommandButton.configure(command=self.reloadCommands)
-        self.startButton = ttk.Button(self.lf)
+        self.startButton = ttk.Button(self.Commands_2_f)
         self.startButton.config(text='Start')
         self.startButton.grid(column='1', padx='5', pady='5', row='1', sticky='ew')
         self.startButton.configure(command=self.startPlay)
+
+        self.Commands_f.pack(fill="both", expand=True, padx='5', pady='5', anchor=tk.E, side='top')
+        self.Commands_2_f.pack(fill=None, expand=True, padx='5', pady='5', anchor=tk.E, side='top')
         self.lf.config(height='200', text='Command')
         self.lf.grid(column='2', padx='5', row='1', rowspan='2', sticky='nsew')
         self.log_scroll = ScrollbarHelper(self.frame_1, scrolltype='both')
@@ -329,6 +351,14 @@ class PokeControllerApp:
 
     def saveCapture(self):
         self.camera.saveCapture()
+
+    def OpenCaptureDir(self):
+        self._logger.debug('Open folder: \'Captures\'')
+        subprocess.call(f'explorer "Captures"')
+
+    def OpenCommandDir(self):
+        self._logger.debug('Open folder: \'Commands\'')
+        subprocess.call(f'explorer "Commands"')
 
     def set_cameraid(self, event=None):
         keys = [k for k, v in self.camera_dic.items() if v == self.Camera_Name.get()]
