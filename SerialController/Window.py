@@ -22,7 +22,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.6 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.6.1 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
@@ -357,8 +357,12 @@ class PokeControllerApp:
         subprocess.call(f'explorer "Captures"')
 
     def OpenCommandDir(self):
-        self._logger.debug('Open folder: \'Commands\'')
-        subprocess.call(f'explorer "Commands"')
+        if self.Command_nb.index("current") == 0:
+            dir = "Commands\PythonCommands"
+        else:
+            dir = "Commands\McuCommands"
+        self._logger.debug(f'Open folder: \'{dir}\'')
+        subprocess.call(f'explorer "{dir}"')
 
     def set_cameraid(self, event=None):
         keys = [k for k, v in self.camera_dic.items() if v == self.Camera_Name.get()]
