@@ -118,3 +118,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# local vscode settings
+Poke-Controller.code-workspace
