@@ -160,15 +160,22 @@ class ImageProcPythonCommand(PythonCommand):
 		super(ImageProcPythonCommand, self).__init__()
 		self.camera = cam
 
-	# Judge if current screenshot contains an image using template matching
+	# Judge if current screenshot contains a template using template matching
 	# It's recommended that you use gray_scale option unless the template color wouldn't be cared for performace
 	# 現在のスクリーンショットと指定した画像のテンプレートマッチングを行います
 	# 色の違いを考慮しないのであればパフォーマンスの点からuse_grayをTrueにしてグレースケール画像を使うことを推奨します
-	def isContainTemplate(self, template_path, threshold=0.7, use_gray=True, show_value=False):
+	def isContainTemplate(self,
+		template_path, threshold=0.7, use_gray=True, show_value=False,
+		area=[], tmp_area=[]):
+
+		# Read a current image
 		src = self.camera.readFrame()
 		src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
+		src = src[area[2]:area[3], area[0]:area[1]] if not area else src # trim
 
+		# Read a template image
 		template = cv2.imread(TEMPLATE_PATH+template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+		template = template[tmp_area[2]:tmp_area[3], tmp_area[0]:tmp_area[1]] # trim
 		w, h = template.shape[1], template.shape[0]
 
 		method = cv2.TM_CCOEFF_NORMED
@@ -203,3 +210,8 @@ class ImageProcPythonCommand(PythonCommand):
 		# remove noise
 		mask = cv2.medianBlur(img_th, 3)
 		return mask
+
+	# Take a screenshot (saved in /SerialController/Captures/)
+	# スクリーンショットを取得
+	def saveCapture(self, filename):
+		self.camera.saveCapture(filename)
