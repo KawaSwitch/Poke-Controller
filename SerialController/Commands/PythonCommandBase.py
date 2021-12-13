@@ -106,7 +106,9 @@ class PythonCommand(CommandBase.Command):
 
     # do nothing at wait time(s)
     def wait(self, wait):
-        sleep(wait)
+        current_time = time.perf_counter()
+        while time.perf_counter() < current_time + wait:
+            pass
         self.checkIfAlive()
 
     def checkIfAlive(self):

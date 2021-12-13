@@ -328,7 +328,7 @@ class KeyPress:
 
         # self._logger.debug(f": {list(map(str,self.format.format.values()))}")
 
-    def inputEnd(self, btns, ifPrint=True, unset_hat=False):
+    def inputEnd(self, btns, ifPrint=True, unset_hat=True):
         # self._logger.debug(f"input end: {btns}")
         self.pushing2 = dict(self.format.format)
 

@@ -22,7 +22,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.6.1 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.6.2 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
