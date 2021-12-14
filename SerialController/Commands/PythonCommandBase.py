@@ -105,10 +105,20 @@ class PythonCommand(CommandBase.Command):
         self.checkIfAlive()
 
     # do nothing at wait time(s)
-    def wait(self, wait):
+    def short_wait(self, wait):
         current_time = time.perf_counter()
         while time.perf_counter() < current_time + wait:
             pass
+        self.checkIfAlive()
+
+    # do nothing at wait time(s)
+    def wait(self, wait):
+        if float(wait) > 0.1:
+            sleep(wait)
+        else:
+            current_time = time.perf_counter()
+            while time.perf_counter() < current_time + wait:
+                pass
         self.checkIfAlive()
 
     def checkIfAlive(self):
