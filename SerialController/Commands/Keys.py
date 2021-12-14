@@ -178,8 +178,8 @@ class SendFormat:
         # print(hex(send_btn))
         str_format = format(send_btn, '#06x') + \
                      (space + str_Hat) + \
-                     (space + str_L if self.L_stick_changed else ' 80 80') + \
-                     (space + str_R if self.R_stick_changed else ' 80 80')
+                     (space + str_L if self.L_stick_changed else '') + \
+                     (space + str_R if self.R_stick_changed else '')
 
         self.L_stick_changed = False
         self.R_stick_changed = False
