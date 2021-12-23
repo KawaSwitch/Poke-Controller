@@ -204,6 +204,7 @@ typedef enum {
 	MASH_A,		// mash button A
 	AUTO_LEAGUE,// auto league
 	INF_WATT, 	// infinity watt
+	PICKUPBERRY, 	// infinity watt
 	P_SYNC,
 	P_UNSYNC,
 	DEBUG,
@@ -219,7 +220,8 @@ char* cmd_name[MAX_BUFFER] = {
 	"auto_league",
 	"inf_watt",
 	"sync",
-	"unsync"
+	"unsync",
+	"pickupberry"
 };
 
 int step_index;
@@ -291,6 +293,8 @@ void ParseLine(char* line)
 		proc_state = P_SYNC;
 	} else if (strncmp(cmd, cmd_name[4], 16) == 0) {
 		proc_state = P_UNSYNC;
+	} else if (strncmp(cmd, cmd_name[5], 16) == 0) {
+		proc_state = PICKUPBERRY;
 	} else {
 		proc_state = DEBUG2;
 	}
@@ -368,6 +372,10 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 
 				case INF_WATT:
 					GetNextReportFromCommands(inf_watt_commands, inf_watt_size, ReportData);
+					break;
+					
+				case PICKUPBERRY:
+					GetNextReportFromCommands(pickupberry_commands, pickupberry_size, ReportData);
 					break;
 				
 				case P_SYNC:
@@ -536,6 +544,42 @@ void ApplyButtonCommand(const Buttons_t button, USB_JoystickReport_Input_t* cons
 
 		case HOME:
 			ReportData->Button |= SWITCH_HOME;
+			break;
+			
+		case RS_UP:
+			ReportData->RY = STICK_MIN;				
+			break;
+
+		case RS_LEFT:
+			ReportData->RX = STICK_MIN;				
+			break;
+
+		case RS_DOWN:
+			ReportData->RY = STICK_MAX;				
+			break;
+
+		case RS_RIGHT:
+			ReportData->RX = STICK_MAX;				
+			break;
+
+		case RS_UPLEFT:
+			ReportData->RX = STICK_MIN;
+			ReportData->RY = STICK_MIN;
+			break;
+
+		case RS_UPRIGHT:
+			ReportData->RX = STICK_MAX;
+			ReportData->RY = STICK_MIN;
+			break;	
+
+		case RS_DOWNRIGHT:
+			ReportData->RX = STICK_MAX;
+			ReportData->RY = STICK_MAX;
+			break;
+
+		case RS_DOWNLEFT:
+			ReportData->RX = STICK_MIN;
+			ReportData->RY = STICK_MAX;
 			break;
 
 		default:

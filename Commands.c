@@ -87,108 +87,176 @@ const int auto_league_size = (int)(sizeof(auto_league_commands) / sizeof(Command
 // from: https://medaka.5ch.net/test/read.cgi/poke/1574816324/ >>25
 const Command inf_watt_commands[] PROGMEM = {
     { NOP,  	70 },
-	{ A,		5 }, // レイドを始める
-    { NOP, 		20 },
-    { A,		5 },
-	{ NOP, 		20 },
-    { A,		5 },
-    { NOP, 		150 },
-    { HOME,		5 },
-    { NOP, 		20 },
-    { DOWN,		5 },
-    { NOP, 		2 },
-    { RIGHT, 	2 },
-    { NOP, 		5 },
-    { RIGHT, 	2 },
-    { NOP,  	5 },
-    { RIGHT,  	2 },
-    { NOP, 		5 },
-    { RIGHT,  	2 },
-    { NOP,   	5 },
-    { A,		5 }, // 設定選択
-    { NOP,   	20 },
-    { DOWN,   	60 },
-    { NOP,   	20 },
+	{ A,		2 },
+	{ NOP,		50},
+	{ B,		2 },
+	{ NOP,		50},
+	{ B,		2 },
+	{ NOP,		50},
+	{ B,		2 },
+	{ NOP,		50},
+	{ B,		2 },
+	{ NOP,		50},
+	{ B,		2 },
+	{ NOP,		50},
+	{ A,		2 },
+	{ NOP,		50},
+	{ A,		2 },
+	{ NOP,		175},
 
-    { A,		5 }, // 設定>本体 選択
-    { NOP,   	20 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { A,		5 }, // 日付と時刻選択
-    { NOP,   	10 },
-    { A,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { A,		5 },
-    { NOP,   	20 },
-    { UP,	  	5 },
-    { NOP,   	20 },
-    { RIGHT,	45 },
-    { NOP,   	20 },
-    { A,		5 }, // OK選択
-    { NOP,   	20 },
-    { HOME,		5 },
-    { NOP,   	20 },
-    { HOME,		5 }, // ゲームに戻る
-    { NOP,   	30 },
-    { B,		5 },
-    { NOP,   	50 },
-    { A,		5 }, // レイドバトルをいったんやめる
-    { NOP,   	20 },
-    { NOP,   	150 },// 待機
-    { A,		5 },
-    { NOP,   	20 },
-    { A,		5 },
-    { NOP,   	20 },
-    { B,		5 },
-    { NOP,   	20 },
-    { B,		5 },
-    { NOP,   	20 },
-    { NOP,   	150 },// 待機
-    
-    { HOME,		5 }, // ホームへ
-    { NOP,   	20 },
-    { DOWN,		2 },
-    { NOP,   	5 },
-    { RIGHT,	2 },
-    { NOP,   	5 },
-    { RIGHT, 	2 },
-    { NOP,   	5 },
-    { RIGHT,	2 },
-    { NOP,   	5 },
-    { RIGHT,	2 },
-    { NOP,   	5 },
-    { A,		5 }, // 設定選択
-    { NOP,   	20 },
-    { DOWN,		60 },
-
-    { DOWN,		5 },
-    { NOP,   	20 },
-    { A,		5 }, // 設定>本体 選択
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { DOWN,		5 },
-    { NOP,   	10 },
-    { A,		5 }, // 日付と時刻選択
-    { NOP,   	20 },
-    { A,		5 },
-    { NOP,   	20 },
-    { HOME,		5 },
-    { NOP,   	20 },
-    { HOME,		5 }, // ゲームへ
+	{ HOME,		5},//HOME画面に遷移
+	{ NOP,		20},
+	{ LEFT,		2},//画面右端に移動
+	{ NOP,		8},
+	{ DOWN,		2},//スリープに移動
+	{ LEFT,		2},//設定に移動
+	{ A,		2},//決定
+	{ NOP,		45},
+	{ DOWN,		2},//画面の明るさに移動
+	{ RS_DOWN,	2},//ロックに移動
+	{ DOWN,		2},//みまもり設定に移動
+	{ RS_DOWN,	2},//インターネットに移動
+	{ DOWN,		2},//データ管理に移動
+	{ RS_DOWN,	2},//ユーザーに移動
+	{ DOWN,		2},//Miiに移動
+	{ RS_DOWN,	2},//amiiboに移動
+	{ DOWN,		2},//テーマに移動
+	{ RS_DOWN,	2},//通知に移動
+	{ DOWN,		2},//スリープに移動
+	{ RS_DOWN,	2},//コントローラーとセンサーに移動
+	{ DOWN,		2},//Bluetoothオーディオに移動
+	{ RS_DOWN,	2},//テレビ出力に移動
+	{ DOWN,		2},//本体に移動
+	{ NOP,		2},
+	{ A,		2},//本体の更新に移動
+	{ NOP,		15},
+	{ DOWN,		2},//ドックの更新に移動
+	{ RS_DOWN,	2},//本体のニックネームに移動
+	{ DOWN,		25},//言語に移動(画面スクロール)
+	{ RS_DOWN,	2},//地域に移動
+	{ DOWN,		2},//日付と時刻に移動
+	{ A,		2},//決定
+	{ NOP,		10},
+	{ DOWN,		2},//タイムゾーンに移動
+	{ RS_DOWN,	2},//現在の日付と時刻に移動
+	{ NOP,		2},
+	{ A,		2},//決定
+	{ NOP,		10},
+	{ RIGHT,	2},//月に移動
+	{ RS_RIGHT,	2},//日に移動
+	{ UP,		2},//1日進める
+	{ RIGHT,	2},//時に移動
+	{ RS_RIGHT,	2},//分に移動
+	{ RIGHT,	2},//OKに移動
+	{ NOP,		2},
+	{ A,		2},//決定  
+	{ NOP,		20},
+	{ HOME,		5},//HOMEに戻る
+	{ NOP,		35},
+	{ HOME,		5},//ゲームに戻る
+	{ NOP,		35},
+	{ B,		2},
+	{ NOP,		40},
+	{ A,		2},
+	{ NOP,		100},
 };
 const int inf_watt_size = (int)(sizeof(inf_watt_commands) / sizeof(Command));
+
+const Command pickupberry_commands[] PROGMEM = {
+    { NOP,  	5 },
+	{ A,		2 },
+	{ NOP,		20},
+	{ A,		2 },
+	{ NOP,		20},
+	{ A,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+	{ B,		2 },
+	{ NOP,		20},
+
+	{ HOME,		5},//HOME画面に遷移
+	{ NOP,		20},
+	{ LEFT,		2},//画面右端に移動
+	{ NOP,		8},
+	{ DOWN,		2},//スリープに移動
+	{ LEFT,		2},//設定に移動
+	{ A,		2},//決定
+	{ NOP,		45},
+	{ DOWN,		2},//画面の明るさに移動
+	{ RS_DOWN,	2},//ロックに移動
+	{ DOWN,		2},//みまもり設定に移動
+	{ RS_DOWN,	2},//インターネットに移動
+	{ DOWN,		2},//データ管理に移動
+	{ RS_DOWN,	2},//ユーザーに移動
+	{ DOWN,		2},//Miiに移動
+	{ RS_DOWN,	2},//amiiboに移動
+	{ DOWN,		2},//テーマに移動
+	{ RS_DOWN,	2},//通知に移動
+	{ DOWN,		2},//スリープに移動
+	{ RS_DOWN,	2},//コントローラーとセンサーに移動
+	{ DOWN,		2},//Bluetoothオーディオに移動
+	{ RS_DOWN,	2},//テレビ出力に移動
+	{ DOWN,		2},//本体に移動
+	{ NOP,		2},
+	{ A,		2},//本体の更新に移動
+	{ NOP,		15},
+	{ DOWN,		2},//ドックの更新に移動
+	{ RS_DOWN,	2},//本体のニックネームに移動
+	{ DOWN,		25},//言語に移動(画面スクロール)
+	{ RS_DOWN,	2},//地域に移動
+	{ DOWN,		2},//日付と時刻に移動
+	{ A,		2},//決定
+	{ NOP,		10},
+	{ DOWN,		2},//タイムゾーンに移動
+	{ RS_DOWN,	2},//現在の日付と時刻に移動
+	{ NOP,		2},
+	{ A,		2},//決定
+	{ NOP,		10},
+	{ RIGHT,	2},//月に移動
+	{ RS_RIGHT,	2},//日に移動
+	{ UP,		2},//1日進める
+	{ RIGHT,	2},//時に移動
+	{ RS_RIGHT,	2},//分に移動
+	{ RIGHT,	2},//OKに移動
+	{ NOP,		2},
+	{ A,		2},//決定  
+	{ NOP,		20},
+	{ HOME,		5},//HOMEに戻る
+	{ NOP,		35},
+	{ HOME,		5},//ゲームに戻る
+	{ NOP,		35},
+};
+const int pickupberry_size = (int)(sizeof(pickupberry_commands) / sizeof(Command));
