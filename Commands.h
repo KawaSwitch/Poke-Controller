@@ -44,3 +44,7 @@ extern const int auto_league_size;
 // Infinity Watt
 extern const Command inf_watt_commands[];
 extern const int inf_watt_size;
+
+// Pick Up Berry
+extern const Command pickupberry_commands[];
+extern const int pickupberry_size;

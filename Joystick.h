@@ -127,6 +127,14 @@ typedef enum {
 	NOP,
 	TRIGGERS,
     HOME,
+	RS_UP,
+	RS_DOWN,
+	RS_LEFT,
+	RS_RIGHT,
+    RS_UPLEFT,
+	RS_UPRIGHT,
+	RS_DOWNLEFT,
+	RS_DOWNRIGHT,
 } Buttons_t;
 
 // Function Prototypes
