@@ -48,3 +48,7 @@ extern const int inf_watt_size;
 // Pick Up Berry
 extern const Command pickupberry_commands[];
 extern const int pickupberry_size;
+
+//Change the Year
+extern const Command changetheyear_commands[];
+extern const int changetheyear_size;
