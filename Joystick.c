@@ -205,6 +205,7 @@ typedef enum {
 	AUTO_LEAGUE,// auto league
 	INF_WATT, 	// infinity watt
 	PICKUPBERRY, 	// infinity watt
+	CHANGETHEYEAR,	// Change the Year
 	P_SYNC,
 	P_UNSYNC,
 	DEBUG,
@@ -232,6 +233,8 @@ int duration_buf;
 int step_size_buf;
 
 uint8_t pc_lx, pc_ly, pc_rx, pc_ry;
+uint32_t YearChangeCnt;//0~4294967295回まで可
+int NowYear = 0;
 
 void ParseLine(char* line)
 {
@@ -295,6 +298,10 @@ void ParseLine(char* line)
 		proc_state = P_UNSYNC;
 	} else if (strncmp(cmd, cmd_name[5], 16) == 0) {
 		proc_state = PICKUPBERRY;
+	} else if (strncmp(cmd, "Year", 4) == 0) {
+		proc_state = CHANGETHEYEAR;
+		sscanf(line, "Year %lu",&YearChangeCnt);
+		NowYear = 0;
 	} else {
 		proc_state = DEBUG2;
 	}
@@ -377,7 +384,11 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				case PICKUPBERRY:
 					GetNextReportFromCommands(pickupberry_commands, pickupberry_size, ReportData);
 					break;
-				
+									
+				case CHANGETHEYEAR:
+					GetNextReportFromCommandsforChangeTheYear(changetheyear_commands, changetheyear_size, ReportData);
+					break;
+
 				case P_SYNC:
 					if (!GetNextReportFromCommands(sync, sync_size, ReportData))
 						proc_state = NONE;
@@ -457,6 +468,82 @@ bool GetNextReportFromCommands(
 
 	// Get command from flash memory
 	memcpy_P(&cur_command, &commands[step_index++], sizeof(Command));
+	step_size_buf = step_size;
+
+	duration_buf = cur_command.duration;
+	ApplyButtonCommand(cur_command.button, ReportData);
+
+	memcpy(&last_report, ReportData, sizeof(USB_JoystickReport_Input_t)); // create echo report
+	return true;
+}
+
+// return: commands have not reached to the end?
+bool GetNextReportFromCommandsforChangeTheYear(
+	const Command* const commands, 
+	const int step_size, 
+	USB_JoystickReport_Input_t* const ReportData)
+{
+	// Repeat the last report at duration times
+	// duration_buf is mul by the ratio for concerning compatibility with code using echo variables
+	if (duration_count++ < duration_buf * echo_ratio)
+	{
+		memcpy(ReportData, &last_report, sizeof(USB_JoystickReport_Input_t));
+		return true;
+	}
+	else
+	{
+		duration_count = 0;		
+	}
+
+	// Check step size range
+	if (step_index > step_size_buf - 1)
+	{
+		step_index = 0; // go back to first step
+
+		ReportData->LX = STICK_CENTER;
+		ReportData->LY = STICK_CENTER;
+		ReportData->RX = STICK_CENTER;
+		ReportData->RY = STICK_CENTER;
+		ReportData->HAT = HAT_CENTER;
+
+		memcpy(&last_report, ReportData, sizeof(USB_JoystickReport_Input_t)); // create echo report
+		return false;
+	}
+
+	// Get command from flash memory
+	step_index++;
+	//
+	if((YearChangeCnt > 0) && (step_index == 17))
+	{
+		YearChangeCnt--;
+		if(YearChangeCnt == 0)
+		{
+			step_index = 33;
+		}
+		else if(NowYear < YEAR_MAX - 1)
+		{
+			step_index = 1;
+			NowYear++;
+		}
+		else
+		{
+			//何もしない
+		}
+	}
+	else if((YearChangeCnt > 0) && (step_index == 33))
+	{
+		step_index = 1;
+		NowYear = 0;
+	}
+	else if((YearChangeCnt == 0) && (step_index > step_size_buf - 1))
+	{
+		step_index = step_size_buf - 1;
+	}
+	else
+	{
+		//何もしない
+	}
+	memcpy_P(&cur_command, &commands[step_index], sizeof(Command));
 	step_size_buf = step_size;
 
 	duration_buf = cur_command.duration;
