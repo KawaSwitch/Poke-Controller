@@ -13,6 +13,7 @@ from LineNotify import Line_Notify
 from . import CommandBase
 from .Keys import Button, Direction, KeyPress
 
+import numpy as np
 
 # the class For notifying stop signal is sent from Main window
 class StopThread(Exception):
@@ -249,6 +250,49 @@ class ImageProcPythonCommand(PythonCommand):
                                  tag=tag,
                                  ms=ms)
             return False
+
+    def isContainTemplate_max(self, template_path_list, threshold=0.7, use_gray=True,
+                              show_value=False, show_position=True, show_only_true_rect=True, ms=2000):
+        src = self.camera.readFrame()
+        src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
+
+        max_val_list = []
+        judge_threshold_list = []
+        for template_path in template_path_list:
+            template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+            w, h = template.shape[1], template.shape[0]
+
+            method = cv2.TM_CCOEFF_NORMED
+            res = cv2.matchTemplate(src, template, method)
+            _, max_val, _, max_loc = cv2.minMaxLoc(res)
+
+            if show_value:
+                print(template_path + ' ZNCC value: ' + str(max_val))
+
+            top_left = max_loc
+            bottom_right = (top_left[0] + w + 1, top_left[1] + h + 1)
+            tag = str(time.perf_counter()) + str(random.random())
+            max_val_list.append(max_val)
+            judge_threshold_list.append(max_val >= threshold)
+
+            if max_val >= threshold:
+                if self.gui is not None and show_position:
+                    # self.gui.delete("ImageRecRect")
+                    self.gui.ImgRect(*top_left,
+                                    *bottom_right,
+                                    outline='blue',
+                                    tag=tag,
+                                    ms=ms)
+            else:
+                if self.gui is not None and show_position and not show_only_true_rect:
+                    # self.gui.delete("ImageRecRect")
+                    self.gui.ImgRect(*top_left,
+                                    *bottom_right,
+                                    outline='red',
+                                    tag=tag,
+                                    ms=ms)
+
+        return np.argmax(max_val_list), max_val_list, judge_threshold_list
 
     try:
         def isContainTemplateGPU(self, template_path, threshold=0.7, use_gray=True,
