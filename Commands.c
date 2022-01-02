@@ -260,3 +260,52 @@ const Command pickupberry_commands[] PROGMEM = {
 	{ NOP,		35},
 };
 const int pickupberry_size = (int)(sizeof(pickupberry_commands) / sizeof(Command));
+
+const Command changetheyear_commands[] PROGMEM = {
+	{ NOP,		10},
+/* 1年進めるブロック */
+	{ LEFT,	2},//分に移動
+	{ RS_LEFT,	2},//時に移動
+	{ LEFT,	2},//日に移動
+	{ RS_LEFT,	2},//月に移動
+	{ LEFT,	2},//年に移動
+	{ UP,		2},//1年進める
+	{ RIGHT,	2},//月に移動
+	{ RS_RIGHT,	2},//日に移動
+	{ RIGHT,	2},//時に移動
+	{ RS_RIGHT,	2},//分に移動
+	{ RIGHT,	2},//OKに移動
+	{ NOP,		2},
+	{ A,		2},//決定  
+	{ NOP,		4},
+	{ A,		2},//決定  
+	{ NOP,		4},
+/* 2000年まで戻るブロック */
+	{ LEFT,	2},//分に移動
+	{ RS_LEFT,	2},//時に移動
+	{ LEFT,	2},//日に移動
+	{ RS_LEFT,	2},//月に移動
+	{ LEFT,	2},//年に移動
+	{ DOWN,		230},//2000年に戻す
+	{ RIGHT,	2},//月に移動
+	{ RS_RIGHT,	2},//日に移動
+	{ RIGHT,	2},//時に移動
+	{ RS_RIGHT,	2},//分に移動
+	{ RIGHT,	2},//OKに移動
+	{ NOP,		2},
+	{ A,		2},//決定  
+	{ NOP,		4},
+	{ A,		2},//決定  
+	{ NOP,		4},
+/* 消費終了後のブロック */
+	{ B,		2},
+	{ NOP,		20},
+	{ UP,		2},//HOMEに戻る
+	{ NOP,		4},
+	{ A,		5},//ゲームに戻る
+	{ NOP,		4},
+/* 日付変更する前にメニュー画面にしてもらうこと前提にコメントアウト */
+//	{ X,		5},//乱数消費を避けるため、メニューに入る
+//	{ NOP,		35}
+};
+const int changetheyear_size = (int)(sizeof(changetheyear_commands) / sizeof(Command));
