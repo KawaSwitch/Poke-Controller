@@ -85,6 +85,8 @@ typedef enum {
 #define STICK_CENTER 128
 #define STICK_MAX    255
 
+#define YEAR_MAX 60
+
 // Joystick HID report structure. We have an input and an output.
 typedef struct {
 	uint16_t Button; // 16 buttons; see JoystickButtons_t for bit mapping
