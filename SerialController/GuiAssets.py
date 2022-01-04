@@ -99,13 +99,14 @@ class CaptureArea(tk.Canvas):
         # self._logger.addHandler(self.stick_handler)
         # self._logger.propagate = False
         if isTakeLog:
-            self.LS = logging.FileHandler(filename=f"log\\{nowtime}_LStick.log", encoding='utf-8')
+            filename_base = os.path.join("log", f"{nowtime}")
+            self.LS = logging.FileHandler(filename=f"{filename_base}_LStick.log", encoding='utf-8')
             self.LS.setLevel(logging.DEBUG)
             self.LSTICK_logger = logging.getLogger("L_STICK")
             self.LSTICK_logger.setLevel(logging.DEBUG)
             self.LSTICK_logger.addHandler(self.LS)
 
-            self.RS = logging.FileHandler(filename=f"log\\{nowtime}_RStick.log", encoding='utf-8')
+            self.RS = logging.FileHandler(filename=f"{filename_base}_RStick.log", encoding='utf-8')
             self.RS.setLevel(logging.DEBUG)
             self.RSTICK_logger = logging.getLogger("R_STICK")
             self.RSTICK_logger.setLevel(logging.DEBUG)

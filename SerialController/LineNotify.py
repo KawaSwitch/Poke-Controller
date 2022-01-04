@@ -32,12 +32,13 @@ class Line_Notify:
         """
         utf-8 のファイルを BOM ありかどうかを自動判定して読み込む
         """
-        is_with_bom = self.is_utf8_file_with_bom(os.path.dirname(__file__) + '\\line_token.ini')
+        line_token_path = os.path.join(os.path.dirname(__file__), 'line_token.ini')
+        is_with_bom = self.is_utf8_file_with_bom(line_token_path)
 
         encoding = 'utf-8-sig' if is_with_bom else 'utf-8'
 
         self._logger.debug("Load token file")
-        self.token_file.read(os.path.dirname(__file__) + '\\line_token.ini', encoding)
+        self.token_file.read(line_token_path, encoding)
 
     def is_utf8_file_with_bom(self, filename):
         """
@@ -128,7 +129,7 @@ class Line_Notify:
         except AttributeError as e:
             self._logger.error(e)
             pass
-        except KeyError  as e:
+        except KeyError as e:
             self._logger.error(e)
             pass
 
