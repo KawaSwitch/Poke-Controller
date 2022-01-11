@@ -3,6 +3,7 @@
 import math
 import os
 import time
+import platform
 
 import serial
 from logging import getLogger, DEBUG, NullHandler
@@ -39,25 +40,37 @@ class Sender:
                     "LEFT", "TOP_LEFT",
                     "CENTER"]
 
-    def openSerial(self, portNum):
+    def openSerial(self, portNum: int, portName: str = ''):
         try:
-            if os.name == 'nt':
-                print('connecting to ' + "COM" + str(portNum))
-                self._logger.info('connecting to ' + "COM" + str(portNum))
-                self.ser = serial.Serial("COM" + str(portNum), 9600)
-                return True
-            elif os.name == 'posix':
-                print('connecting to ' + "/dev/ttyUSB" + str(portNum))
-                self._logger.info('connecting to ' + "/dev/ttyUSB" + str(portNum))
-                self.ser = serial.Serial("/dev/ttyUSB" + str(portNum), 9600)
-                return True
+            if portName is None or portName == '':
+                if os.name == 'nt':
+                    print('connecting to ' + "COM" + str(portNum))
+                    self._logger.info('connecting to ' + "COM" + str(portNum))
+                    self.ser = serial.Serial("COM" + str(portNum), 9600)
+                    return True
+                elif os.name == 'posix':
+                    if platform.system() == 'Darwin':
+                        print('connecting to ' + "/dev/tty.usbserial-" + str(portNum))
+                        self._logger.info('connecting to ' + "/dev/tty.usbserial-" + str(portNum))
+                        self.ser = serial.Serial("/dev/tty.usbserial-" + str(portNum), 9600)
+                        return True
+                    else:
+                        print('connecting to ' + "/dev/ttyUSB" + str(portNum))
+                        self._logger.info('connecting to ' + "/dev/ttyUSB" + str(portNum))
+                        self.ser = serial.Serial("/dev/ttyUSB" + str(portNum), 9600)
+                        return True
+                else:
+                    print('Not supported OS')
+                    self._logger.warning('Not supported OS')
+                    return False
             else:
-                print('Not supported OS')
-                self._logger.warning('Not supported OS')
-                return False
+                print('connecting to ' + portName)
+                self._logger.info('connecting to ' + portName)
+                self.ser = serial.Serial(portName, 9600)
+                return True
         except IOError as e:
             print('COM Port: can\'t be established')
-            self._logger.error('COM Port: can\'t be established')
+            self._logger.error('COM Port: can\'t be established', e)
             # print(e)
             return False
 
@@ -67,7 +80,7 @@ class Sender:
 
     def isOpened(self):
         self._logger.debug("Checking if serial communication is open")
-        return not self.ser is None and self.ser.isOpen()
+        return True if self.ser is not None and self.ser.isOpen() else False
 
     def writeRow(self, row, is_show=False):
         try:

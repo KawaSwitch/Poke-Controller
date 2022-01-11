@@ -5,6 +5,7 @@ import tkinter.ttk as ttk
 import tkinter.messagebox as tkmsg
 from logging import StreamHandler, getLogger, DEBUG, NullHandler
 import subprocess
+import platform
 
 from pygubu.widgets.scrollbarhelper import ScrollbarHelper
 
@@ -22,7 +23,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.6.2 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.7.0 Modified"  # based on 1.0-beta3
 
 '''
 Todo:
@@ -52,6 +53,8 @@ class PokeControllerApp:
         self.poke_treeview = None
         self.keyPress = None
         self.keyboard = None
+
+        self.camera_dic = None
 
         '''
         ここから
@@ -136,6 +139,7 @@ class PokeControllerApp:
         self.label2.rowconfigure('0', uniform='None', weight='0')
         self.entry2 = ttk.Entry(self.serial_lf)
         self.com_port = tk.IntVar()
+        self.com_port_name = tk.StringVar()
         self.entry2.config(textvariable=self.com_port, width='5')
         self.entry2.grid(column='1', padx='5', row='0', sticky='ew')
         self.entry2.rowconfigure('0', uniform='None', weight='0')
@@ -261,6 +265,7 @@ class PokeControllerApp:
         self.fps.set(self.settings.fps.get())
         self.show_size.set(self.settings.show_size.get())
         self.com_port.set(self.settings.com_port.get())
+        self.com_port_name.set(self.settings.com_port_name.get())
         self.camera_id.set(self.settings.camera_id.get())
         # 各コンボボックスを現在の設定値に合わせて表示
         self.fps_cb.current(self.fps_cb['values'].index(self.fps.get()))
@@ -268,17 +273,23 @@ class PokeControllerApp:
             self.show_size_cb['values'].index(self.show_size.get())
         )
 
-        if os.name == 'nt':
+        if platform.system() != 'Linux':
             try:
                 self.locateCameraCmbbox()
                 self.camera_entry.config(state='disable')
             except:
                 # Locate an entry instead whenever dll is not imported successfully
-                self.camera_name_fromDLL.set("An error occurred while displaying the camera names in NT environment.")
-                self._logger.warning("An error occurred while displaying the camera names in NT environment.")
+                self.camera_name_fromDLL.set("An error occurred when displaying the camera name in the Win/Mac "
+                                             "environment.")
+                self._logger.warning("An error occurred when displaying the camera name in the Win/Mac environment.")
                 self.Camera_Name.config(state='disable')
+        elif platform.system() != 'Linux':
+            self.camera_name_fromDLL.set("Linux environment. So that cannot show Camera name.")
+            self.Camera_Name.config(state='disable')
+            self.cb_use_keyboard.config(state='disable')
+            return
         else:
-            self.camera_name_fromDLL.set("Not nt environment so that cannot show Camera name.")
+            self.camera_name_fromDLL.set("Unknown environment. Cannot show Camera name.")
             self.Camera_Name.config(state='disable')
         # open up a camera
         self.camera = Camera(self.fps.get())
@@ -321,23 +332,36 @@ class PokeControllerApp:
         self.camera.openCamera(self.camera_id.get())
 
     def assignCamera(self, event):
-        if os.name == 'nt':
+        if platform.system() != "Linux":
             self.camera_name_fromDLL.set(self.camera_dic[self.camera_id.get()])
 
     def locateCameraCmbbox(self):
-        import clr
-        clr.AddReference(r"..\DirectShowLib\DirectShowLib-2005")
-        from DirectShowLib import DsDevice, FilterCategory
+        if platform.system() == 'Windows':
+            import clr
+            clr.AddReference(r"..\DirectShowLib\DirectShowLib-2005")
+            from DirectShowLib import DsDevice, FilterCategory
 
-        # Get names of detected camera devices
-        captureDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice)
-        self.camera_dic = {cam_id: device.Name for cam_id, device in enumerate(captureDevices)}
+            # Get names of detected camera devices
+            captureDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice)
+            self.camera_dic = {cam_id: device.Name for cam_id, device in enumerate(captureDevices)}
 
-        self.camera_dic[str(max(list(self.camera_dic.keys())) + 1)] = 'Disable'
-        self.Camera_Name['values'] = [device for device in self.camera_dic.values()]
-        self._logger.debug(f"Camera list: {[device for device in self.camera_dic.values()]}")
-        dev_num = len(self.camera_dic)
+            self.camera_dic[str(max(list(self.camera_dic.keys())) + 1)] = 'Disable'
+            self.Camera_Name['values'] = [device for device in self.camera_dic.values()]
+            self._logger.debug(f"Camera list: {[device for device in self.camera_dic.values()]}")
+            dev_num = len(self.camera_dic)
 
+        elif platform.system() == "Darwin":
+            cmd = 'system_profiler SPCameraDataType | grep "^    [^ ]" | sed "s/    //" | sed "s/://" '
+            res = subprocess.run(cmd, stdout=subprocess.PIPE, shell=True)
+            # 出力結果の加工
+            ret = res.stdout.decode('utf-8')
+            cam_list = list(filter(lambda a: a != "", ret.split('\n')))
+            self.camera_dic = {cam_id: camera_name for cam_id, camera_name in enumerate(cam_list)}
+            dev_num = len(self.Camera_Name['values'])
+            self.camera_dic[str(max(list(self.camera_dic.keys())) + 1)] = 'Disable'
+            self.Camera_Name['values'] = [device for device in self.camera_dic.values()]
+        else:
+            return False
         if self.camera_id.get() > dev_num - 1:
             print('Inappropriate camera ID! -> set to 0')
             self._logger.debug('Inappropriate camera ID! -> set to 0')
@@ -353,16 +377,25 @@ class PokeControllerApp:
         self.camera.saveCapture()
 
     def OpenCaptureDir(self):
-        self._logger.debug('Open folder: \'Captures\'')
-        subprocess.call(f'explorer "Captures"')
+        directory = "Captures"
+        self._logger.debug(f'Open folder: \'{directory}\'')
+        if platform.system() == 'Windows':
+            subprocess.call(f'explorer "{directory}"')
+        elif platform.system() == 'Darwin':
+            command = f'open "{directory}"'
+            subprocess.run(command, shell=True)
 
     def OpenCommandDir(self):
         if self.Command_nb.index("current") == 0:
-            dir = "Commands\PythonCommands"
+            directory = os.path.join("Commands", "PythonCommands")
         else:
-            dir = "Commands\McuCommands"
-        self._logger.debug(f'Open folder: \'{dir}\'')
-        subprocess.call(f'explorer "{dir}"')
+            directory = os.path.join("Commands", "McuCommands")
+        self._logger.debug(f'Open folder: \'{directory}\'')
+        if platform.system() == 'Windows':
+            subprocess.call(f'explorer "{directory}"')
+        elif platform.system() == 'Darwin':
+            command = f'open "{directory}"'
+            subprocess.run(command, shell=True)
 
     def set_cameraid(self, event=None):
         keys = [k for k, v in self.camera_dic.items() if v == self.Camera_Name.get()]
@@ -399,7 +432,7 @@ class PokeControllerApp:
             self.keyPress = None
             self.activateSerial()
         else:
-            if self.ser.openSerial(self.com_port.get()):
+            if self.ser.openSerial(self.com_port.get(), self.com_port_name.get()):
                 print('COM Port ' + str(self.com_port.get()) + ' connected successfully')
                 self._logger.debug('COM Port ' + str(self.com_port.get()) + ' connected successfully')
                 self.keyPress = KeyPress(self.ser)
@@ -412,12 +445,12 @@ class PokeControllerApp:
                 self.keyboard.listen()
 
             # bind focus
-            if os.name == 'nt':
+            if platform.system() != 'Linux':
                 self.root.bind("<FocusIn>", self.onFocusInController)
                 self.root.bind("<FocusOut>", self.onFocusOutController)
 
         else:
-            if os.name == 'nt':  # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
+            if platform.system() != 'Linux':  # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
                 if self.keyboard is not None:
                     # stop listening to keyboard events
                     self.keyboard.stop()

@@ -30,6 +30,7 @@ class GuiSettings:
         # default
         self.camera_id = tk.IntVar(value=self.setting['General Setting'].getint('camera_id'))
         self.com_port = tk.IntVar(value=self.setting['General Setting'].getint('com_port'))
+        self.com_port_name = tk.StringVar(value=self.setting['General Setting'].get('com_port_name'))
         self.fps = tk.StringVar(value=self.setting['General Setting']['fps'])
         self.show_size = tk.StringVar(value=self.setting['General Setting'].get('show_size'))
         self.is_show_realtime = tk.BooleanVar(value=self.setting['General Setting'].getboolean('is_show_realtime'))
@@ -49,6 +50,7 @@ class GuiSettings:
         self.setting['General Setting'] = {
             'camera_id': 0,
             'com_port': 0,
+            'com_port_name': '',
             'fps': 45,
             'show_size': '640x360',
             'is_show_realtime': True,
@@ -99,6 +101,7 @@ class GuiSettings:
         }
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
             self.setting.write(file)
+        os.chmod(path=self.SETTING_PATH, mode=0o777)
 
     def save(self, path=None):
         # Some preparations are needed because tkinter related objects are not serializable.
@@ -106,6 +109,7 @@ class GuiSettings:
         self.setting['General Setting'] = {
             'camera_id': self.camera_id.get(),
             'com_port': self.com_port.get(),
+            'com_port_name': self.com_port_name.get(),
             'fps': self.fps.get(),
             'show_size': self.show_size.get(),
             'is_show_realtime': self.is_show_realtime.get(),
@@ -120,4 +124,5 @@ class GuiSettings:
 
         with open(self.SETTING_PATH, 'w', encoding='utf-8') as file:
             self.setting.write(file)
+        os.chmod(path=self.SETTING_PATH, mode=0o777)
         self._logger.debug('Settings file has been saved.')

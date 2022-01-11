@@ -519,8 +519,11 @@ class ControllerGUI:
 
         self.window = tk.Toplevel(root)
         self.window.title('Switch Controller Simulator')
-        self.window.geometry("%dx%d%+d%+d" % (600, 300, 250, 125))
-        self.window.resizable(0, 0)
+        root_geometry = root.geometry().split('+')
+        root_x = int(root_geometry[1])
+        root_y = int(root_geometry[2])
+        self.window.geometry("%dx%d%+d%+d" % (600, 300, 250 + root_x, 125 + root_y))
+        self.window.resizable(False, False)
 
         joycon_L_color = '#95f1ff'
         joycon_R_color = '#ff6b6b'
