@@ -23,7 +23,7 @@ from Menubar import PokeController_Menubar
 # from get_pokestatistics import GetFromHomeGUI
 
 NAME = "Poke-Controller"
-VERSION = "v3.0.2.7.0 Modified"  # based on 1.0-beta3
+VERSION = "v3.0.2.7.0a Modified"  # based on 1.0-beta3(custom by @dragonite303)
 
 '''
 Todo:
@@ -143,20 +143,39 @@ class PokeControllerApp:
         self.entry2.config(textvariable=self.com_port, width='5')
         self.entry2.grid(column='1', padx='5', row='0', sticky='ew')
         self.entry2.rowconfigure('0', uniform='None', weight='0')
+
+        self.baud_rate_label = ttk.Label(self.serial_lf)
+        self.baud_rate_label.config(text='Baud Rate: ')
+        self.baud_rate_label.grid(column='2', padx='5', row='0', sticky='ew')
+
+        self.baud_rate_cb = ttk.Combobox(self.serial_lf)
+        self.baud_rate = tk.StringVar()
+        self.baud_rate_cb.config(justify='right', state='readonly', textvariable=self.baud_rate, values=[9600, 4800])
+        self.baud_rate_cb.config(width='6')
+        self.baud_rate_cb.grid(column='3', padx='5', row='0', sticky='ew')
+        self.baud_rate_cb.bind('<<ComboboxSelected>>', self.applyBaudRate, add='')
+
         self.reloadComPort = ttk.Button(self.serial_lf)
         self.reloadComPort.config(text='Reload Port')
-        self.reloadComPort.grid(column='2', row='0')
+        self.reloadComPort.grid(column='4', padx='5', row='0')
         self.reloadComPort.rowconfigure('0', uniform='None', weight='0')
         self.reloadComPort.configure(command=self.activateSerial)
+
+        self.disconnectComPort = ttk.Button(self.serial_lf)
+        self.disconnectComPort.config(text='Disconnect Port')
+        self.disconnectComPort.grid(column='5', padx='5', row='0')
+        self.disconnectComPort.rowconfigure('0', uniform='None', weight='0')
+        self.disconnectComPort.configure(command=self.inactivateSerial)
+
         self.separator_4 = ttk.Separator(self.serial_lf)
         self.separator_4.config(orient='vertical')
-        self.separator_4.grid(column='3', padx='5', row='0', sticky='ns')
+        self.separator_4.grid(column='6', padx='5', row='0', sticky='ns')
         self.separator_4.rowconfigure('0', uniform='None', weight='0')
         self.separator_4.columnconfigure('3', uniform='None', weight='0')
         self.checkbutton_2 = ttk.Checkbutton(self.serial_lf)
         self.is_show_serial = tk.BooleanVar()
         self.checkbutton_2.config(text='Show Serial', variable=self.is_show_serial)
-        self.checkbutton_2.grid(column='4', columnspan='2', padx='5', row='0', sticky='ew')
+        self.checkbutton_2.grid(column='7', columnspan='2', padx='5', row='0', sticky='ew')
         self.checkbutton_2.rowconfigure('0', uniform='None', weight='0')
         self.serial_lf.config(text='Serial Settings')
         self.serial_lf.grid(column='0', columnspan='2', padx='5', row='1', sticky='nsew')
@@ -266,6 +285,7 @@ class PokeControllerApp:
         self.show_size.set(self.settings.show_size.get())
         self.com_port.set(self.settings.com_port.get())
         self.com_port_name.set(self.settings.com_port_name.get())
+        self.baud_rate.set(self.settings.baud_rate.get())
         self.camera_id.set(self.settings.camera_id.get())
         # 各コンボボックスを現在の設定値に合わせて表示
         self.fps_cb.current(self.fps_cb['values'].index(self.fps.get()))
@@ -409,6 +429,9 @@ class PokeControllerApp:
         print('changed FPS to: ' + self.fps.get() + ' [fps]')
         self.preview.setFps(self.fps.get())
 
+    def applyBaudRate(self, event=None):
+        pass
+
     def applyWindowSize(self, event=None):
         width, height = map(int, self.show_size.get().split("x"))
         self.preview.setShowsize(height, width)
@@ -432,10 +455,19 @@ class PokeControllerApp:
             self.keyPress = None
             self.activateSerial()
         else:
-            if self.ser.openSerial(self.com_port.get(), self.com_port_name.get()):
+            if self.ser.openSerial(self.com_port.get(), self.com_port_name.get(), self.baud_rate.get()):
                 print('COM Port ' + str(self.com_port.get()) + ' connected successfully')
                 self._logger.debug('COM Port ' + str(self.com_port.get()) + ' connected successfully')
                 self.keyPress = KeyPress(self.ser)
+                self.settings.com_port.set(self.com_port.get())
+                self.settings.baud_rate.set(self.baud_rate.get())
+                self.settings.save()
+
+    def inactivateSerial(self):
+        if self.ser.isOpened():
+            print('Port is already opened and being closed.')
+            self.ser.closeSerial()
+            self.keyPress = None
 
     def activateKeyboard(self):
         if self.is_use_keyboard.get():
@@ -603,6 +635,7 @@ class PokeControllerApp:
             self.settings.fps.set(self.fps.get())
             self.settings.show_size.set(self.show_size.get())
             self.settings.com_port.set(self.com_port.get())
+            self.settings.baud_rate.set(self.baud_rate.get())
             self.settings.camera_id.set(self.camera_id.get())
 
             self.settings.save()

@@ -31,6 +31,7 @@ class GuiSettings:
         self.camera_id = tk.IntVar(value=self.setting['General Setting'].getint('camera_id'))
         self.com_port = tk.IntVar(value=self.setting['General Setting'].getint('com_port'))
         self.com_port_name = tk.StringVar(value=self.setting['General Setting'].get('com_port_name'))
+        self.baud_rate = tk.IntVar(value=self.setting['General Setting'].getint('baud_rate'))
         self.fps = tk.StringVar(value=self.setting['General Setting']['fps'])
         self.show_size = tk.StringVar(value=self.setting['General Setting'].get('show_size'))
         self.is_show_realtime = tk.BooleanVar(value=self.setting['General Setting'].getboolean('is_show_realtime'))
@@ -51,6 +52,7 @@ class GuiSettings:
             'camera_id': 0,
             'com_port': 0,
             'com_port_name': '',
+            'baud_rate': 9600,
             'fps': 45,
             'show_size': '640x360',
             'is_show_realtime': True,
@@ -110,6 +112,7 @@ class GuiSettings:
             'camera_id': self.camera_id.get(),
             'com_port': self.com_port.get(),
             'com_port_name': self.com_port_name.get(),
+            'baud_rate': self.baud_rate.get(),
             'fps': self.fps.get(),
             'show_size': self.show_size.get(),
             'is_show_realtime': self.is_show_realtime.get(),

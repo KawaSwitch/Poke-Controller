@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import cv2
 import threading
@@ -8,12 +9,16 @@ from time import sleep
 import random
 import time
 from logging import getLogger, DEBUG, NullHandler
+import tkinter as tk
+import tkinter.ttk as ttk
 
+import Settings
 from LineNotify import Line_Notify
 from . import CommandBase
 from .Keys import Button, Direction, KeyPress
 
 import numpy as np
+
 
 # the class For notifying stop signal is sent from Main window
 class StopThread(Exception):
@@ -29,6 +34,7 @@ class PythonCommand(CommandBase.Command):
         self.alive = True
         self.postProcess = None
         self.Line = Line_Notify()
+        self.message_dialogue = None
 
         self._logger = getLogger(__name__)
         self._logger.addHandler(NullHandler())
@@ -121,7 +127,7 @@ class PythonCommand(CommandBase.Command):
             while time.perf_counter() < current_time + wait:
                 pass
         self.checkIfAlive()
-
+    
     def checkIfAlive(self):
         if not self.alive:
             self.keys.end()
@@ -138,7 +144,14 @@ class PythonCommand(CommandBase.Command):
         else:
             return True
 
+    def dialogue(self, title: str, message: int | str | list, need=list):
+        self.message_dialogue = tk.Toplevel()
+        ret = PokeConDialogue(self.message_dialogue, title, message).ret_value(need)
+        self.message_dialogue = None
+        return ret
+
     # Use time glitch
+
     # Controls the system time and get every-other-day bonus without any punishments
     def timeLeap(self, is_go_back=True):
         self.press(Button.HOME, wait=1)
@@ -188,6 +201,100 @@ class PythonCommand(CommandBase.Command):
     def LINE_text(self, txt="", token='token'):
         self.Line.send_text(txt, token)
 
+    # direct serial
+    def direct_serial(self, serialcommands: list, waittime: list):
+        # 余計なものが付いている可能性があるので確認して削除する
+        checkedcommands = []
+        for row in serialcommands:
+            checkedcommands.append(row.replace("\r", "").replace("\n", ""))
+        self.keys.serialcommand_direct_send(checkedcommands, waittime)
+
+    # Reload COM port (temporary function)
+    def reload_com_port(self):
+        if self.keys.ser.isOpened():
+            print('Port is already opened and being closed.')
+            self.keys.ser.closeSerial()
+            # self.keyPress = None (ここでNoneはNGなはず)
+            self.reload_com_port()
+        else:
+            if self.keys.ser.openSerial(Settings.GuiSettings().com_port.get(), Settings.GuiSettings().com_port_name.get(), Settings.GuiSettings().baud_rate.get()):
+                print('COM Port ' + str(Settings.GuiSettings().com_port.get()) + ' connected successfully')
+                self._logger.debug('COM Port ' + str(Settings.GuiSettings().com_port.get()) + ' connected successfully')
+                # self.keyPress = None (ここでNoneはNGなはず)
+
+class PokeConDialogue(object):
+    def __init__(self, parent, title: str, message: int | str | list):
+        self._ls = None
+        self.isOK = None
+
+        self.message_dialogue = parent
+        self.message_dialogue.title(title)
+        self.message_dialogue.attributes("-topmost", True)
+        self.message_dialogue.protocol("WM_DELETE_WINDOW", self.close_window)
+
+        self.main_frame = tk.Frame(self.message_dialogue)
+        self.inputs = ttk.Frame(self.main_frame)
+
+        self.title_label = ttk.Label(self.main_frame, text=title, anchor='center')
+        self.title_label.grid(column=0, columnspan=2, ipadx='10', ipady='10', row=0, sticky='nsew')
+
+        self.dialogue_ls = {}
+        if type(message) is not list:
+            message = [message]
+        n = len(message)
+        x = self.message_dialogue.master.winfo_x()
+        w = self.message_dialogue.master.winfo_width()
+        y = self.message_dialogue.master.winfo_y()
+        h = self.message_dialogue.master.winfo_height()
+        w_ = self.message_dialogue.winfo_width()
+        h_ = self.message_dialogue.winfo_height()
+        self.message_dialogue.geometry(f"+{int(x+w/2-w_/2)}+{int(y+h/2-h_/2)}")
+        for i in range(n):
+            self.dialogue_ls[message[i]] = tk.StringVar()
+            label = ttk.Label(self.inputs, text=message[i])
+            entry = ttk.Entry(self.inputs, textvariable=self.dialogue_ls[message[i]])
+            label.grid(column=0, row=i, sticky='nsew', padx=3, pady=3)
+            entry.grid(column=1, row=i, sticky='nsew', padx=3, pady=3)
+
+        self.inputs.grid(column=0, columnspan=2, ipadx='10', ipady='10', row=1, sticky='nsew')
+        self.inputs.grid_anchor('center')
+        self.result = ttk.Frame(self.main_frame)
+        self.OK = ttk.Button(self.result, command=self.ok_command)
+        self.OK.configure(text='OK')
+        self.OK.grid(column=0, row=1)
+        self.Cancel = ttk.Button(self.result, command=self.cancel_command)
+        self.Cancel.configure(text='Cancel')
+        self.Cancel.grid(column=1, row=1, sticky='ew')
+        self.result.grid(column=0, columnspan=2, pady=5, row=2, sticky='ew')
+        self.result.grid_anchor('center')
+        self.main_frame.pack()
+        self.message_dialogue.master.wait_window(self.message_dialogue)
+
+    def ret_value(self, need):
+        if self.isOK:
+            if need == dict:
+                return {k: v.get() for k, v in self.dialogue_ls.items()}
+            elif need == list:
+                return self._ls
+            else:
+                print(f"Wrong arg. Try Return list.")
+                return self._ls
+        else:
+            return False
+
+    def close_window(self):
+        self.message_dialogue.destroy()
+        self.isOK = False
+
+    def ok_command(self):
+        self._ls = [v.get() for k, v in self.dialogue_ls.items()]
+        self.message_dialogue.destroy()
+        self.isOK = True
+
+    def cancel_command(self):
+        self.message_dialogue.destroy()
+        self.isOK = False
+
 
 TEMPLATE_PATH = "./Template/"
 
@@ -215,10 +322,13 @@ class ImageProcPythonCommand(PythonCommand):
     # 現在のスクリーンショットと指定した画像のテンプレートマッチングを行います
     # 色の違いを考慮しないのであればパフォーマンスの点からuse_grayをTrueにしてグレースケール画像を使うことを推奨します
     def isContainTemplate(self, template_path, threshold=0.7, use_gray=True,
-                          show_value=False, show_position=True, show_only_true_rect=True, ms=2000):
+                          show_value=False, show_position=True, show_only_true_rect=True, ms=2000, crop=[]):
         src = self.camera.readFrame()
         src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
-
+        
+        if len(crop) == 4:
+            src = src[crop[1]: crop[3], crop[0]: crop[2]]
+        
         template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
         w, h = template.shape[1], template.shape[0]
 
@@ -250,12 +360,18 @@ class ImageProcPythonCommand(PythonCommand):
                                  tag=tag,
                                  ms=ms)
             return False
-
+    
+    # 現在のスクリーンショットと指定した複数の画像のテンプレートマッチングを行います
+    # 相関値が最も大きい値となった画像のインデックス、各画像のテンプレートマッチングの閾値、閾値判定結果を返します。
+    # 色の違いを考慮しないのであればパフォーマンスの点からuse_grayをTrueにしてグレースケール画像を使うことを推奨します
     def isContainTemplate_max(self, template_path_list, threshold=0.7, use_gray=True,
-                              show_value=False, show_position=True, show_only_true_rect=True, ms=2000):
+                              show_value=False, show_position=True, show_only_true_rect=True, ms=2000, crop=[]):
         src = self.camera.readFrame()
         src = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) if use_gray else src
-
+        
+        if len(crop) == 4:
+            src = src[crop[1]: crop[3], crop[0]: crop[2]]
+        
         max_val_list = []
         judge_threshold_list = []
         for template_path in template_path_list:
@@ -343,4 +459,8 @@ class ImageProcPythonCommand(PythonCommand):
         return mask
 
     def LINE_image(self, txt="", token='token'):
-        self.Line.send_text_n_image(txt, token)
+        try:
+            self.Line.send_text_n_image(txt, token)
+        except:
+            pass
+
