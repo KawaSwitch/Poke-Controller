@@ -40,24 +40,24 @@ class Sender:
                     "LEFT", "TOP_LEFT",
                     "CENTER"]
 
-    def openSerial(self, portNum: int, portName: str = ''):
+    def openSerial(self, portNum: int, portName: str = '', baudrate: int = 9600):
         try:
             if portName is None or portName == '':
                 if os.name == 'nt':
-                    print('connecting to ' + "COM" + str(portNum))
-                    self._logger.info('connecting to ' + "COM" + str(portNum))
-                    self.ser = serial.Serial("COM" + str(portNum), 9600)
+                    print('connecting to ' + "COM" + str(portNum) + "(" + str(baudrate) + ")")
+                    self._logger.info('connecting to ' + "COM" + str(portNum) + "(" + str(baudrate) + ")")
+                    self.ser = serial.Serial("COM" + str(portNum), baudrate)
                     return True
                 elif os.name == 'posix':
                     if platform.system() == 'Darwin':
-                        print('connecting to ' + "/dev/tty.usbserial-" + str(portNum))
-                        self._logger.info('connecting to ' + "/dev/tty.usbserial-" + str(portNum))
-                        self.ser = serial.Serial("/dev/tty.usbserial-" + str(portNum), 9600)
+                        print('connecting to ' + "/dev/tty.usbserial-" + str(portNum) + "(" + str(baudrate) + ")")
+                        self._logger.info('connecting to ' + "/dev/tty.usbserial-" + str(portNum) + "(" + str(baudrate) + ")")
+                        self.ser = serial.Serial("/dev/tty.usbserial-" + str(portNum), baudrate)
                         return True
                     else:
-                        print('connecting to ' + "/dev/ttyUSB" + str(portNum))
-                        self._logger.info('connecting to ' + "/dev/ttyUSB" + str(portNum))
-                        self.ser = serial.Serial("/dev/ttyUSB" + str(portNum), 9600)
+                        print('connecting to ' + "/dev/ttyUSB" + str(portNum) + "(" + str(baudrate) + ")")
+                        self._logger.info('connecting to ' + "/dev/ttyUSB" + str(portNum) + "(" + str(baudrate) + ")")
+                        self.ser = serial.Serial("/dev/ttyUSB" + str(portNum), baudrate)
                         return True
                 else:
                     print('Not supported OS')
@@ -94,6 +94,22 @@ class Sender:
             self.before = row
         except serial.serialutil.SerialException as e:
             # print(e)
+            self._logger.error(f"Error : {e}")
+        except AttributeError as e:
+            print('Using a port that is not open.')
+            self._logger.error('Maybe Using a port that is not open.')
+            self._logger.error(e)
+        # self._logger.debug(f"{row}")
+        # Show sending serial datas
+        if self.is_show_serial.get():
+            print(row)
+    
+    def writeRow_wo_perf_counter(self, row, is_show=False):
+        try:
+            self.ser.write((row + '\r\n').encode('utf-8'))
+        except serial.serialutil.SerialException as e:
+            # エラーはあえてprintでも出す。
+            print(e)
             self._logger.error(f"Error : {e}")
         except AttributeError as e:
             print('Using a port that is not open.')

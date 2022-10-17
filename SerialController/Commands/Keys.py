@@ -375,3 +375,8 @@ class KeyPress:
 
     def end(self):
         self.ser.writeRow('end')
+
+    def serialcommand_direct_send(self, serialcommands: list, waittime: list):
+        for wtime, row in zip(waittime, serialcommands):
+            time.sleep(wtime)
+            self.ser.writeRow_wo_perf_counter(row, is_show=False)
