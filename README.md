@@ -106,6 +106,12 @@ pandas
 numpy
 ```
 
+> [requirements.txt](./requirements.txt)を使用して、必要なライブラリを一括でインストールできます。
+> 
+> ```
+> pip install -r .\requirements.txt
+> ```
+
 ## おまけ
 
 - 好みの表示サイズがある場合は、Window.pyのそれっぽいところに自分好みのサイズを追記してください。fpsも同様です。
