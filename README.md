@@ -104,6 +104,7 @@ pygubu
 requests
 pandas
 numpy
+scipy
 ```
 
 > [requirements.txt](./requirements.txt)を使用して、必要なライブラリを一括でインストールできます。
@@ -116,12 +117,16 @@ numpy
 
 - 好みの表示サイズがある場合は、Window.pyのそれっぽいところに自分好みのサイズを追記してください。fpsも同様です。
 
-- OpenCVで行う処理をNVIDIA GPUで動かすためのコードを同梱しています(TemplateMatchingTimeMeasure.py)。\
+- OpenCVで行う処理をNVIDIA GPU(CUDA)で動かすためのサンプルコードを同梱しています(TemplateMatchingTimeMeasure.py)。\
   ただし、pip install でインストール可能なライブラリでは使用できません\
   使用してみたい方は、各自で自分のGPUに対応したオプションでpython用のOpenCVをソースコードからビルドして貰う必要があります。\
   それなりに難易度が高くかなり手間な処理になりますが、余裕がある方は試してみてください。\
   `OpenCV + CUDA (+ Windows)`
   などと検索すればビルドの解説ページが出てきます。
+  
+- SciPyは最短経路の算出に使用しています。\
+  具体的には、Switchのソフトウェアキーボードを有向グラフに見立てて、文字入力の最適化を試みています。\
+  サンプルコードを同梱しているので、興味のある方は試してみてください。
 
 以下は本家様の説明になります。
 - - -
