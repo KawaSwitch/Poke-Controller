@@ -20,7 +20,7 @@ def _test_save_capture(command: ImageProcPythonCommand):
     test_cases = [
         # ファイル名のみ
         ("_test", "./Captures/_test.png"),
-        # 相対パス ⇒ saveCapture未対応
+        # 相対パス
         ("_test/_test", "./Captures/_test/_test.png"),
         # 絶対パス
         (path.join(path.dirname(__file__), "_test"),
