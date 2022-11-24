@@ -1,0 +1,21 @@
+#
+# from original wiki:
+#
+opencv-python
+pynput
+pyserial
+Pillow
+pythonnet
+
+#
+# from forked README:
+# 
+pygubu
+requests
+pandas
+numpy
+
+#
+# requirements not mentioned in the documents above:
+#
+scipy
