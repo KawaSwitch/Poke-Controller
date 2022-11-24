@@ -1,24 +1,54 @@
 from os import path
+import os
 from Commands.PythonCommandBase import ImageProcPythonCommand
 
 
-class TestCase:
-    def __init__(self, input: str, expected: str, ignore: bool = False) -> None:
-        self.__input = input
-        self.__expected = expected
-        self.__ignore = ignore
+def _test_save_capture(command: ImageProcPythonCommand):
+    test_cases = [
+        # ファイル名のみ
+        ("_test", "./Captures/_test.png"),
+        # 相対パス ⇒ saveCapture未対応
+        ("_test/_test", "./Captures/_test/_test.png"),
+        # 絶対パス
+        (path.join(path.dirname(__file__), "_test"),
+         path.join(path.dirname(__file__), "_test.png")),
+    ]
 
-    @property
-    def input(self):
-        return self.__input
+    for test_case in test_cases:
 
-    @property
-    def expected(self):
-        return self.__expected
+        if path.exists(test_case[1]):
+            os.remove(test_case[1])
 
-    @property
-    def ignore(self):
-        return self.__ignore
+        command.camera.saveCapture(test_case[0])
+        if not path.exists(test_case[1]):
+            print(
+                f"----------\n[FAILURE]\ninput:{test_case[0]}\nexpected:{test_case[1]}\n----------\n")
+        else:
+            print(
+                f"----------\n[SUCCESSED]\ninput:{test_case[0]}\nexpected:{test_case[1]}\n----------\n")
+            os.remove(test_case[1])
+
+
+def _test_is_contain_template(command: ImageProcPythonCommand):
+    test_cases = [
+        # ファイル名のみ
+        ("_test.png", "./Template/_test.png"),
+        # 相対パス
+        ("_test/_test.png", "./Template/_test/_test.png"),
+        # 絶対パス
+        (path.join(path.dirname(__file__), "__test.png"),
+         path.join(path.dirname(__file__), "__test.png")),
+    ]
+
+    for test_case in test_cases:
+        try:
+            command.isContainTemplate(test_case[0])
+            print(
+                f"----------\n[SUCCESSED]\ninput:{test_case[0]}\nexpected:{test_case[1]}\n----------\n")
+        except:
+            print(
+                f"----------\n[FAILURE]\ninput:{test_case[0]}\nexpected:{test_case[1]}\n----------\n")
+        # ログ目視
 
 
 class TestPath(ImageProcPythonCommand):
@@ -29,28 +59,8 @@ class TestPath(ImageProcPythonCommand):
         super().__init__(cam)
 
     def do(self):
+        print("\n====================\nsaveCapture\n====================\n")
+        _test_save_capture(self)
 
-        test_cases = [
-            # ファイル名のみ
-            TestCase("_test", "./Captures/_test.png"),
-            # 相対パス ⇒ saveCapture未対応
-            TestCase("_test/_test", "./Captures/_test/_test.png", True),
-            # 絶対パス
-            TestCase(path.join(path.dirname(__file__), "_test"),
-                     path.join(path.dirname(__file__), "_test.png"))
-        ]
-
-        print("saveCapture")
-        for test_case in test_cases:
-            if test_case.ignore:
-                continue
-            self.camera.saveCapture(test_case.input)
-            if not path.exists(test_case.expected):
-                print(
-                    f"failure\ninput:{test_case.input}\noutput:{test_case.expected}")
-                return
-
-        print("isContainTemplate")
-        for test_case in test_cases:
-            self.isContainTemplate(test_case.input)
-            # ログ目視
+        print("\n====================\nisContainTemplate\n====================\n")
+        _test_is_contain_template(self)
