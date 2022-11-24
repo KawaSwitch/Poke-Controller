@@ -125,11 +125,12 @@ class Camera:
         else:
             image = self.image_bgr
 
-        if not os.path.exists(self.capture_dir):
-            os.makedirs(self.capture_dir)
-            self._logger.debug("Created Capture folder")
-
         save_path = _get_save_filespec(filename)
+
+        if not os.path.exists(os.path.dirname(save_path)) or not os.path.isdir(os.path.dirname(save_path)):
+            # 保存先ディレクトリが存在しないか、同名のファイルが存在する場合（existsはファイルとフォルダを区別しない）
+            os.makedirs(os.path.dirname(save_path))
+            self._logger.debug("Created Capture folder")
 
         try:
             imwrite(save_path, image)
