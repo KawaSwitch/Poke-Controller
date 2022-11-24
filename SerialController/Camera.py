@@ -29,12 +29,31 @@ def imwrite(filename, img, params=None):
         return False
 
 
+CAPTURE_DIR = "./Captures/"
+def _get_save_filespec(filename: str) -> str:
+    """
+    画像ファイルの保存パスを取得する。
+
+    入力が絶対パスの場合は、`CAPTURE_DIR`につなげずに返す。
+
+    Args:
+        filename (str): 保存名／保存パス
+
+    Returns:
+        str: _description_
+    """
+    if os.path.isabs(filename):
+        return filename
+    else:
+        return os.path.join(CAPTURE_DIR, filename)
+
+
 class Camera:
     def __init__(self, fps=45):
         self.camera = None
         self.capture_size = (1280, 720)
         # self.capture_size = (1920, 1080)
-        self.capture_dir = "Captures"
+        self.capture_dir = CAPTURE_DIR
         self.fps = int(fps)
 
         self._logger = getLogger(__name__)
@@ -110,7 +129,7 @@ class Camera:
             os.makedirs(self.capture_dir)
             self._logger.debug("Created Capture folder")
 
-        save_path = os.path.join(self.capture_dir, filename)
+        save_path = _get_save_filespec(filename)
 
         try:
             imwrite(save_path, image)
