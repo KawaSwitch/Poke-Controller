@@ -9,6 +9,7 @@ from time import sleep
 import random
 import time
 from logging import getLogger, DEBUG, NullHandler
+from os import path
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -297,6 +298,22 @@ class PokeConDialogue(object):
 
 
 TEMPLATE_PATH = "./Template/"
+def _get_template_filespec(template_path: str) -> str:
+    """
+    テンプレート画像ファイルのパスを取得する。
+
+    入力が絶対パスの場合は、`TEMPLATE_PATH`につなげずに返す。
+
+    Args:
+        template_path (str): 画像パス
+
+    Returns:
+        str: _description_
+    """
+    if path.isabs(template_path):
+        return template_path
+    else:
+        return path.join(TEMPLATE_PATH, template_path)
 
 
 class ImageProcPythonCommand(PythonCommand):
@@ -329,7 +346,7 @@ class ImageProcPythonCommand(PythonCommand):
         if len(crop) == 4:
             src = src[crop[1]: crop[3], crop[0]: crop[2]]
         
-        template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+        template = cv2.imread(_get_template_filespec(template_path), cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
         w, h = template.shape[1], template.shape[0]
 
         method = cv2.TM_CCOEFF_NORMED
@@ -375,7 +392,7 @@ class ImageProcPythonCommand(PythonCommand):
         max_val_list = []
         judge_threshold_list = []
         for template_path in template_path_list:
-            template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+            template = cv2.imread(_get_template_filespec(template_path), cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
             w, h = template.shape[1], template.shape[0]
 
             method = cv2.TM_CCOEFF_NORMED
@@ -418,7 +435,7 @@ class ImageProcPythonCommand(PythonCommand):
 
             self.gsrc.upload(src)
 
-            template = cv2.imread(TEMPLATE_PATH + template_path, cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
+            template = cv2.imread(_get_template_filespec(template_path), cv2.IMREAD_GRAYSCALE if use_gray else cv2.IMREAD_COLOR)
             self.gtmpl.upload(template)
 
             method = cv2.TM_CCOEFF_NORMED
