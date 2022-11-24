@@ -53,7 +53,7 @@ class Camera:
         self.camera = None
         self.capture_size = (1280, 720)
         # self.capture_size = (1920, 1080)
-        self.capture_dir = CAPTURE_DIR
+        self.capture_dir = "Captures"
         self.fps = int(fps)
 
         self._logger = getLogger(__name__)
