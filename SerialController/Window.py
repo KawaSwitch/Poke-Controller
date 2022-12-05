@@ -470,6 +470,9 @@ class PokeControllerApp:
             self.keyPress = None
 
     def activateKeyboard(self):
+        
+        is_windows = platform.system() == 'Windows'
+
         if self.is_use_keyboard.get():
             # enable Keyboard as controller
             if self.keyboard is None:
@@ -477,19 +480,21 @@ class PokeControllerApp:
                 self.keyboard.listen()
 
             # bind focus
-            if platform.system() != 'Linux':
-                self.root.bind("<FocusIn>", self.onFocusInController)
-                self.root.bind("<FocusOut>", self.onFocusOutController)
+            if not is_windows:
+                return
+            self.root.bind("<FocusIn>", self.onFocusInController)
+            self.root.bind("<FocusOut>", self.onFocusOutController)
 
         else:
-            if platform.system() != 'Linux':  # NOTE: Idk why but self.keyboard.stop() makes crash on Linux
-                if self.keyboard is not None:
-                    # stop listening to keyboard events
-                    self.keyboard.stop()
-                    self.keyboard = None
+            if not is_windows:
+                return
+            if self.keyboard is not None:
+                # stop listening to keyboard events
+                self.keyboard.stop()
+                self.keyboard = None
 
-                self.root.bind("<FocusIn>", lambda _: None)
-                self.root.bind("<FocusOut>", lambda _: None)
+            self.root.bind("<FocusIn>", lambda _: None)
+            self.root.bind("<FocusOut>", lambda _: None)
 
     def onFocusInController(self, event):
         # enable Keyboard as controller
