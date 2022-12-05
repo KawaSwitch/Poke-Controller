@@ -470,6 +470,9 @@ class PokeControllerApp:
             self.keyPress = None
 
     def activateKeyboard(self):
+        
+        is_windows = platform.system() == 'Windows'
+
         if self.is_use_keyboard.get():
             # enable Keyboard as controller
             if self.keyboard is None:
@@ -477,13 +480,13 @@ class PokeControllerApp:
                 self.keyboard.listen()
 
             # bind focus
-            if platform.system() == 'Linux' or platform.system() == 'Darwin':
+            if not is_windows:
                 return
             self.root.bind("<FocusIn>", self.onFocusInController)
             self.root.bind("<FocusOut>", self.onFocusOutController)
 
         else:
-            if platform.system() == 'Linux' or platform.system() == 'Darwin':
+            if not is_windows:
                 return
             if self.keyboard is not None:
                 # stop listening to keyboard events
